@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use Illuminate\Http\Request;
-use App\Models\PaymentOrder; // Ensure to import your model
 use App\Models\SalesInvoice;
+use Illuminate\Http\Request;
 use App\Models\SalesInvoiceDetail;
+use Database\Factories\CodeFactory;
+use App\Models\PaymentOrder; // Ensure to import your model
 
 class PaymentOrderController extends Controller
 {
@@ -82,14 +83,20 @@ class PaymentOrderController extends Controller
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
             'invoice_id.*' => 'exists:sales_invoices,id', // Validate each invoice ID exists
         ]);
-    
+
+
+        $salesPaymentCode = CodeFactory::generatePaymentOrderCode();
         // Create a new payment order
         $paymentOrder = PaymentOrder::create([
+            'code' => $salesPaymentCode,
             'customer_id' => $request['customer_id'],
             'description' => $request['description'],
             'date' => $request['date'],
+            'status' => 'pending'
         ]);
-    
+        
+        
+
         // Loop through the requested amounts and associate them with the created payment order
         foreach ($request['invoice_id'] as $index => $invoiceId) {
             $paymentOrder->invoiceLines()->create([
@@ -98,7 +105,7 @@ class PaymentOrderController extends Controller
                 // You may want to add more fields depending on your setup
             ]);
         }
-    
+        
         return redirect()->route('payment_orders.index')->with('success', 'Payment Order created successfully.');
     }
     
