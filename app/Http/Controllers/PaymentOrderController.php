@@ -75,6 +75,9 @@ class PaymentOrderController extends Controller
     {
         dd($request->all());
         // Validate the request data
+
+        
+
         $request->validate([
             'customer_id' => 'required|exists:customers,id', // Validate customer ID
             'description' => 'nullable|string|max:255', // Optional description
@@ -83,7 +86,6 @@ class PaymentOrderController extends Controller
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
             'invoice_id.*' => 'exists:sales_invoices,id', // Validate each invoice ID exists
         ]);
-
 
         $salesPaymentCode = CodeFactory::generatePaymentOrderCode();
         // Create a new payment order
@@ -96,7 +98,6 @@ class PaymentOrderController extends Controller
         ]);
         
         
-
         // Loop through the requested amounts and associate them with the created payment order
         foreach ($request['invoice_id'] as $index => $invoiceId) {
             $paymentOrder->invoiceLines()->create([
