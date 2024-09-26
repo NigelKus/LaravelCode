@@ -115,6 +115,10 @@ Route::prefix('admin/transactional/payment_order')
         Route::get('index', [PaymentOrderController::class, 'index'])->name('index');
         Route::get('create', [PaymentOrderController::class, 'create'])->name('create');
         Route::post('store', [PaymentOrderController::class, 'store'])->name('store');
+        Route::delete('{id}', [PaymentOrderController::class, 'destroy'])->name('destroy');
+        Route::get('{id}', [PaymentOrderController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [PaymentOrderController::class, 'edit'])->name('edit');
+        Route::patch('{id}/update-status', [PaymentOrderController::class, 'updateStatus'])->name('update_status');
         Route::get('/customer/{id}/invoices', [PaymentOrderController::class, 'getInvoicesByCustomerId'])->name('customer.invoices');
 });
 

@@ -54,4 +54,6 @@ class SalesInvoice extends Model
     {
         return self::orderBy('id', 'desc')->pluck('id')->first();
     }
+
+    
 }

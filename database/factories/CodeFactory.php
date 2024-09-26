@@ -60,7 +60,7 @@ class CodeFactory
     {
         $datePrefix = Carbon::now()->format('d-m-y');
 
-        $latestOrder = DB::table('invoice_sales')
+        $latestOrder = DB::table('mstr_payment')
             ->where('code', 'like', "{$datePrefix}-PO-%")
             ->orderBy('code', 'desc')
             ->first();

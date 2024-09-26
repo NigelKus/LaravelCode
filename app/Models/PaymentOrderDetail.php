@@ -26,7 +26,12 @@ class PaymentOrderDetail extends Model
     // Define any relationships here
     public function paymentOrder()
     {
-        return $this->belongsTo(PaymentOrder::class); // Define the inverse relationship
+        return $this->belongsTo(PaymentOrder::class, 'payment_id'); // Explicitly define the foreign key
+    }
+    
+        public function salesInvoice()
+    {
+        return $this->belongsTo(SalesInvoice::class, 'invoicesales_id');
     }
 
     // You can define other relationships or methods as necessary

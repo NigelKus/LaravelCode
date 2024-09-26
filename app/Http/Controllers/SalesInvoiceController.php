@@ -220,7 +220,7 @@ public function store(Request $request)
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
-
+        
         // dd([
         //     'salesInvoice' => $salesInvoice,
         //     'invoicedetails' => $salesInvoice->invoicedetails,

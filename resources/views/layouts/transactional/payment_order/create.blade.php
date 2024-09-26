@@ -128,8 +128,7 @@ $(document).ready(function() {
     $('#customer_id').select2();
 
     $('#customer_id').change(function() {
-    var customerId = $(this).val(); // Get the selected customer ID
-    console.log('Customer ID selected:', customerId);
+    var customerId = $(this).val(); // Get the selected cu
     // Clear the invoice table when customer changes
     $('#invoice-sales-table tbody').empty(); // Clear existing invoices
 
@@ -138,8 +137,6 @@ $(document).ready(function() {
             url: '/admin/transactional/sales_invoice/customer/' + customerId + '/invoices',
             type: 'GET',
             success: function(response) {
-                console.log('AJAX Request URL:', this.url);
-                console.log('AJAX Response:', response);
                 // Check if the sales invoices array exists and has elements
                 if (response.salesInvoices && response.salesInvoices.length > 0) {
                     // Append each invoice and fetch its original price
@@ -174,8 +171,7 @@ $(document).ready(function() {
                                 if (detailResponse.total_price !== undefined && detailResponse.price_remaining !== undefined) {
                                     // Set the original price and remaining price for the new row
                                     $currentRow.find('.original-price').val(detailResponse.total_price.toFixed(2));
-                                    // $currentRow.find('.remaining_price').val(detailResponse.price_remaining.toFixed(2));
-                                    console.log('remaining_price Response:', detailResponse.total_price);
+                                    
                                 } else {
                                     console.warn('Price details are undefined in response:', detailResponse);
                                 }

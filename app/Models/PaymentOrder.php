@@ -26,6 +26,11 @@ class PaymentOrder extends Model
     // Define any relationships here
     public function paymentDetails()
     {
-        return $this->hasMany(PaymentOrderDetail::class); // Example relationship
+        return $this->hasMany(PaymentOrderDetail::class, 'payment_id'); // Example relationship
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 }
