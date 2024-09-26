@@ -22,7 +22,8 @@ class SalesInvoiceController extends Controller
     {
         $statuses = ['pending', 'completed']; // Define your statuses
         $salesOrders = SalesOrder::all(); // Fetch all sales orders for the filter
-        $query = SalesInvoice::query();
+        $query = SalesInvoice::with('details', 'customer', 'salesOrder'); // Eager load the relationships
+
 
         $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
@@ -64,12 +65,26 @@ class SalesInvoiceController extends Controller
         // Determine items per page
         $perPage = $request->get('perPage', 10); // Default to 10 if not specified
         $salesInvoices = $query->paginate($perPage);
+
+        foreach ($salesInvoices as $invoice) {
+            // Calculate total price of the invoice details
+            $totalPrice = $invoice->details->sum(function($detail) {
+                return $detail->price * $detail->quantity; // Ensure quantity exists
+            });
+        
+            // Add the calculated fields to the invoice object
+            $invoice->total_price = $totalPrice;
+         // Adjust this if necessary // Accessor will automatically calculate it
+        }
     
-    
-        return view('layouts.transactional.sales_invoice.index', compact('salesInvoices', 'statuses', 'salesOrders'));
+        return view('layouts.transactional.sales_invoice.index', [
+            'salesInvoices' => $salesInvoices,
+            'statuses' => $statuses,
+            'salesOrders' => $salesOrders
+        ]);
     }
 
-    public function create(Request $request)
+    public function create()
     {
         // Fetch only active customers
         $customers = Customer::where('status', 'active')->get();
@@ -81,17 +96,7 @@ class SalesInvoiceController extends Controller
         $salesOrders = SalesOrder::where('status', 'pending')->get();
     
         $salesOrdersDetail = SalesorderDetail::where('status', 'pending')->get();
-        // Optionally, fetch details of a specific sales order if provided
-        // $salesOrderDetailsMap = [];
-        // if ($request->has('salesorder_id')) {
-        //     $salesOrder = SalesOrder::with('details.product')->find($request->input('salesorder_id'));
-        //     if ($salesOrder) {
-        //         $salesOrderDetailsMap = $salesOrder->details->mapWithKeys(function ($detail) {
-        //             return [$detail => $detail->id];
-        //         });
-        //     }
-        // }
-        // Pass the data to the view
+        
         return view('layouts.transactional.sales_invoice.create', [
             'customers' => $customers,
             'products' => $products,
@@ -375,7 +380,7 @@ public function store(Request $request)
         ]);
         $salesInvoice->delete();
 
-    
+        
         // Iterate through each detail of the sales invoice
         foreach ($salesInvoice->details as $detail) {
             try {
@@ -429,15 +434,67 @@ public function store(Request $request)
     }
     
     
-        public function getSalesInvoicesByCustomer($customerId)
+    public function getSalesInvoicesByCustomer($customerId)
     {
-        // Fetch sales invoices for the selected customer
-        $salesInvoices = SalesInvoice::where('customer_id', $customerId)
-                    ->where('status', 'pending')
-                    ->get();
-
-        return response()->json(['salesInvoices' => $salesInvoices]);
-    }
-
+        // Fetch sales invoices for the selected customer, including their details
+        $salesInvoices = SalesInvoice::with('details')
+            ->where('customer_id', $customerId)
+            ->where('status', 'pending')
+            ->get();
     
+        // Initialize an empty collection for valid invoices
+        $validInvoices = collect();
+    
+        // Process each invoice to calculate total and remaining price
+        $salesInvoices->each(function ($invoice) use ($validInvoices) {
+            $invoice->total_price = $invoice->details->sum(function ($detail) {
+                return $detail->price * $detail->quantity;
+            });
+            $invoice->remaining_price = $invoice->calculatePriceRemaining();
+    
+            // Only add invoices with a remaining price greater than 0
+            if ($invoice->remaining_price > 0) {
+                $validInvoices->push($invoice);
+            }
+        });
+    
+        return response()->json(['salesInvoices' => $validInvoices]);
+    }
+    
+    
+    
+
+    //     public function getSalesInvoicesWithDetails($customerId)
+    // {
+    //     // Fetch sales invoices for the selected customer with their details
+    //     $salesInvoices = SalesInvoice::with('details')
+    //         ->where('customer_id', $customerId)
+    //         ->where('status', 'pending')
+    //         ->get();
+            
+
+    //     // Map the sales invoices with their total price and price remaining
+    //         $salesInvoicesWithDetails = $salesInvoices->map(function($invoice) {
+    //             // Calculate the total price of the invoice details
+    //             $totalPrice = $invoice->details->sum(function($detail) {
+    //                 return $detail->price * $detail->quantity;
+    //             });
+
+    //         // Get the price remaining using the accessor (if it exists)
+    //         $priceRemaining = $invoice->calculatePriceRemaining();
+    //         dd($priceRemaining);
+
+    //         return [
+    //             'id' => $invoice->id,
+    //             'code' => $invoice->code,
+    //             'total_price' => $totalPrice,
+    //             'price_remaining' => $priceRemaining,
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'salesInvoices' => $salesInvoicesWithDetails,
+    //     ]);
+    // }
+
 }

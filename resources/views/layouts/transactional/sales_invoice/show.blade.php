@@ -38,6 +38,9 @@
                     <p><strong>Order:</strong> {{ $salesInvoice->salesOrder->code ?? 'N/A' }}</p>
                     <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($salesInvoice->date)->format('Y-m-d') }}</p>
                     <p><strong>Due Date:</strong> {{ \Carbon\Carbon::parse($salesInvoice->due_date)->format('Y-m-d') }}</p>
+                    <p><strong>Price :</strong> {{ number_format($salesInvoice->getTotalPriceAttribute()) }}</p>
+                    <p><strong>Price Paid :</strong> {{ number_format($salesInvoice->showPriceDetails()) }}</p>
+                    <p><strong>Price Remaining :</strong> {{ number_format($salesInvoice->calculatePriceRemaining()) }}</p>
                 </div>
                 <div class="col-md-6 text-md-right">
                     <!-- Right Side: Customer Contact Details -->
@@ -72,9 +75,9 @@
                                 <td>{{ $detail->product->code }}</td>
                                 <td>{{ $detail->product->collection }}</td>
                                 <td>{{ $detail->product->weight }} g</td>
-                                <td>{{ number_format($detail->price, 2) }}</td>
+                                <td>{{ number_format($detail->price) }}</td>
                                 <td>{{ $detail->quantity }}</td>
-                                <td>{{ number_format($detail->price * $detail->quantity, 2) }}</td>
+                                <td>{{ number_format($detail->price * $detail->quantity) }}</td>
                             </tr>
                         @endforeach
                         </tbody>

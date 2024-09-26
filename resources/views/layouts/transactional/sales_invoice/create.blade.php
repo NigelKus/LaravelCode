@@ -226,7 +226,7 @@
                         $this.val(maxQty); // Set requested quantity to maximum allowed
                         alert('Requested quantity cannot be greater than the remaining quantity.');
                     }
-        
+                    
                     updateTotal($row); // Update the total price if needed
                 });
         

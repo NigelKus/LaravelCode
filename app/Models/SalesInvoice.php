@@ -27,6 +27,27 @@ class SalesInvoice extends Model
         'due_date',
     ];
 
+        public function getTotalPriceAttribute()
+    {
+        return $this->details->sum(function ($detail) {
+            return $detail->price * $detail->quantity; 
+        });
+    }
+
+    public function calculatePriceRemaining()  
+    {  
+        $totalPrice = $this->getTotalPriceAttribute();  
+        $payments = $this->paymentDetails()->sum('price');  
+        
+        return $totalPrice - $payments;  
+    } 
+    
+    public function showPriceDetails()
+    {
+        $payments = $this->paymentDetails()->sum('price');  
+        return $payments;  
+    }
+
     // Define relationships
     public function salesOrder()
     {
@@ -44,6 +65,10 @@ class SalesInvoice extends Model
         return $this->hasMany(SalesInvoiceDetail::class, 'invoicesales_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table
     }
 
+    public function paymentDetails()
+    {
+        return $this->hasMany(PaymentOrderDetail::class, 'invoicesales_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table
+    }
 
     /**
      * Get the latest sales order ID.

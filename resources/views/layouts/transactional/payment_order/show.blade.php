@@ -64,14 +64,14 @@
                             @foreach($paymentOrder->paymentDetails as $detail)
                                 <tr>
                                     <td>{{ $detail->salesInvoice->code }}</td>
-                                    <td>{{ number_format($detail->price, 2) }}</td>
+                                    <td>{{ number_format($detail->price) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th>Total Price</th>
-                                <th>{{ number_format($totalPrice, 2) }}</th>
+                                <th>{{ number_format($totalPrice) }}</th>
                             </tr>
                         </tfoot>
                     </table>

@@ -26,18 +26,6 @@ class SalesInvoiceDetail extends Model
         'salesdetail_id',
     ];
 
-    public function getPriceSentAttribute()
-    {
-        return $this->SalesInvoiceDetail()
-            ->whereIn('status', ['pending', 'completed'])
-            ->sum('price') ;
-    }
-    
-    public function getPriceRemainingAttribute() 
-    {
-        return $this->price_sent;
-    }
-
     // Define relationships
     public function salesinvoice()
     {

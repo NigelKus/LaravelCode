@@ -54,26 +54,6 @@ class SalesorderDetail extends Model
         return $this->quantity - $this->quantity_sent;
     }
     
-    public function setQuantitySentAttribute($value)
-    {
-        // Ensure $value is an integer and handle any necessary logic
-        $this->attributes['quantity_sent'] = (int) $value;
-
-        // Save the changes to the database
-        $this->save();
-    }
-
-    public function adjustQuantityRemaining($amount)
-    {
-        // Access the current quantity remaining
-        $currentRemaining = $this->quantity_remaining; // This uses the accessor
-
-        // Calculate the new remaining quantity
-        $currentRemaining = $currentRemaining += $amount;
-        
-    }
-    
-
     public static function checkAndUpdateStatus(int $salesOrderId, int $productId,int $salesOrderDetailId): bool
     {
         // dd($salesOrderId,$productId, $salesOrderDetailId);

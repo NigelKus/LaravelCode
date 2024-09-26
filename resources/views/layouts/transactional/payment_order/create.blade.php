@@ -123,83 +123,92 @@
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
-$(document).ready(function() {
-    // Initialize Select2 for customer dropdown
-    $('#customer_id').select2();
+$(document).ready(function() {  
+   // Initialize Select2 for customer dropdown  
+    $('#customer_id').select2();  
+    
+    // Trigger when customer selection changes  
+    $('#customer_id').change(function() {  
+        var customerId = $(this).val(); // Get the selected customer ID  
+        
+        // Clear the invoice table when the customer changes  
+        $('#invoice-sales-table tbody').empty(); // Clear existing invoices  
+    
+        if (customerId) {  
+            $.ajax({  
+            url: '/admin/transactional/sales_invoice/customer/' + customerId + '/invoices', // Adjust URL if needed  
+            type: 'GET',  
+            success: function(response) {  
+                // console.log(response);
+                // Check if the response contains sales invoices  
+                if (response.salesInvoices && response.salesInvoices.length > 0) {  
+                    // Append each invoice with its total price  
+                    response.salesInvoices.forEach(function(invoice) {  
+                        // console.log('Invoice:', invoice);
+                    // Create a new row for the invoice  
+                    var newRow = `  
+                        <tr class="invoice-line">  
+                            <td>  
+                            <span class="invoice-code">${invoice.code}</span>  
+                            <input type="hidden" name="invoice_id[]" value="${invoice.id}" /> <!-- Store the invoice ID in a hidden input -->  
+                            </td>  
+                            <td><input type="number" class="form-control requested-amount" name="requested[]" min="1" data-remaining="${invoice.remaining_price}"/></td>  
+                            <td>  
+                            <input type="text" name="original_prices[]" class="form-control original-price" value="${formatNumber(invoice.total_price)}" readonly>  
+                            </td>  
+                            <td>  
+                            <input type="text" name="remaining_prices[]" class="form-control remaining_price" value="${formatNumber(invoice.remaining_price)}" readonly>  
+                            </td>  
+                            <td><a href="#" class="btn btn-danger btn-remove-invoice-line">Remove</a></td>  
+                        </tr>  
+                    `;  
+                    $('#invoice-sales-table tbody').append(newRow); // Append the new row to the table  
+                    });  
+                } else {  
+                    // If no invoices are found, display a message  
+                    $('#invoice-sales-table tbody').append(`<tr><td colspan="5">No sales invoices found.</td></tr>`);  
+                }  
+            },  
+            error: function(xhr) {  
+                console.error('Failed to fetch sales invoices:', xhr.responseText);  
+                $('#invoice-sales-table tbody').append('<tr><td colspan="5">Error loading sales invoices. Please try again later.</td></tr>');  
+            }  
+            });  
+        } else {  
+            // If no customer is selected, reset the table  
+            $('#invoice-sales-table tbody').empty();  
+        }  
+    });  
+    
+    // Handle the removal of an invoice line  
+    $(document).on('click', '.btn-remove-invoice-line', function(e) {  
+        e.preventDefault(); // Prevent default link action  
+        $(this).closest('tr').remove(); // Remove the row  
+    });  
+    
+    // Format numbers with thousand separators  
+        $(document).on('blur', '.requested-amount', function() {    
+        var requested = parseInt($(this).val().replace(/,/g, ''));  // Remove commas before parsing   
+        var remaining = parseInt($(this).data('remaining'));    
 
-    $('#customer_id').change(function() {
-    var customerId = $(this).val(); // Get the selected cu
-    // Clear the invoice table when customer changes
-    $('#invoice-sales-table tbody').empty(); // Clear existing invoices
+        // Remove any previous warning message
+        $(this).closest('tr').find('.warning-message').remove();
 
-    if (customerId) {
-        $.ajax({
-            url: '/admin/transactional/sales_invoice/customer/' + customerId + '/invoices',
-            type: 'GET',
-            success: function(response) {
-                // Check if the sales invoices array exists and has elements
-                if (response.salesInvoices && response.salesInvoices.length > 0) {
-                    // Append each invoice and fetch its original price
-                    response.salesInvoices.forEach(function(invoice) {
-                        // Create a new row for the invoice
-                        var newRow = `
-                            <tr class="invoice-line">
-                                <td>
-                                    <span class="invoice-code">${invoice.code}</span>
-                                    <input type="hidden" name="invoice_id[]" value="${invoice.id}" /> <!-- Store the invoice ID in a hidden input -->
-                                </td>
-                                <td><input type="number" class="form-control requested-amount" name="requested[]" /></td>
-                                <td>
-                                    <input type="text" name="original_prices[]" class="form-control original-price" readonly>
-                                </td>
-                                <td>
-                                    <input type="text" name="remaining_prices[]" class="form-control remaining_price" readonly>
-                                </td>
-                                <td><a href="#" class="btn btn-danger btn-remove-invoice-line">Remove</a></td>
-                            </tr>
-                        `;
-                        $('#invoice-sales-table tbody').append(newRow); // Append the new row to the table
+        if (requested > remaining) {    
+            alert("Requested amount cannot be greater than remaining amount.");  
+            $(this).val(remaining);    
 
-                        // Save a reference to the new row
-                        var $currentRow = $('#invoice-sales-table tbody tr:last');
-
-                        // Fetch the original price and remaining price for the newly added invoice
-                        $.ajax({
-                            url: '/admin/transactional/sales_invoice/' + invoice.id + '/details', // Ensure this URL is correct
-                            type: 'GET',
-                            success: function(detailResponse) {
-                                if (detailResponse.total_price !== undefined && detailResponse.price_remaining !== undefined) {
-                                    // Set the original price and remaining price for the new row
-                                    $currentRow.find('.original-price').val(detailResponse.total_price.toFixed(2));
-                                    
-                                } else {
-                                    console.warn('Price details are undefined in response:', detailResponse);
-                                }
-                            },
-                            error: function(xhr) {
-                                console.error('Failed to fetch invoice details:', xhr.responseText);
-                            }
-                        });
-                    });
-                } else {
-                    $('#invoice-sales-table tbody').append(`<tr><td colspan="5">No sales invoices found.</td></tr>`);
-                }
-            },
-            error: function(xhr) {
-                console.error('Failed to fetch sales invoices:', xhr.responseText);
-                $('#invoice-sales-table tbody').append('<tr><td colspan="5">Error loading sales invoices. Please try again later.</td></tr>');
-            }
-        });
-    } else {
-        // If no customer is selected, reset the table
-        $('#invoice-sales-table tbody').empty();
-    }
-});
-
-    $(document).on('click', '.btn-remove-invoice-line', function(e) {
-        e.preventDefault(); // Prevent default link action
-        $(this).closest('tr').remove(); // Remove the row
+            // Append a warning message in the same row
+            $(this).closest('td').append('<span class="warning-message" style="color: red; font-size: 12px;">Requested amount exceeds remaining amount</span>');
+        }    
     });
+
+    
+    // Function to format numbers with thousand separators  
+    function formatNumber(number) {  
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");  
+    }
+
 
 });
 

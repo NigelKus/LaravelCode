@@ -19,7 +19,7 @@
             <form method="POST" action="{{ route('sales_invoice.update', $salesInvoice->id) }}" class="form-horizontal">
                 @csrf
                 @method('PUT')
-
+                
                 <!-- Sales Order Code -->
                 <div class="form-group">
                     <label for="sales_order_code">Sales Order Code</label>

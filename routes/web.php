@@ -120,6 +120,8 @@ Route::prefix('admin/transactional/payment_order')
         Route::get('{id}/edit', [PaymentOrderController::class, 'edit'])->name('edit');
         Route::patch('{id}/update-status', [PaymentOrderController::class, 'updateStatus'])->name('update_status');
         Route::get('/customer/{id}/invoices', [PaymentOrderController::class, 'getInvoicesByCustomerId'])->name('customer.invoices');
+        
+        Route::put('{id}', [PaymentOrderController::class, 'update'])->name('update');
 });
 
 

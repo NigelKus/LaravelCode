@@ -60,10 +60,13 @@
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th>Code</th> 
+                        <th>Code</th>
                         <th>Sales Order</th>
                         <th>Customer</th>
                         <th>Description</th>
+                        <th>Total Price</th>
+                        <th>Paid</th>
+                        <th>Price Remaining</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -75,15 +78,21 @@
                         <td>{{ $salesInvoice->salesOrder->code ?? 'N/A' }}</td>
                         <td>{{ $salesInvoice->customer->name ?? 'N/A' }}</td>
                         <td>{{ $salesInvoice->description }}</td>
+                        <td>{{ number_format($salesInvoice->total_price) }}</td> <!-- Total Price with thousand separator -->
+                        <td>{{ number_format($salesInvoice->total_price - $salesInvoice->calculatePriceRemaining()) }}</td> <!-- Paid with thousand separator -->
+                        <td>{{ number_format($salesInvoice->calculatePriceRemaining()) }}</td>
                         <td>{{ $salesInvoice->status }}</td>
-                        <td><a href="{{ route('sales_invoice.show', $salesInvoice->id) }}" class="btn btn-info btn-sm">View</a></td>
+                        <td>
+                            <a href="{{ route('sales_invoice.show', $salesInvoice->id) }}" class="btn btn-info btn-sm">View</a>
+                        </td>
                     </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="text-center">No Sales Invoice found.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="8" class="text-center">No Sales Invoice found.</td>
+                    </tr>
                     @endforelse
                 </tbody>
+                
             </table>
         </div>
     </div>
