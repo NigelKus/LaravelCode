@@ -1,10 +1,10 @@
 @extends('adminlte::page')
 
-@section('title', 'Payment Order Details')
+@section('title', 'Payment Sales Details')
 
 @section('content_header')
 <div class="d-flex justify-content-between align-items-center">
-    <h1>Payment Order Details</h1>
+    <h1>Payment Sales Details</h1>
     <form action="{{ route('payment_order.destroy', $paymentOrder->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
         @csrf
         @method('DELETE')
@@ -33,17 +33,33 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <!-- Left Side: Sales Invoice Details -->
-                    <h4>Payment Order</h4>
-                    <p><strong>Code:</strong> {{ $paymentOrder->code }}</p>
-                    <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($paymentOrder->date)->format('Y-m-d') }}</p>
+                    <h4>Payment Sales</h4>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Code</dt>
+                        <dd class="col-sm-9">{{ $paymentOrder->code }}</dd>
+            
+                        <dt class="col-sm-3">Date</dt>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($paymentOrder->date)->format('Y-m-d') }}</dd>
+                    </dl>
                 </div>
                 <div class="col-md-6 text-md-right">
                     <!-- Right Side: Customer Contact Details -->
                     <h4>Customer Contact</h4>
-                    <p><strong>Customer Name:</strong> {{ $paymentOrder->customer->name }}</p>
-                    <p><strong>Address:</strong> {{ $paymentOrder->customer->address }}</p>
-                    <p><strong>Phone:</strong> {{ $paymentOrder->customer->phone }}</p>
-                    <p><strong>Email:</strong> {{ $paymentOrder->customer->email }}</p>
+                    <dl class="row">
+                        <dt class="col-sm-8">Customer Name</dt>
+                        <dd class="col-sm-4">{{ $paymentOrder->customer->name }}</dd>
+            
+                        <dt class="col-sm-8">Address</dt>
+                        <dd class="col-sm-4">{{ $paymentOrder->customer->address }}</dd>
+
+                        <dt class="col-sm-8">Phone</dt>
+                        <dd class="col-sm-4">{{ $paymentOrder->customer->phone }}</dd>
+
+                        <dt class="col-sm-8">Email</dt>
+                        <dd class="col-sm-4">{{ $paymentOrder->customer->email }}</dd>
+                    </dl>
                 </div>
             </div>
 
@@ -105,9 +121,7 @@
                     </form>
                 </div>
             </div>
-
-            <!-- Edit and Back Buttons -->
-            <div class="mt-3">
+            <div class="card-footer">
                 <a href="{{ route('payment_order.edit', $paymentOrder->id) }}" class="btn btn-warning">Edit</a>
                 <a href="{{ route('payment_order.index') }}" class="btn btn-secondary">Back to List</a>
             </div>

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
-use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
 use App\Models\PaymentOrder; // Ensure to import your model
@@ -112,7 +111,7 @@ class PaymentOrderController extends Controller
         ]);
         
         // Generate the payment order code
-        $salesPaymentCode = CodeFactory::generatePaymentOrderCode();
+        $salesPaymentCode = CodeFactory::generatePaymentSalesCode();
         DB::beginTransaction();
         // Create the payment order
         $paymentOrder = PaymentOrder::create([
@@ -126,7 +125,7 @@ class PaymentOrderController extends Controller
         // Loop through the filtered data and create invoice lines  
         foreach ($request['invoice_id'] as $index => $invoiceId) {
             // Find the invoice
-            $invoice = SalesInvoice::with('details')->findOrFail($invoiceId);
+            
 
             $requestedAmount = $request['requested'][$index];
             
@@ -137,7 +136,9 @@ class PaymentOrderController extends Controller
                 'price' => $requestedAmount, // Use the requested price or total price
                 'status' => 'pending',
             ]);
-            if ($invoice->remaining_price == 0) 
+            $invoice = SalesInvoice::with('details')->findOrFail($invoiceId);
+
+            if ($invoice->calculatePriceRemaining() == 0) 
             {
                 $invoice->status = 'completed';
             }else 
@@ -152,9 +153,6 @@ class PaymentOrderController extends Controller
 
     }
     
-    
-    
-
     // Display the specified payment order
     public function show($id)
     {
@@ -184,28 +182,27 @@ class PaymentOrderController extends Controller
         $salesInvoices = SalesInvoice::where('customer_id', $customers->id)
             ->whereIn('status', ['pending', 'completed'])
             ->get();
-        
-        // Prepare combined details
+    
+        // Prepare combined details and filter out invoices with remaining price 0
         $combinedDetails = $salesInvoices->map(function ($invoice) use ($paymentOrder) {
             // Find the corresponding payment detail for this invoice
             $paymentDetail = $paymentOrder->paymentDetails->firstWhere('invoicesales_id', $invoice->id);
     
-            return [
-                'invoice_id' => $invoice->id, // Ensure this is assigned
-                'invoice_code' => $invoice->code,
-                'requested' => $paymentDetail ? $paymentDetail->price : '', // Existing payment detail, if any
-                'original_price' => $invoice->getTotalPriceAttribute(),
-                'remaining_price' => $invoice->calculatePriceRemaining() + ($paymentDetail->price ?? 0),
-            ];
-        });
+            // Calculate remaining price
+            $remainingPrice = $invoice->calculatePriceRemaining() + ($paymentDetail->price ?? 0);
     
-        // Debug the combined details
-        // dd([
-        //     'paymentOrder' => $paymentOrder,
-        //     'customer' => $customers, // Corrected from $customer to $customers for consistency
-        //     'combinedDetails' => $combinedDetails,
-        // ]);
-        
+            // Return only if remaining price is greater than 0
+            if ($remainingPrice > 0) {
+                return [
+                    'invoice_id' => $invoice->id, // Ensure this is assigned
+                    'invoice_code' => $invoice->code,
+                    'requested' => $paymentDetail ? $paymentDetail->price : '', // Existing payment detail, if any
+                    'original_price' => $invoice->getTotalPriceAttribute(),
+                    'remaining_price' => $remainingPrice,
+                ];
+            }
+        })->filter(); // Use filter to remove null entries where remaining_price == 0
+    
         // Continue with passing data to the view if needed
         return view('layouts.transactional.payment_order.edit', [
             'paymentOrder' => $paymentOrder,
@@ -215,6 +212,7 @@ class PaymentOrderController extends Controller
             'payment_order_code' => $paymentOrder->code, // Send payment order code
         ]);
     }
+    
 
     // Update the specified payment order in storage
     public function update(Request $request, $id)
@@ -239,7 +237,6 @@ class PaymentOrderController extends Controller
             }
         }
         
-        // Update the input data with the filtered values
         $request->merge([
             'invoice_id' => $filteredInvoiceIds,
             'requested' => $filteredRequested,
@@ -247,7 +244,6 @@ class PaymentOrderController extends Controller
             'remaining_prices' => $filteredRemainingPrices,
         ]);
         
-        // Validate the request data (after filtering)
         $request->validate([
             'payment_order_id' => 'required|exists:mstr_payment,id',
             'customer_id' => 'required|exists:mstr_customer,id', // Validate customer ID
@@ -258,7 +254,6 @@ class PaymentOrderController extends Controller
             'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
         ]);
 
-        // dd($request->payment_order_id);
 
         $paymentOrder = PaymentOrder::findOrFail($request->payment_order_id); // Find payment order or fail
 
@@ -271,6 +266,14 @@ class PaymentOrderController extends Controller
 
         foreach($orderDetails as $detail)
         {
+            $invoice = SalesInvoice::with('details')->findOrFail($detail->invoicesales_id);
+
+            // If the status is 'completed', set it back to 'pending'
+            if ($invoice->status === 'completed') {
+                $invoice->status = 'pending';
+                $invoice->save();
+            }
+
             $detail->delete();
         }
 
@@ -285,6 +288,17 @@ class PaymentOrderController extends Controller
                     'payment_id' => $paymentOrder->id, // Insert the payment_order_id here
                 ]
             );
+
+            $invoice = SalesInvoice::with('details')->findOrFail($invoiceId);
+            if ($invoice->calculatePriceRemaining() == 0) 
+            {
+                $invoice->status = 'completed';
+            }else 
+            {
+                $invoice->status = 'pending';   
+            }
+
+            $invoice->save();
         }
         
         
@@ -299,58 +313,44 @@ class PaymentOrderController extends Controller
     
         // Loop through the payment order details and set their status to 'deleted'
         foreach ($paymentOrder->paymentDetails as $detail) {
-            $detail->update(['status' => 'deleted']); // Update status to 'deleted'
-            $detail->delete(); // Soft delete the payment order detail
+            // Retrieve the related sales invoice
+            $invoice = SalesInvoice::with('details')->findOrFail($detail->invoicesales_id); // Assuming invoicesales_id is the related field
+            $invoice->status = 'pending';
+            $invoice->save(); // Save the updated status
+        
+            // Update payment detail status to 'deleted'
+            $detail->update(['status' => 'deleted']);
+            
+            // Soft delete the payment order detail
+            $detail->delete();
         }
+        
     
-        // Update the payment order status to 'deleted'
         $paymentOrder->update([
             'status' => 'deleted',
         ]);
     
-        // Soft delete the payment order
         $paymentOrder->delete();
     
-        // Redirect to the payment order index page with success message
         return redirect()->route('payment_order.index')->with('success', 'Payment Order and its details deleted successfully.');
     }
     
 
     public function updateStatus(Request $request, $id)
     {
-        // $request->validate([
-        //     'status' => 'required|in:pending,completed,cancelled,deleted',
-        // ]);
+        $request->validate([
+            'status' => 'required|in:pending,completed',
+        ]);
         
         $paymentOrder = PaymentOrder::findOrFail($id);
 
-        // $salesOrder = SalesOrder::findOrFail($salesInvoice->salesorder_id);
+        $paymentOrder->update([
+            'status' => $request->input('status'),
+        ]);
 
-        // // Check if the sales order status is canceled or deleted
-        // if ($salesOrder->status === 'canceled' || $salesOrder->status === 'deleted') {
-        //     // Return an error message if the sales order has been canceled or deleted
-        //     return redirect()->route('sales_invoice.show', $salesInvoice->id)->withErrors([
-        //         'error' => 'The sales order has already been deleted or canceled. Status cannot be updated.'
-        //     ]);
-        // }
-
-        // $salesInvoice->status = $request->input('status');
-        // $salesInvoice->save();
-        // // Collection of details
-
-        // // Update the status of each associated invoice detail
-        // foreach ($salesInvoice->details as $detail) {
-        //     $detail->status = $request->input('status'); // Set the same status as the invoice
-        //     $detail->save(); // Save each detail
-        // }
+        $paymentOrder->save();
     
         return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Sales invoice updated successfully.');
-    }
-
-        public function fetchInvoices($customerId)
-    {
-        $invoices = SalesInvoice::where('customer_id', $customerId)->get(['id']); // Adjust the fields as necessary
-        return response()->json(['invoices' => $invoices]);
     }
 
 }

@@ -46,9 +46,6 @@ class ProductController extends Controller
         
         return view('layouts.master.product.index', compact('products', 'statuses', 'collections'));
     }
-    
-    
-    
 
     public function create()
     {
@@ -97,8 +94,6 @@ class ProductController extends Controller
         }
     }
     
-
-
     public function show($id)
     {
         $product = Product::findOrFail($id);

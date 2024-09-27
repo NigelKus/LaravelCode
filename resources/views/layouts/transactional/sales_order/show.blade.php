@@ -30,24 +30,36 @@
                     </ul>
                 </div>
             @endif
-            <!-- Sales Order Header -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <!-- Left Side: Sales Order Details -->
-                    <h4>Sales Order</h4>
-                    <p><strong>Code:</strong> {{ $salesOrder->code }}</p>
-                    <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($salesOrder->date)->format('Y-m-d') }}</p>
-                    <p><strong>Customer Name:</strong> {{ $salesOrder->customer->name }}</p>
+                        
+                <div class="row mb-4">  
+                    <div class="col-md-6">  
+                    <!-- Left Side: Sales Order Details -->  
+                    <h4>Sales Order</h4>  
+                        <dl class="row">  
+                            <dt class="col-sm-3">ID</dt>  
+                            <dd class="col-sm-9">{{ $salesOrder->id }}</dd>  
+                            <dt class="col-sm-3">Code</dt>  
+                            <dd class="col-sm-9">{{ $salesOrder->code }}</dd>  
+                            <dt class="col-sm-3">Date</dt>  
+                            <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesOrder->date)->format('Y-m-d') }}</dd>  
+                            <dt class="col-sm-3">Customer Name</dt>  
+                            <dd class="col-sm-9">{{ $salesOrder->customer->name }}</dd>  
+                        </dl>  
+                    </div>  
+                    <div class="col-md-6 text-right">  
+                    <!-- Right Side: Customer Contact Details -->  
+                        <h4>Customer Contact</h4>  
+                        <dl class="row">  
+                            <dt class="col-sm-8 ">Address</dt>  
+                            <dd class="col-sm-4 ">{{ $salesOrder->customer->address }}</dd>  
+                            <dt class="col-sm-8 ">Phone</dt>  
+                            <dd class="col-sm-4 ">{{ $salesOrder->customer->phone }}</dd>  
+                            <dt class="col-sm-8 ">Email</dt>  
+                            <dd class="col-sm-4 ">{{ $salesOrder->customer->email }}</dd>  
+                        </dl>  
+                    </div>  
                 </div>
-                <div class="col-md-6 text-md-right">
-                    <!-- Right Side: Customer Contact Details -->
-                    <h4>Customer Contact</h4>
-                    <p><strong>Address:</strong> {{ $salesOrder->customer->address }}</p>
-                    <p><strong>Phone:</strong> {{ $salesOrder->customer->phone }}</p>
-                    <p><strong>Email:</strong> {{ $salesOrder->customer->email }}</p>
-                </div>
-            </div>
-
+            
             <!-- Sales Order Details Table -->
             <div class="card mt-4">
                 <div class="card-header">
@@ -60,7 +72,6 @@
                                 <th>Product Code</th>
                                 <th>Collection</th>
                                 <th>Weight</th>
-                                {{--     --}}
                                 <th>Price</th>
                                 <th>Quantity</th>
                                 <th>Remaining Quantity</th>
@@ -73,7 +84,6 @@
                                     <td>{{ $detail->product->code }}</td>
                                     <td>{{ $detail->product->collection }}</td>
                                     <td>{{ $detail->product->weight }} g</td>
-                                    {{-- <td>{{ $detail->status}}</td> --}}
                                     <td>{{ number_format($detail->price, 2) }}</td>
                                     <td>{{ $detail->quantity }}</td>
                                     <td>{{ $detail->quantity_remaining }}</td>
@@ -122,8 +132,6 @@
             <!-- Edit Button -->
             <div class="mt-3">
                 <a href="{{ route('sales_order.edit', $salesOrder->id) }}" class="btn btn-warning">Edit</a>
-
-
                 <a href="{{ route('sales_order.index') }}" class="btn btn-secondary">Back to List</a>
             </div>
         </div>

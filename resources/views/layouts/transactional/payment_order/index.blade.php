@@ -1,15 +1,15 @@
 @extends('adminlte::page')
 
-@section('title', 'Payment Orders Index')
+@section('title', 'Payment Sales Index')
 
 @section('content_header')
-    <h1>Payment Orders</h1>
+    <h1>Payment Sales</h1>
 @stop
 
 @section('content')
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Payment Orders List</h3>
+            <h3 class="card-title">Payment Sales List</h3>
             @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>

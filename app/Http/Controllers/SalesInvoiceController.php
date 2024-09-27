@@ -8,12 +8,9 @@ use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
 use App\Models\SalesorderDetail;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Database\Factories\CodeFactory; 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 
 class SalesInvoiceController extends Controller
@@ -105,115 +102,99 @@ class SalesInvoiceController extends Controller
         ]);
     }
     
-public function store(Request $request)
-{   
-    // Validate the incoming request data
-    // dd($request->all());
-    
-    $filteredData = collect($request->input('requested'))->filter(function ($value, $key) {
-        return $value > 0; // Keep only values greater than 0
-    })->keys()->toArray();
-
-    // Now filter other related fields to keep the same indexes
-    $requestData = $request->all();
-    foreach (['requested', 'qtys', 'price_eachs', 'price_totals', 'sales_order_detail_ids'] as $field) {
-        $requestData[$field] = array_intersect_key($requestData[$field], array_flip($filteredData));
-    }
-
-    $requestData['price_eachs'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_eachs'], array_flip($filteredData)));
-    $requestData['price_totals'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_totals'], array_flip($filteredData)));
-
-    // Now validate the filtered data
-    $request->replace($requestData);
-    
-    $request->validate([
-        'customer_id' => 'required|exists:mstr_customer,id',
-        'description' => 'nullable|string',
-        'date' => 'required|date',
-        'due_date' => 'required|date|after_or_equal:date',
-        'salesorder_id' => 'required|exists:mstr_salesorder,id',
-        'requested.*' => 'required|integer|min:1', // Validate requested quantity
-        'qtys.*' => 'required|integer|min:1',
-        'price_eachs.*' => 'required|numeric|min:0',
-        'price_totals.*' => 'required|numeric|min:0',
-        'sales_order_detail_ids.*' => 'required|integer',
-    ], [
-        'requested.*.min' => 'Requested quantity must be at least 1.',
-    ]);
-
-    // dd($request->all());
-    // dd($request);
-    // dd($validator);
-    // if ($validator->fails()) {
-    //     return redirect()->back()->withErrors($validator)->withInput();
-    // }
-
-    // Begin a transaction to ensure atomicity
-    DB::beginTransaction();
-    
+    public function store(Request $request)
+    {   
         
-        // Create a new SalesInvoice record
-        $salesInvoiceCode = CodeFactory::generateSalesInvoiceCode();
+        $filteredData = collect($request->input('requested'))->filter(function ($value, $key) {
+            return $value > 0; // Keep only values greater than 0
+        })->keys()->toArray();
 
-        $salesInvoice = new SalesInvoice();
-        $salesInvoice->code = $salesInvoiceCode; // Set the generated code
-        $salesInvoice->salesorder_id = $request->input('salesorder_id');
-        $salesInvoice->customer_id = $request->input('customer_id');
-        $salesInvoice->description = $request->input('description');
-        $salesInvoice->date = $request->input('date');
-        $salesInvoice->due_date = $request->input('due_date');
-        $salesInvoice->status = 'pending'; // Assuming a default status
-        $salesInvoice->save();
-        
-        // Get the sales order ID from the request
-        $salesOrderId = $request->input('salesorder_id');
-        
-        // Fetch the corresponding sales order
-        $existingSalesOrder = SalesOrder::with('details')->find($salesOrderId); // Eager load details
-        if (!$existingSalesOrder) {
-            throw new \Exception('Sales order not found.');
+        // Now filter other related fields to keep the same indexes
+        $requestData = $request->all();
+        foreach (['requested', 'qtys', 'price_eachs', 'price_totals', 'sales_order_detail_ids'] as $field) {
+            $requestData[$field] = array_intersect_key($requestData[$field], array_flip($filteredData));
         }
 
-        // Retrieve product details
-        $requestedQuantities = $request->input('requested');
-        $priceEaches = $request->input('price_eachs');
-        $salesDetail = $request->input('sales_order_detail_ids');
-        // dd($salesDetail);
-        foreach ($salesDetail as $index => $salesOrderDetailId) {
-            $salesOrderDetail = $existingSalesOrder->details->where('id', $salesOrderDetailId)->first();
+        $requestData['price_eachs'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_eachs'], array_flip($filteredData)));
+        $requestData['price_totals'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_totals'], array_flip($filteredData)));
 
-            if (!$salesOrderDetail) {
-                throw new \Exception('Sales order detail not found for ID ' . $salesOrderDetailId);
+        // Now validate the filtered data
+        $request->replace($requestData);
+        
+        $request->validate([
+            'customer_id' => 'required|exists:mstr_customer,id',
+            'description' => 'nullable|string',
+            'date' => 'required|date',
+            'due_date' => 'required|date|after_or_equal:date',
+            'salesorder_id' => 'required|exists:mstr_salesorder,id',
+            'requested.*' => 'required|integer|min:1', // Validate requested quantity
+            'qtys.*' => 'required|integer|min:1',
+            'price_eachs.*' => 'required|numeric|min:0',
+            'price_totals.*' => 'required|numeric|min:0',
+            'sales_order_detail_ids.*' => 'required|integer',
+        ], [
+            'requested.*.min' => 'Requested quantity must be at least 1.',
+        ]);
+
+        DB::beginTransaction();
+        
+            $salesInvoiceCode = CodeFactory::generateSalesInvoiceCode();
+
+            $salesInvoice = new SalesInvoice();
+            $salesInvoice->code = $salesInvoiceCode; // Set the generated code
+            $salesInvoice->salesorder_id = $request->input('salesorder_id');
+            $salesInvoice->customer_id = $request->input('customer_id');
+            $salesInvoice->description = $request->input('description');
+            $salesInvoice->date = $request->input('date');
+            $salesInvoice->due_date = $request->input('due_date');
+            $salesInvoice->status = 'pending'; // Assuming a default status
+            $salesInvoice->save();
+            
+            // Get the sales order ID from the request
+            $salesOrderId = $request->input('salesorder_id');
+            
+            // Fetch the corresponding sales order
+            $existingSalesOrder = SalesOrder::with('details')->find($salesOrderId); // Eager load details
+            if (!$existingSalesOrder) {
+                throw new \Exception('Sales order not found.');
             }
-            
-            $productId = $salesOrderDetail->product_id;
-            $requested = $requestedQuantities[$index] ?? 0;
-            // dd($salesOrderDetailId);
-            // $salesOrderDetailId = $salesOrderDetailIds[$index] ?? null;
-            
-            $salesInvoiceDetail = new SalesInvoiceDetail();
-            $salesInvoiceDetail->invoicesales_id = $salesInvoice->id;
-            $salesInvoiceDetail->product_id = $productId;
-            $salesInvoiceDetail->quantity = $requested;
-            $salesInvoiceDetail->salesdetail_id = $salesOrderDetail->id;
-            $salesInvoiceDetail->price = $priceEaches[$index];
-            $salesInvoiceDetail->status = 'pending'; // Assuming a default status
-            // dd($salesInvoiceDetail);
-            $salesInvoiceDetail->save();
-            // dd($salesInvoiceDetail);
-            // Update status of the sales order detail
-            // dd($salesOrderDetailId);
-            SalesorderDetail::checkAndUpdateStatus($salesOrderId, $productId, $salesOrderDetailId);
-            // DD($statusUpdated);
-        }
 
-        // Commit the transaction
-        DB::commit();
+            // Retrieve product details
+            $requestedQuantities = $request->input('requested');
+            $priceEaches = $request->input('price_eachs');
+            $salesDetail = $request->input('sales_order_detail_ids');
+            // dd($salesDetail);
+            foreach ($salesDetail as $index => $salesOrderDetailId) {
+                $salesOrderDetail = $existingSalesOrder->details->where('id', $salesOrderDetailId)->first();
 
-        // Redirect or return response
-        return redirect()->route('sales_invoice.show', $salesInvoice->id)
-        ->with('success', 'Sales invoice updated successfully.');
-}
+                if (!$salesOrderDetail) {
+                    throw new \Exception('Sales order detail not found for ID ' . $salesOrderDetailId);
+                }
+                
+                $productId = $salesOrderDetail->product_id;
+                $requested = $requestedQuantities[$index] ?? 0;
+                // dd($salesOrderDetailId);
+                // $salesOrderDetailId = $salesOrderDetailIds[$index] ?? null;
+                
+                $salesInvoiceDetail = new SalesInvoiceDetail();
+                $salesInvoiceDetail->invoicesales_id = $salesInvoice->id;
+                $salesInvoiceDetail->product_id = $productId;
+                $salesInvoiceDetail->quantity = $requested;
+                $salesInvoiceDetail->salesdetail_id = $salesOrderDetail->id;
+                $salesInvoiceDetail->price = $priceEaches[$index];
+                $salesInvoiceDetail->status = 'pending'; 
+                $salesInvoiceDetail->save();
+
+                SalesorderDetail::checkAndUpdateStatus($salesOrderId, $productId, $salesOrderDetailId);
+                
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+            return redirect()->route('sales_invoice.show', $salesInvoice->id)
+            ->with('success', 'Sales invoice updated successfully.');
+    }
 
 
     public function show($id)
@@ -225,12 +206,6 @@ public function store(Request $request)
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
-        
-        // dd([
-        //     'salesInvoice' => $salesInvoice,
-        //     'invoicedetails' => $salesInvoice->invoicedetails,
-        //     'totalPrice' => $totalPrice,
-        // ]);
     
         // Return the view with the sales invoice and its details
         return view('layouts.transactional.sales_invoice.show', [
@@ -238,6 +213,7 @@ public function store(Request $request)
             'totalPrice' => $totalPrice,
         ]);
     }
+
     public function edit($id)
     {
         // Fetch the sales invoice with its details and related products
@@ -262,8 +238,6 @@ public function store(Request $request)
             ]);
         }
         
-        // Fetch sales order details for the given sales order ID
-        // Fetch sales order details
         $salesOrderDetails = SalesOrderDetail::where('salesorder_id', $salesInvoice->salesorder_id)->get();
         
         // Map sales order details by product_id
@@ -281,9 +255,6 @@ public function store(Request $request)
     
     public function update(Request $request, $id)
     {   
-        // Find the sales invoice
-        // dd($request->all());
-
         $salesInvoice = SalesInvoice::findOrFail($id);
         
         // Update sales invoice fields
@@ -291,7 +262,6 @@ public function store(Request $request)
         $salesInvoice->description = $request['description'];
         $salesInvoice->date = $request['date'];
         $salesInvoice->due_date = $request['due_date'];
-        // dd($salesInvoice);
         $salesInvoice->save();
         
         // Get existing sales invoice details
@@ -303,10 +273,7 @@ public function store(Request $request)
             $detail->delete();
         }
 
-        // dd($invoiceDetails);
-        $newDetails = []; // Array to hold newly created details
         $requested = $request['requested'];
-        $qtys = $request['qtys'];
         $priceEachs = $request['price_eachs'];
         $productIds = $request['product_id'];
         $sales_order_id = $request['sales_order_id'];
@@ -324,8 +291,6 @@ public function store(Request $request)
                 $salesInvoiceDetail->price = $priceEachs[$i] !== null ? (float)str_replace(',', '', $priceEachs[$i]) : 0; // Price from the request
                 $salesInvoiceDetail->status = 'pending';
                 
-                // dd($salesInvoiceDetail);
-                // dd($sales_order_id[$i], $productId,$request['salesdetail_id'][$i]);
                 
                 $salesInvoiceDetail->save();
                 SalesorderDetail::checkAndUpdateStatus($sales_order_id[$i], $productId, $request['salesdetail_id'][$i]);
@@ -373,15 +338,24 @@ public function store(Request $request)
     {
         // Find the sales invoice or fail if not found
         $salesInvoice = SalesInvoice::findOrFail($id);
-    
-        // Update the status of the sales invoice to 'deleted'
-        $salesInvoice->update([
-            'status' => 'deleted',
-        ]);
-        $salesInvoice->delete();
 
+        $hasPaymentOrderDetail = false;
+
+        // Check if any payment order detail has the same sales invoice ID
+        foreach ($salesInvoice->details as $detail) {
+            // Check if there is a PaymentOrderDetail with the same sales_invoice_id
+            $paymentOrderDetail = \App\Models\PaymentOrderDetail::where('invoicesales_id', $salesInvoice->id)->exists();
         
-        // Iterate through each detail of the sales invoice
+            if ($paymentOrderDetail) {
+                $hasPaymentOrderDetail = true;
+                break; // Exit the loop if a match is found
+            }
+        }
+        
+        if ($hasPaymentOrderDetail) {
+            return redirect()->back()->withErrors(['error' => 'There is an ongoing payment related to this sales invoice.']);
+        }
+        
         foreach ($salesInvoice->details as $detail) {
             try {
                 // Find the corresponding sales order detail using an appropriate relation
@@ -409,6 +383,11 @@ public function store(Request $request)
                 return redirect()->back()->withErrors(['error' => $e->getMessage()]);
             }
         }
+        $salesInvoice->update([
+            'status' => 'deleted',
+        ]);
+        
+        $salesInvoice->delete();
     
         // Redirect back to the sales invoice index with a success message
         return redirect()->route('sales_invoice.index')->with('success', 'Sales Invoice deleted successfully.');
@@ -451,7 +430,8 @@ public function store(Request $request)
                 return $detail->price * $detail->quantity;
             });
             $invoice->remaining_price = $invoice->calculatePriceRemaining();
-    
+
+            
             // Only add invoices with a remaining price greater than 0
             if ($invoice->remaining_price > 0) {
                 $validInvoices->push($invoice);
@@ -460,41 +440,4 @@ public function store(Request $request)
     
         return response()->json(['salesInvoices' => $validInvoices]);
     }
-    
-    
-    
-
-    //     public function getSalesInvoicesWithDetails($customerId)
-    // {
-    //     // Fetch sales invoices for the selected customer with their details
-    //     $salesInvoices = SalesInvoice::with('details')
-    //         ->where('customer_id', $customerId)
-    //         ->where('status', 'pending')
-    //         ->get();
-            
-
-    //     // Map the sales invoices with their total price and price remaining
-    //         $salesInvoicesWithDetails = $salesInvoices->map(function($invoice) {
-    //             // Calculate the total price of the invoice details
-    //             $totalPrice = $invoice->details->sum(function($detail) {
-    //                 return $detail->price * $detail->quantity;
-    //             });
-
-    //         // Get the price remaining using the accessor (if it exists)
-    //         $priceRemaining = $invoice->calculatePriceRemaining();
-    //         dd($priceRemaining);
-
-    //         return [
-    //             'id' => $invoice->id,
-    //             'code' => $invoice->code,
-    //             'total_price' => $totalPrice,
-    //             'price_remaining' => $priceRemaining,
-    //         ];
-    //     });
-
-    //     return response()->json([
-    //         'salesInvoices' => $salesInvoicesWithDetails,
-    //     ]);
-    // }
-
 }

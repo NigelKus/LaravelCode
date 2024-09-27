@@ -23,15 +23,16 @@
     
     <td>
         <!-- Original Price -->
-        <input type="number" name="original_prices[]" class="form-control original-price"
-               value="{{ $original_price }}" readonly />
+        <input type="text" name="original_prices[]" class="form-control original-price"
+               value="{{ number_format((float)$original_price, 2, '.', ',') }}" readonly />
     </td>
     
     <td>
         <!-- Remaining Price -->
-        <input type="number" name="remaining_prices[]" class="form-control remaining_price"
-               value="{{ $remaining_price }}" readonly />
+        <input type="text" name="remaining_prices[]" class="form-control remaining_price"
+               value="{{ number_format((float)$remaining_price, 2, '.', ',') }}" readonly />
     </td>
+    
     
     <td>
         <!-- Action Button: Remove Line -->

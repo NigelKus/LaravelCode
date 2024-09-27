@@ -29,28 +29,56 @@
                     </ul>
                 </div>
             @endif
+
+
             <!-- Sales Invoice Header -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <!-- Left Side: Sales Invoice Details -->
                     <h4>Sales Invoice</h4>
-                    <p><strong>Code:</strong> {{ $salesInvoice->code }}</p>
-                    <p><strong>Order:</strong> {{ $salesInvoice->salesOrder->code ?? 'N/A' }}</p>
-                    <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($salesInvoice->date)->format('Y-m-d') }}</p>
-                    <p><strong>Due Date:</strong> {{ \Carbon\Carbon::parse($salesInvoice->due_date)->format('Y-m-d') }}</p>
-                    <p><strong>Price :</strong> {{ number_format($salesInvoice->getTotalPriceAttribute()) }}</p>
-                    <p><strong>Price Paid :</strong> {{ number_format($salesInvoice->showPriceDetails()) }}</p>
-                    <p><strong>Price Remaining :</strong> {{ number_format($salesInvoice->calculatePriceRemaining()) }}</p>
+                    <dl class="row">
+                        <dt class="col-sm-3">Code</dt>
+                        <dd class="col-sm-9">{{ $salesInvoice->code }}</dd>
+            
+                        <dt class="col-sm-3">Order</dt>
+                        <dd class="col-sm-9">{{ $salesInvoice->salesOrder->code ?? 'N/A' }}</dd>
+            
+                        <dt class="col-sm-3">Date</dt>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesInvoice->date)->format('Y-m-d') }}</dd>
+            
+                        <dt class="col-sm-3">Due Date</dt>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesInvoice->due_date)->format('Y-m-d') }}</dd>
+            
+                        <dt class="col-sm-3">Price</dt>
+                        <dd class="col-sm-9">{{ number_format($salesInvoice->getTotalPriceAttribute()) }}</dd>
+            
+                        <dt class="col-sm-3">Price Paid</dt>
+                        <dd class="col-sm-9">{{ number_format($salesInvoice->showPriceDetails()) }}</dd>
+            
+                        <dt class="col-sm-3">Price Remaining</dt>
+                        <dd class="col-sm-9">{{ number_format($salesInvoice->calculatePriceRemaining()) }}</dd>
+                    </dl>
                 </div>
-                <div class="col-md-6 text-md-right">
+            
+                <div class="col-md-6 text-right">
                     <!-- Right Side: Customer Contact Details -->
                     <h4>Customer Contact</h4>
-                    <p><strong>Customer Name:</strong> {{ $salesInvoice->customer->name }}</p>
-                    <p><strong>Address:</strong> {{ $salesInvoice->customer->address }}</p>
-                    <p><strong>Phone:</strong> {{ $salesInvoice->customer->phone }}</p>
-                    <p><strong>Email:</strong> {{ $salesInvoice->customer->email }}</p>
+                    <dl class="row">
+                        <dt class="col-sm-8">Customer Name</dt>
+                        <dd class="col-sm-4">{{ $salesInvoice->customer->name }}</dd>
+            
+                        <dt class="col-sm-8">Address</dt>
+                        <dd class="col-sm-4">{{ $salesInvoice->customer->address }}</dd>
+            
+                        <dt class="col-sm-8">Phone</dt>
+                        <dd class="col-sm-4">{{ $salesInvoice->customer->phone }}</dd>
+            
+                        <dt class="col-sm-8">Email</dt>
+                        <dd class="col-sm-4">{{ $salesInvoice->customer->email }}</dd>
+                    </dl>
                 </div>
             </div>
+            
 
             <!-- Sales Invoice Details Table -->
             <div class="card mt-4">

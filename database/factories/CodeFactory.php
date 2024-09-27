@@ -56,12 +56,12 @@ class CodeFactory
         return "{$datePrefix}-SI-{$nextNumber}";
     }
 
-    public static function generatePaymentOrderCode()
+    public static function generatePaymentSalesCode()
     {
         $datePrefix = Carbon::now()->format('d-m-y');
 
         $latestOrder = DB::table('mstr_payment')
-            ->where('code', 'like', "{$datePrefix}-PO-%")
+            ->where('code', 'like', "{$datePrefix}-PS-%")
             ->orderBy('code', 'desc')
             ->first();
 
@@ -72,6 +72,6 @@ class CodeFactory
             $nextNumber = '0001';
         }
 
-        return "{$datePrefix}-PO-{$nextNumber}";
+        return "{$datePrefix}-PS-{$nextNumber}";
     }
 }

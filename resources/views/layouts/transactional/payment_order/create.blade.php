@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Payment Order Create')
+@section('title', 'Payment Sales Create')
 
 @section('content_header')
-    <h1>Create Payment Order</h1>
+    <h1>Create Payment Sales</h1>
 @stop
 
 @section('content')
@@ -187,7 +187,7 @@ $(document).ready(function() {
     });  
     
     // Format numbers with thousand separators  
-        $(document).on('blur', '.requested-amount', function() {    
+    $(document).on('input', '.requested-amount', function() {    
         var requested = parseInt($(this).val().replace(/,/g, ''));  // Remove commas before parsing   
         var remaining = parseInt($(this).data('remaining'));    
 
@@ -203,13 +203,10 @@ $(document).ready(function() {
         }    
     });
 
-    
     // Function to format numbers with thousand separators  
     function formatNumber(number) {  
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");  
     }
-
-
 });
 
     </script>

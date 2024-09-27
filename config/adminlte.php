@@ -362,6 +362,20 @@ return [
             'url' => 'admin/master/user/index',
             'icon' => 'fas fa-users',
         ],
+
+        [
+            'text' => 'Supplier',
+            'url' => 'admin/master/supplier/index',
+            'icon' => 'fas fa-truck',
+        ],
+
+        [
+            'text' => 'Chart of Account',
+            'url' => 'admin/master/CoA/index',
+            'icon' => 'fas fa-chart-bar',
+        ],
+
+
         // ['header' => 'Transactional'],
         // [
         //     'text' => 'Sales Invoice',
@@ -396,12 +410,12 @@ return [
             'submenu' => [
                 [
                     'text' => 'Purchase Order',
-                    'url' => 'admin/transactional/purchase/index',
+                    'url' => 'admin/transactional/purchase_order/index',
                     'icon' =>  'fas fa-clipboard-list',
                 ],
                 [
                     'text' => 'Purchase Invoice',
-                    'url' => 'admin/transactional/payment_invoice/index',
+                    'url' => 'admin/transactional/purchase_invoice/index',
                     'icon' =>  'fas fa-file-invoice-dollar',
                 ],
             ],
@@ -411,18 +425,18 @@ return [
             'icon' => 'fas fa-money-bill-wave', // Changed icon for Payment
             'submenu' => [
                 [
-                    'text' => 'Payment Order',
+                    'text' => 'Payment Sales',
                     'url' => 'admin/transactional/payment_order/index',
                     'icon' => 'fas fa-receipt', // Changed icon for Payment Order
                 ],
                 [
-                    'text' => 'Payment Invoice',
-                    'url' => 'admin/transactional/payment_invoice/index',
+                    'text' => 'Payment Purchase',
+                    'url' => 'admin/transactional/payment_purchase/index',
                     'icon' => 'fas fa-file-invoice', // Changed icon for Payment Invoice
                 ],
             ],
         ],
-        
+        ['header' => 'Report'],
         // [
         //     'text' => 'Purchase',
         //     'icon' => 'fas fa-file-alt',

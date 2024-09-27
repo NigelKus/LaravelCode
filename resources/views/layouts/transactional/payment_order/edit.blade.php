@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Edit Payment Order')
+@section('title', 'Edit Payment Sales')
 
 @section('content_header')
-    <h1>Edit Payment Order</h1>
+    <h1>Edit Payment Sales</h1>
 @stop
 
 @section('content')
@@ -22,11 +22,8 @@
             <form method="POST" action="/admin/transactional/payment_order/update" class="form-horizontal">
                 @csrf
                 @method('PUT')
-
-                <!-- Customer Field -->
-
             <div class="form-group">
-                <label for="payment_order_id">Payment Order Code</label>
+                <label for="payment_order_id">Payment Sales Code</label>
                 <input type="hidden" name="payment_order_id" value="{{ $payment_order_id }}">
                     <input type="text" class="form-control @error('payment_order_id') is-invalid @enderror" 
                         id="payment_order_id_display" 
@@ -38,7 +35,6 @@
                         </span>
                     @enderror
                 </div>
-
                 
                 <div class="form-group">
                     <label for="customer_id">Customer</label>
@@ -124,7 +120,7 @@
                 <!-- Form Submit and Cancel Buttons -->
                 <div class="form-group mt-3">
                     <button type="submit" class="btn btn-primary">Save</button>
-                    <a href="{{ route('payment_order.index') }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ route('payment_order.show', $paymentOrder->id) }}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
@@ -133,26 +129,40 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Event listener for requested input field
-        $('#invoice-sales-table').on('input', '.payment', function() {
-            // Get the current requested amount and remaining price
-            var requestedAmount = parseFloat($(this).val());
-            var remainingPrice = parseFloat($(this).closest('tr').find('.remaining_price').val().replace(/,/g, ''));
-    
-            // Check if the requested amount exceeds the remaining price
-            if (requestedAmount > remainingPrice) {
-                alert('Requested amount cannot exceed the remaining price.');
-                $(this).val(remainingPrice); // Set requested to remaining price
-            }
-        });
+$(document).ready(function() {
+    // Set the sidebar height to match the document height
+    function adjustSidebarHeight() {
+        $('.main-sidebar').height($(document).outerHeight());
+    }
 
-        $('#invoice-sales-table').on('click', '.del-invoice-line', function() {
-        // Confirm deletion
-        
-            // Remove the row
-            $(this).closest('tr').remove();
-        
+    adjustSidebarHeight();
+
+    $(window).resize(function() {
+        adjustSidebarHeight();
     });
+
+    // Event listener for requested input field
+    $('#invoice-sales-table').on('input', '.payment', function() {
+        // Get the current requested amount and remaining price
+        var requestedAmount = parseFloat($(this).val()) || 0; // Default to 0 if NaN
+        var remainingPrice = parseFloat($(this).closest('tr').find('.remaining_price').val().replace(/,/g, '')) || 0; // Default to 0 if NaN
+
+        $(this).closest('tr').find('.warning-message').remove();
+        // Check if the requested amount exceeds the remaining price
+        if (requestedAmount > remainingPrice) {
+            alert('Requested amount cannot exceed the remaining price.');
+            $(this).val(remainingPrice); // Set requested to remaining price
+            $(this).closest('td').append('<span class="warning-message" style="color: red; font-size: 12px;">Requested amount exceeds remaining amount</span>');
+        
+        } else if (requestedAmount < 0) {
+            alert('Requested amount cannot be negative.');
+            $(this).val(0); // Reset to 0 if negative
+        }
     });
-    </script>
+
+    $('#invoice-sales-table').on('click', '.del-invoice-line', function() {
+        $(this).closest('tr').remove();       
+    });
+});
+
+</script>
