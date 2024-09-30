@@ -74,4 +74,42 @@ class CodeFactory
 
         return "{$datePrefix}-PS-{$nextNumber}";
     }
+
+    public static function generatePurchaseOrdersCode()
+    {
+        $datePrefix = Carbon::now()->format('d-m-y');
+
+        $latestOrder = DB::table('purchase_order')
+            ->where('code', 'like', "{$datePrefix}-PO-%")
+            ->orderBy('code', 'desc')
+            ->first();
+
+        if ($latestOrder) {
+            $lastNumber = (int)substr($latestOrder->code, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        return "{$datePrefix}-PO-{$nextNumber}";
+    }
+
+    public static function transactionCode()
+    {
+        $datePrefix = Carbon::now()->format('d-m-y');
+
+        $latestOrder = DB::table('acct_journals')
+            ->where('code', 'like', "{$datePrefix}-JI-%")
+            ->orderBy('code', 'desc')
+            ->first();
+
+        if ($latestOrder) {
+            $lastNumber = (int)substr($latestOrder->code, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        return "{$datePrefix}-JI-{$nextNumber}";
+    }
 }

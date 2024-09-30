@@ -3,13 +3,13 @@
 @section('title', 'Sales Invoice Index')
 
 @section('content_header')
-    <h1>Sales Invoice</h1>
+    <h1>Sales Invoices</h1>
 @stop
 
 @section('content')
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Sales Invoice List</h3>
+            <h3 class="card-title">Sales Invoices List</h3>
             @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>

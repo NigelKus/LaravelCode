@@ -18,43 +18,43 @@
         <div class="card-body">
             <h4 >Customer Information</h4>
             <dl class="row mb-4">
-                <dt class="col-sm-2">ID</dt>
+                <dt class="col-sm-3">ID</dt>
                 <dd class="col-sm-9">{{ $customer->id }}</dd>
 
-                <dt class="col-sm-2">Code</dt>
+                <dt class="col-sm-3">Code</dt>
                 <dd class="col-sm-9">{{ $customer->code }}</dd>
 
-                <dt class="col-sm-2">Name</dt>
+                <dt class="col-sm-3">Name</dt>
                 <dd class="col-sm-9">{{ $customer->name }}</dd>
 
-                <dt class="col-sm-2">Sales Category</dt>
+                <dt class="col-sm-3">Sales Category</dt>
                 <dd class="col-sm-9">{{ $customer->sales_category }}</dd>
 
-                <dt class="col-sm-2">Address</dt>
+                <dt class="col-sm-3">Address</dt>
                 <dd class="col-sm-9">{{ $customer->address }}</dd>
 
-                <dt class="col-sm-2">Phone</dt>
+                <dt class="col-sm-3">Phone</dt>
                 <dd class="col-sm-9">{{ $customer->phone }}</dd>
 
-                <dt class="col-sm-2">Description</dt>
+                <dt class="col-sm-3">Description</dt>
                 <dd class="col-sm-9">{{ $customer->description }}</dd>
 
-                <dt class="col-sm-2">Birth Date</dt>
+                <dt class="col-sm-3">Birth Date</dt>
                 <dd class="col-sm-9">{{ $customer->birth_date }}</dd>
 
-                <dt class="col-sm-2">Birth City</dt>
+                <dt class="col-sm-3">Birth City</dt>
                 <dd class="col-sm-9">{{ $customer->birth_city }}</dd>
 
-                <dt class="col-sm-2">Email</dt>
+                <dt class="col-sm-3">Email</dt>
                 <dd class="col-sm-9">{{ $customer->email }}</dd>
 
-                <dt class="col-sm-2">Created At</dt>
+                <dt class="col-sm-3">Created At</dt>
                 <dd class="col-sm-9">{{ $customer->created_at }}</dd>
 
-                <dt class="col-sm-2">Updated At</dt>
+                <dt class="col-sm-3">Updated At</dt>
                 <dd class="col-sm-9">{{ $customer->updated_at }}</dd>
 
-                <dt class="col-sm-2">Deleted At</dt>
+                <dt class="col-sm-3">Deleted At</dt>
                 <dd class="col-sm-9">{{ $customer->deleted_at }}</dd>
             </dl>
         </div>

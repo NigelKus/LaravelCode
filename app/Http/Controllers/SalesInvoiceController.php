@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
 use App\Models\SalesorderDetail;
+use App\Utils\AccountingEvents\AE_S02_FinishSalesInvoice;
 use Illuminate\Http\Request;
 use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
@@ -188,6 +189,10 @@ class SalesInvoiceController extends Controller
                 SalesorderDetail::checkAndUpdateStatus($salesOrderId, $productId, $salesOrderDetailId);
                 
             }
+            
+            
+            AE_S02_FinishSalesInvoice::process($salesInvoice);
+
 
             // Commit the transaction
             DB::commit();

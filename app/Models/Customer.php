@@ -26,7 +26,7 @@ class Customer extends Model
         'birth_date',
         'birth_city',
         'email',
-        'status',
+    'status',
         'timestamp',
     ];
 

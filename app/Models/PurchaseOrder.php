@@ -5,21 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Purchase extends Model
+class PurchaseOrder extends Model
 {
     use HasFactory;
 
     // Define the table name
-    protected $table = 'mstr_purchase';
-
-    public $timestamps = false;
+    protected $table = 'purchase_order';
 
     protected $dates = ['date'];
 
     // Define fillable fields
     protected $fillable = [
         'code',
-        'customer_id',
+        'supplier_id',
         'description',
         'status',
         'date',
@@ -28,12 +26,12 @@ class Purchase extends Model
     // Define relationships
     public function details()
     {
-        return $this->hasMany(SalesOrderDetail::class, 'salesorder_id');
+        return $this->hasMany(PurchaseOrderDetail::class, 'purchaseorder_id');
     }
 
-    public function customer()
+    public function supplier()
     {
-        return $this->belongsTo(Customer::class, 'customer_id');
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     /**
@@ -45,4 +43,6 @@ class Purchase extends Model
     {
         return self::orderBy('id', 'desc')->pluck('id')->first();
     }
+
+
 }

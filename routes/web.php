@@ -127,6 +127,13 @@ Route::prefix('admin/master/product')
         ->group(function () {
             Route::get('index', [PurchaseOrderController::class, 'index'])->name('index');
             Route::get('create', [PurchaseOrderController::class, 'create'])->name('create');
+            Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
+            Route::get('{id}', [PurchaseOrderController::class, 'show'])->name('show');
+            Route::delete('{id}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
+            Route::patch('{id}/update-status', action: [PurchaseOrderController::class, 'updateStatus'])->name('update_status');
+            Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
+            
+            Route::put('{id}', [PurchaseOrderController::class, 'update'])->name('update');
     });
 
     Route::prefix('admin/transactional/purchase_invoice')
@@ -148,6 +155,7 @@ Route::prefix('admin/master/product')
             Route::patch('{id}/update-status', [PaymentOrderController::class, 'updateStatus'])->name('update_status');
             Route::get('/customer/{id}/invoices', [PaymentOrderController::class, 'getInvoicesByCustomerId'])->name('customer.invoices');
             Route::put('{id}', [PaymentOrderController::class, 'update'])->name('update');
+            
     });
 
     Route::prefix('admin/transactional/payment_purchase')

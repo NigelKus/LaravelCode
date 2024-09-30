@@ -3,22 +3,20 @@
 @section('title', 'Supplier Details')
 
 @section('content_header')
-    <h1>Supplier Details</h1>
+    <div class = "d-flex justify-content-between align-items-center">
+        <h1>Supplier Details</h1>
+            <form action="{{ route('supplier.destroy', $supplier->id) }}" method="POST" style="display:inline;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+            </form>
+    </div>
 @stop
 
 @section('content')
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Supplier Information</h3>
-            <div class="card-tools">
-                <form action="{{ route('supplier.destroy', $supplier->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                </form>
-            </div>
-        </div>
         <div class="card-body">
+            <h4>Supplier Information</h4>
             <dl class="row">
                 <dt class="col-sm-3">ID</dt>
                 <dd class="col-sm-9">{{ $supplier->id }}</dd>
@@ -61,25 +59,26 @@
             </dl>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header">
-                <h3 class="card-title">Change Supplier Status</h3>
-            </div>
+        <div class="card-body">        
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Change Supplier Status</h3>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('supplier.updateStatus', $supplier->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to change the status?');">
+                        @csrf
+                        @method('POST')
 
-            <div class="card-body">
-                <form action="{{ route('supplier.updateStatus', $supplier->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to change the status?');">
-                    @csrf
-                    @method('POST')
+                        <div class="form-group">
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="active" {{ $supplier->status == 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="trashed" {{ $supplier->status == 'trashed' ? 'selected' : '' }}>Trashed</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <select class="form-control" id="status" name="status" required>
-                            <option value="active" {{ $supplier->status == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="trashed" {{ $supplier->status == 'trashed' ? 'selected' : '' }}>Trashed</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Update Status</button>
-                </form>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
             </div>
         </div>
 
