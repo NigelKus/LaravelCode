@@ -11,10 +11,10 @@ use App\Utils\Constants;
 use App\Utils\SelectHelper;
 use Illuminate\Support\Facades\DB;
 
-class AE_S02_FinishSalesInvoice extends AE_Base
+class AE_S01_FinishSalesOrder extends AE_Base
 {
-    const TYPE = 'S02';
-    const NAME = 'Finish Sales Invoice';
+    const TYPE = 'S01';
+    const NAME = 'Finish Sales Order';
     const REQUIRED_CLASS = SalesInvoice::class;
 
     public static function buildJournalContent($obj) {
@@ -37,7 +37,7 @@ class AE_S02_FinishSalesInvoice extends AE_Base
         );
         
         
-
+        
         AccountingManager::credit( $journal,
         4000,  // CREDIT :: Penjualan
             $amount

@@ -66,14 +66,16 @@ class CoAController extends Controller
 
     public function show($id)
     {
-        $CoA = ChartOfAccount::findOrFail($id);
-
+        $CoA = ChartOfAccount::with(['postings.journal'])->findOrFail($id);
         return view('layouts.master.CoA.show', compact('CoA'));
     }
-
+    
+    
     public function edit($id)
     {
         $CoA = ChartOfAccount::findOrFail($id);
+
+        
 
         return view('layouts.master.CoA.edit', compact('CoA'));
     }

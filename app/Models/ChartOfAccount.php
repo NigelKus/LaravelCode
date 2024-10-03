@@ -25,4 +25,10 @@ class ChartOfAccount extends Model
     const STATUS_TRASHED = 'trashed';
     const STATUS_DELETED = 'deleted';
 
+    public function postings()
+    {
+        return $this->hasMany(Posting::class, 'account_id'); // Make sure this points to the correct foreign key
+    }
+
+
 }

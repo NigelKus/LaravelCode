@@ -116,7 +116,6 @@ Route::prefix('admin/master/product')
             Route::put('{id}', [SalesInvoiceController::class, 'update'])->name('update');
             Route::delete('{id}', [SalesInvoiceController::class, 'destroy'])->name('destroy');
             Route::get('{id}/details', [SalesInvoiceController::class, 'getInvoiceDetails'])->name('details');
-            
             Route::get('customer/{customerId}/invoices', [SalesInvoiceController::class, 'getSalesInvoicesByCustomer'])
             ->name('customer.invoices'); 
         });
@@ -132,8 +131,10 @@ Route::prefix('admin/master/product')
             Route::delete('{id}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
             Route::patch('{id}/update-status', action: [PurchaseOrderController::class, 'updateStatus'])->name('update_status');
             Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
-            
             Route::put('{id}', [PurchaseOrderController::class, 'update'])->name('update');
+            Route::get('supplier/{supplierId}/orders', [PurchaseOrderController::class, 'getPurchaseOrdersBySupplier'])
+            ->name('supplier.orders'); // New route for fetching sales orders
+            Route::get('{id}/products', [PurchaseOrderController::class, 'getProducts'])->name('products');
     });
 
     Route::prefix('admin/transactional/purchase_invoice')
@@ -141,6 +142,15 @@ Route::prefix('admin/master/product')
     ->group(function () {
         Route::get('index', [PurchaseInvoiceController::class, 'index'])->name('index');
         Route::get('create', [PurchaseInvoiceController::class, 'create'])->name('create');
+        Route::post('store', [PurchaseInvoiceController::class, 'store'])->name('store');
+        Route::get('{id}', [PurchaseInvoiceController::class, 'show'])->name('show');
+        Route::patch('{id}/update-status', [PurchaseInvoiceController::class, 'updateStatus'])->name('update_status');
+        Route::get('{id}/edit', [PurchaseInvoiceController::class, 'edit'])->name('edit');
+        Route::put('{id}', [PurchaseInvoiceController::class, 'update'])->name('update');
+        Route::delete('{id}', [PurchaseInvoiceController::class, 'destroy'])->name('destroy');
+        Route::get('{id}/details', [PurchaseInvoiceController::class, 'getInvoiceDetails'])->name('details');
+        Route::get('supplier/{supplierId}/invoices', [PurchaseInvoiceController::class, 'gePurchaseInvoicesBySupplier'])
+        ->name('supplier.invoices'); 
 });
 
     Route::prefix('admin/transactional/payment_order')

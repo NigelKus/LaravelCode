@@ -34,7 +34,6 @@ class AccountingManager
         if (is_null($date)) {
             $date = Carbon::now();
         }
-        
         $journal = new Journal;
         $journal->code = CodeFactory::transactionCode();
         $journal->date = $date;
@@ -78,7 +77,7 @@ class AccountingManager
         if (is_null($date)) {
             $date = $journal->date;
         }
-
+        
         $account = ChartOfAccount::where('code', $accountCode)->first();
 
         if (! $account) {

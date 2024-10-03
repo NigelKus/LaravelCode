@@ -94,6 +94,25 @@ class CodeFactory
         return "{$datePrefix}-PO-{$nextNumber}";
     }
 
+    public static function generatePurchaseInvoiceCode()
+    {
+        $datePrefix = Carbon::now()->format('d-m-y');
+
+        $latestOrder = DB::table('purchase_invoice')
+            ->where('code', 'like', "{$datePrefix}-PI-%")
+            ->orderBy('code', 'desc')
+            ->first();
+
+        if ($latestOrder) {
+            $lastNumber = (int)substr($latestOrder->code, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+
+        return "{$datePrefix}-PI-{$nextNumber}";
+    }
+
     public static function transactionCode()
     {
         $datePrefix = Carbon::now()->format('d-m-y');

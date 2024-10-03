@@ -27,9 +27,9 @@ class PurchaseOrderDetail extends Model
 
     public function purchaseInvoiceDetail()
     {
-        return $this->hasMany(SalesInvoiceDetail::class, 'salesdetail_id');
+        return $this->hasMany(PurchaseInvoiceDetail::class, 'purchasedetail_id');
     }
-
+    
     public function purchaseorder()
     {
         return $this->belongsTo(PurchaseOrder::class, 'purchaseorder_id');
@@ -42,7 +42,7 @@ class PurchaseOrderDetail extends Model
 
     public function getQuantitySentAttribute()
     {
-        return $this->PurchaseInvoiceDetail()
+        return $this->purchaseInvoiceDetail()
             ->whereIn('status', ['pending', 'completed'])
             ->sum('quantity') ;
     }
@@ -80,7 +80,7 @@ class PurchaseOrderDetail extends Model
             return false; // Sales order detail not found for the product
         }
         
-        $quantity_remaining = $purchaseDetail->quantity_remaining;
+        $quantity_remaining = $purchaseDetail->quantity_remaining;  
         if ($quantity_remaining <= 0) {
             $purchaseDetail->status = 'completed'; // Update status
             $purchaseDetail->save();

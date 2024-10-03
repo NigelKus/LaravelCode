@@ -70,6 +70,13 @@ class SalesInvoice extends Model
         return $this->hasMany(PaymentOrderDetail::class, 'invoicesales_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table
     }
 
+    public function journal()
+    {
+        return $this->belongsTo(Journal::class, 'ref_id');
+    }
+    
+
+
     /**
      * Get the latest sales order ID.
      *

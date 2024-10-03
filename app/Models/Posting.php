@@ -32,4 +32,14 @@ class Posting extends Model
     const STATUS_TRASHED = 'trashed';
     const STATUS_DELETED = 'deleted';
 
+    public function account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_id');
+    }
+
+    public function journal()
+    {
+        return $this->belongsTo(Journal::class, 'journal_id'); // Assuming journal_id is the foreign key in the postings table
+    }
+    
 }

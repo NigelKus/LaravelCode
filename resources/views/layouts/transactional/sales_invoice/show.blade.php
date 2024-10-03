@@ -147,6 +147,74 @@
                 </div>
             </div>
 
+            <div class ="card-body">
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Journal Account</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($postings as $posting)
+                                <tr>
+                                    <td>{{ $posting->account->name }}</td>
+                                    <td>{{ $posting->journal->code }}</td>
+                                    <td>{{ $posting->journal->name }}</td>
+                                    <td>{{ $posting->journal->date }}</td>
+                                    <td>{{ number_format($posting->amount) }}</td>
+                                    <td>
+                                        <a href="{{ route('sales_invoice.show', $posting->journal->id) }}" class="btn btn-info btn-sm">View</a>
+                                    </td>
+                                </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Approve Transaction</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('sales_invoice.update_status', $salesInvoice->id) }}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="form-group">
+                            <label for="status">Choose type of transaction</label>
+                            <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
+                                <option value="">Select Status</option>
+                                <option value="cash" {{ $salesInvoice->status === 'cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="Bank" {{ $salesInvoice->status === 'Bank' ? 'selected' : '' }}>Bank</option>
+                                {{-- <option value="cancelled" {{ $salesInvoice->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option> --}}
+                            </select>
+                            @error('status')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary">Approve</button>
+                    </form>
+                </div>
+            </div>
+
             <!-- Edit and Back Buttons -->
             <div class="mt-3">
                 <a href="{{ route('sales_invoice.edit', $salesInvoice->id) }}" class="btn btn-warning">Edit</a>

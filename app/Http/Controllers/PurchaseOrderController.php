@@ -360,4 +360,53 @@ class PurchaseOrderController extends Controller
         return redirect()->route('purchase_order.show', $purchaseOrder->id)->with('success', 'Status updated successfully.');
         
     }
+
+    public function getPurchaseOrdersBySupplier($supplierId)
+    {
+        $purchaseOrders = PurchaseOrder::where('supplier_id', $supplierId)
+                                ->where('status', 'pending') // Add the condition for 'pending' status
+                                ->get();
+
+        return response()->json(['purchaseOrders' => $purchaseOrders]);
+    }
+
+    public function getProducts($purchaseOrderId)
+    {
+        try {
+            // Find the purchase order and eager load the details with their associated product
+            $purchaseOrder = PurchaseOrder::with(['details' => function ($query) {
+                // Filter details to only include those with status "pending"
+                $query->where('status', 'pending');
+            }, 'details.product'])->find($purchaseOrderId);
+            
+            
+            if (!$purchaseOrder) {
+                throw new \Exception('purchase order not found');
+            }
+            
+            // Map the details to the required format
+                $productsData = $purchaseOrder->details->map(function ($detail) {
+                // Use the accessor to get the remaining quantity
+                $remainingQuantity = $detail->quantity_remaining ?? 0; // Default value if null
+                
+                return [
+                    'product_id' => $detail->id, //product id
+                    'code' => $detail->product->code,
+                    'quantity' => $detail->quantity, // Total quantity requested
+                    'price' => $detail->price,
+                    'requested' => $detail->quantity, // Quantity requested
+                    'remaining_quantity' => $remainingQuantity,
+                    'purchase_order_detail_id' => $detail->purchase_order_detail_id // Corrected key name
+                ];
+            });
+            
+            return response()->json(['products' => $productsData]);
+        
+        } catch (\Exception $e) {
+            Log::error('Error fetching products: ' . $e->getMessage());
+            
+            // If you want to return an error response instead of logging it
+            return response()->json(['error' => 'Failed to fetch products'], 500);
+        }
+    }
 }

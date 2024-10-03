@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Journal;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
-use App\Models\SalesorderDetail;
-use App\Utils\AccountingEvents\AE_S02_FinishSalesInvoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use App\Models\SalesorderDetail;
 use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory; 
-use Illuminate\Support\Carbon;
+use App\Utils\AccountingEvents\AE_S02_FinishSalesInvoice;
 
 class SalesInvoiceController extends Controller
 {
@@ -205,19 +206,34 @@ class SalesInvoiceController extends Controller
     public function show($id)
     {
         // Fetch the sales invoice with customer, details including related products, and invoicedetails
-        $salesInvoice = SalesInvoice::with(['customer', 'details.product', 'salesOrder'])->findOrFail($id);
+        $salesInvoice = SalesInvoice::with(['customer', 'details.product', 'salesOrder', 'journal'])->findOrFail($id);
         
         // Calculate total price from invoicedetails
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
+        });
+        
+        // Get the journal where ref_id matches the sales invoice ID
+        $journal = Journal::where('ref_id', $salesInvoice->id)->first();
+    
+        // Fetch postings related to the journal
+        $postings = $journal ? $journal->postings : collect();
+    
+        // Map postings to get the Chart of Account
+        $coas = $postings->map(function ($posting) {
+            return $posting->account; // Adjust if necessary for your relationship
         });
     
         // Return the view with the sales invoice and its details
         return view('layouts.transactional.sales_invoice.show', [
             'salesInvoice' => $salesInvoice,
             'totalPrice' => $totalPrice,
+            'journal' => $journal,
+            'postings' => $postings,
+            'coa' => $coas,
         ]);
     }
+    
 
     public function edit($id)
     {

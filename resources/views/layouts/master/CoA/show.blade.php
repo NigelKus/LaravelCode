@@ -70,6 +70,45 @@
             </div>
         </div>
 
+        <div class ="card-body">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Journal Account</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Price</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($CoA->postings as $posting)
+                                <tr>
+                                    <td>{{ $posting->journal->code }}</td>
+                                    <td>{{ $posting->journal->name }}</td>
+                                    <td>{{ $posting->journal->date }}</td>
+                                    <td>{{ $posting->amount }}</td>
+                                    <td>{{ $posting->journal->description }}</td>
+                                    <td>
+                                        <a href="{{ route('CoA.show', $CoA->id) }}" class="btn btn-info btn-sm">View</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="card-footer">
             <a href="{{ route('CoA.edit', $CoA->id) }}" class="btn btn-warning">Edit</a>
             <a href="{{ route('CoA.index') }}" class="btn btn-secondary">Back to List</a>
