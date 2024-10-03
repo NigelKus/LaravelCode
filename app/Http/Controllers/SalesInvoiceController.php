@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Journal;
+use App\Models\Posting;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesOrder;
@@ -13,6 +14,7 @@ use App\Models\SalesorderDetail;
 use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory; 
+use Illuminate\Support\Facades\Gate;
 use App\Utils\AccountingEvents\AE_S02_FinishSalesInvoice;
 
 class SalesInvoiceController extends Controller
@@ -224,14 +226,18 @@ class SalesInvoiceController extends Controller
             return $posting->account; // Adjust if necessary for your relationship
         });
     
+        if (Gate::allows('view', $salesInvoice)) {
         // Return the view with the sales invoice and its details
-        return view('layouts.transactional.sales_invoice.show', [
-            'salesInvoice' => $salesInvoice,
-            'totalPrice' => $totalPrice,
-            'journal' => $journal,
-            'postings' => $postings,
-            'coa' => $coas,
-        ]);
+            return view('layouts.transactional.sales_invoice.show', [
+                'salesInvoice' => $salesInvoice,
+                'totalPrice' => $totalPrice,
+                'journal' => $journal,
+                'postings' => $postings,
+                'coa' => $coas,
+            ]);
+        }
+
+        abort(403);
     }
     
 
@@ -288,15 +294,56 @@ class SalesInvoiceController extends Controller
         // Get existing sales invoice details
         $salesInvoice = SalesInvoice::with('details')->findOrFail($id);
         $invoiceDetails = $salesInvoice->details;
+        
+        $journal = Journal::where('ref_id', $salesInvoice->id)->first();
+        $productIds = $request['product_id'];
+        $requested = $request['requested'];
+        $priceEachs = $request['price_eachs'];
+
+        $priceEachsAcc = array_map(function($price) {
+            return str_replace(',', '', $price); // Remove commas
+        }, $priceEachs);
+
+
+        if ($journal) {
+            // Fetch postings related to this journal
+            $postings = Posting::where('journal_id', $journal->id)->get();
+            $totalNewAmount = 0;
+            // Loop through each invoice detail and update postings accordingly
+            foreach ($invoiceDetails as $i => $productId) {
+                // Check if priceEachsAcc or requested is null or zero
+                if (!isset($priceEachsAcc[$i]) || $priceEachsAcc[$i] == 0 || !isset($requested[$i]) || $requested[$i] == 0) {
+                    continue; // Skip this iteration if any value is null or zero
+                }
+            
+                // Accumulate the new amount
+                $totalNewAmount += $priceEachsAcc[$i] * $requested[$i];
+            }
+            $firstRun = true; // Initialize a flag to track the first run
+
+            foreach ($postings as $posting) {
+                if ($firstRun) {
+                    // For the first run, set to a positive amount
+                    $posting->amount = $totalNewAmount ?? 0; 
+                } else {
+                    // For the second run, set to a negative amount
+                    $posting->amount = -abs($totalNewAmount) ?? 0; 
+                }
+            
+                $posting->save(); // Save each posting after updating
+                
+                $firstRun = false; // Set the flag to false after the first iteration
+            }
+            
+        }
+
 
         // // Delete each detail
         foreach ($invoiceDetails as $detail) {
             $detail->delete();
         }
 
-        $requested = $request['requested'];
-        $priceEachs = $request['price_eachs'];
-        $productIds = $request['product_id'];
+        
         $sales_order_id = $request['sales_order_id'];
 
         // dd($sales_order_id);
@@ -312,11 +359,15 @@ class SalesInvoiceController extends Controller
                 $salesInvoiceDetail->price = $priceEachs[$i] !== null ? (float)str_replace(',', '', $priceEachs[$i]) : 0; // Price from the request
                 $salesInvoiceDetail->status = 'pending';
                 
+
                 
                 $salesInvoiceDetail->save();
                 SalesorderDetail::checkAndUpdateStatus($sales_order_id[$i], $productId, $request['salesdetail_id'][$i]);
             }
         }
+
+        
+
         // Redirect or return response
         return redirect()->route('sales_invoice.show', $salesInvoice->id)
             ->with('success', 'Sales invoice updated successfully.');

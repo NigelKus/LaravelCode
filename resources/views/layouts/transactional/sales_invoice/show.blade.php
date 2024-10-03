@@ -8,12 +8,18 @@
     <form action="{{ route('sales_invoice.destroy', $salesInvoice->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
         @csrf
         @method('DELETE')
-        @if($salesInvoice->status !== 'deleted')
-        <button type="submit" class="btn btn-danger">Delete</button>
-    @else
-        <button type="button" class="btn btn-danger" disabled>Deleted</button>
-    @endif
+    
+        @can('delete', $salesInvoice)
+            @if($salesInvoice->status !== 'deleted')
+                <button type="submit" class="btn btn-danger">Delete</button>
+            @else
+                <button type="button" class="btn btn-danger" disabled>Deleted</button>
+            @endif
+        @else
+            <button type="button" class="btn btn-danger" disabled>Not Authorized</button>
+        @endcan
     </form>
+    
 </div>
 @stop
 
@@ -156,34 +162,42 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                    <th>Date</th>
                                     <th>Code</th>
                                     <th>Name</th>
-                                    <th>Date</th>
-                                    <th>Price</th>
-                                    <th>Action</th>
+                                    <th>Chart of Account</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($postings as $posting)
-                                <tr>
-                                    <td>{{ $posting->account->name }}</td>
-                                    <td>{{ $posting->journal->code }}</td>
-                                    <td>{{ $posting->journal->name }}</td>
-                                    <td>{{ $posting->journal->date }}</td>
-                                    <td>{{ number_format($posting->amount) }}</td>
-                                    <td>
-                                        <a href="{{ route('sales_invoice.show', $posting->journal->id) }}" class="btn btn-info btn-sm">View</a>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        @if ($loop->first)
+                                            <td>{{ $posting->journal->date }}</td>
+                                            <td>{{ $posting->journal->code }}</td>
+                                            <td>{{ $posting->journal->name }}</td>
+                                            <td>{{ $posting->account->name }}</td>
+                                        @else
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>{{ $posting->account->name }}</td>
+                                        @endif
+                                        <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
+                                        <td>{{ $posting->amount < 0 ? '-' . number_format(abs($posting->amount)) : '' }}</td>
+                                        @php
+                                            $previousDate = $posting->journal->date; // Keep track of the previous date
+                                        @endphp
+                                    </tr>
                                 @empty
                                     <tr>
                                         <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
-                            
                         </table>
+                        
                     </div>
                 </div>
             </div>
