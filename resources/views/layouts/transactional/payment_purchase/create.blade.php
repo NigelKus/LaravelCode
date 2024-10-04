@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Payment Sales Create')
+@section('title', 'Payment Purchaces Create')
 
 @section('content_header')
-    <h1>Create Payment Sales</h1>
+    <h1>Create Payment Purchaces</h1>
 @stop
 
 @section('content')
@@ -19,21 +19,21 @@
                 </div>
             @endif
 
-            <form method="POST" action="/admin/transactional/payment_order/store" class="form-horizontal">
+            <form method="POST" action="/admin/transactional/payment_purchase/store" class="form-horizontal">
                 @csrf
 
-                <!-- Customer Field -->
+                <!-- supplier Field -->
                 <div class="form-group">
-                    <label for="customer_id">Customer</label>
-                    <select class="form-control @error('customer_id') is-invalid @enderror" id="customer_id" name="customer_id" required>
-                        <option value="">Select a Customer</option>
-                        @foreach($customers as $customer)
-                            <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                                {{ $customer->name }}
+                    <label for="supplier_id">Supplier</label>
+                    <select class="form-control @error('supplier_id') is-invalid @enderror" id="supplier_id" name="supplier_id" required>
+                        <option value="">Select a supplier</option>
+                        @foreach($suppliers as $supplier)
+                            <option value="{{ $supplier->id }}" {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                {{ $supplier->name }}
                             </option>
                         @endforeach
                     </select>
-                    @error('customer_id')
+                    @error('supplier_id')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
@@ -41,13 +41,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="customer_id">Payment Type</label>
+                    <label for="supplier_id">Payment Type</label>
                     <select class="form-control @error('payment_type') is-invalid @enderror" id="payment_type" name="payment_type" required>
                         <option value="">Select a Payment Type</option>
                         <option value="kas" >Kas</option>
                         <option value="bank" >Bank</option>
                     </select>
-                    @error('customer_id')
+                    @error('supplier_id')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
@@ -77,17 +77,17 @@
                     @enderror
                 </div>
 
-                <!-- Invoice Sales Section -->
+                <!-- Invoice Purchaces Section -->
                 <div class="card mt-4">
                     <div class="card-header">
-                        <h3 class="card-title">Invoice Sales</h3>
+                        <h3 class="card-title">Invoice Purchaces</h3>
                     </div>
                     <div class="card-body">
-                        <!-- Invoice Sales Table -->
-                        <table class="table table-bordered mt-3" id="invoice-sales-table">
+                        <!-- Invoice Purchaces Table -->
+                        <table class="table table-bordered mt-3" id="invoice-Purchaces-table">
                             <thead>
                                 <tr>
-                                    <th>Invoice Sales Code</th>
+                                    <th>Invoice Purchaces Code</th>
                                     <th>Payment Requested</th>
                                     <th>Original Price</th>
                                     <th>Remaining Price</th>
@@ -96,7 +96,7 @@
                             </thead>
                             <tbody>
                                 @foreach(range(0, 0) as $num)
-                                    @include('layouts.transactional.payment_order.partials.invoice_line', [
+                                    @include('layouts.transactional.payment_purchase.partials.invoice_line', [
                                         'invoice_id' => '',
                                         'requested' => '',
                                         'original_price' => '',
@@ -109,7 +109,7 @@
                         <!-- Hidden Invoice Line Template -->
                         <table style="display: none;" id="invoice-line-template">
                             <tbody>
-                                @include('layouts.transactional.payment_order.partials.invoice_line', [
+                                @include('layouts.transactional.payment_purchase.partials.invoice_line', [
                                     'invoice_id' => '',
                                     'requested' => '',
                                     'original_price' => '',
@@ -123,7 +123,7 @@
                 <!-- Form Submit and Cancel Buttons -->
                 <div class="form-group mt-3">
                     <button type="submit" class="btn btn-primary">Save</button>
-                    <a href="{{ route('payment_order.index') }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ route('payment_purchase.index') }}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
@@ -138,26 +138,26 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {  
-   // Initialize Select2 for customer dropdown  
-    $('#customer_id').select2();  
+   // Initialize Select2 for supplier dropdown  
+    $('#supplier_id').select2();  
     
-    // Trigger when customer selection changes  
-    $('#customer_id').change(function() {  
-        var customerId = $(this).val(); // Get the selected customer ID  
+    // Trigger when supplier selection changes  
+    $('#supplier_id').change(function() {  
+        var supplierId = $(this).val(); // Get the selected supplier ID  
         
-        // Clear the invoice table when the customer changes  
-        $('#invoice-sales-table tbody').empty(); // Clear existing invoices  
+        // Clear the invoice table when the supplier changes  
+        $('#invoice-Purchaces-table tbody').empty(); // Clear existing invoices  
     
-        if (customerId) {  
+        if (supplierId) {  
             $.ajax({  
-            url: '/admin/transactional/sales_invoice/customer/' + customerId + '/invoices', // Adjust URL if needed  
+            url: '/admin/transactional/purchase_invoice/supplier/' + supplierId + '/invoices',
             type: 'GET',  
             success: function(response) {  
                 // console.log(response);
-                // Check if the response contains sales invoices  
-                if (response.salesInvoices && response.salesInvoices.length > 0) {  
+                // Check if the response contains Purchaces invoices  
+                if (response.PurchacesInvoices && response.PurchacesInvoices.length > 0) {  
                     // Append each invoice with its total price  
-                    response.salesInvoices.forEach(function(invoice) {  
+                    response.PurchacesInvoices.forEach(function(invoice) {  
                         // console.log('Invoice:', invoice);
                     // Create a new row for the invoice  
                     var newRow = `  
@@ -176,21 +176,21 @@ $(document).ready(function() {
                             <td><a href="#" class="btn btn-danger btn-remove-invoice-line">Remove</a></td>  
                         </tr>  
                     `;  
-                    $('#invoice-sales-table tbody').append(newRow); // Append the new row to the table  
+                    $('#invoice-Purchaces-table tbody').append(newRow); // Append the new row to the table  
                     });  
                 } else {  
                     // If no invoices are found, display a message  
-                    $('#invoice-sales-table tbody').append(`<tr><td colspan="5">No sales invoices found.</td></tr>`);  
+                    $('#invoice-Purchaces-table tbody').append(`<tr><td colspan="5">No Purchaces invoices found.</td></tr>`);  
                 }  
             },  
             error: function(xhr) {  
-                console.error('Failed to fetch sales invoices:', xhr.responseText);  
-                $('#invoice-sales-table tbody').append('<tr><td colspan="5">Error loading sales invoices. Please try again later.</td></tr>');  
+                console.error('Failed to fetch Purchaces invoices:', xhr.responseText);  
+                $('#invoice-Purchaces-table tbody').append('<tr><td colspan="5">Error loading Purchaces invoices. Please try again later.</td></tr>');  
             }  
             });  
         } else {  
-            // If no customer is selected, reset the table  
-            $('#invoice-sales-table tbody').empty();  
+            // If no supplier is selected, reset the table  
+            $('#invoice-Purchaces-table tbody').empty();  
         }  
     });  
     

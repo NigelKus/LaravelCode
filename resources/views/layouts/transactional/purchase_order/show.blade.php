@@ -129,6 +129,8 @@
                 </div>
             </div>
 
+            
+
             <!-- Edit Button -->
             <div class="mt-3">
                 <a href="{{ route('purchase_order.edit', $purchaseOrder->id) }}" class="btn btn-warning">Edit</a>

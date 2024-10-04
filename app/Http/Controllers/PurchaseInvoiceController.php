@@ -123,9 +123,10 @@ class PurchaseInvoiceController extends Controller
         ]);
     }
     
-    
+                    
     public function getPurchaseInvoicesBySupplier($supplierId)
     {
+        dd($supplierId);
         // Fetch purchase invoices for the selected supplier, including their details
         $purchaseInvoices = PurchaseInvoice::with('details')
             ->where('supplier_id', $supplierId)
@@ -134,6 +135,8 @@ class PurchaseInvoiceController extends Controller
     
         // Initialize an empty collection for valid invoices
         $validInvoices = collect();
+
+        
     
         // Process each invoice to calculate total and remaining price
         $purchaseInvoices->each(function ($invoice) use ($validInvoices) {
@@ -141,14 +144,12 @@ class PurchaseInvoiceController extends Controller
                 return $detail->price * $detail->quantity;
             });
             $invoice->remaining_price = $invoice->calculatePriceRemaining();
-
             
             // Only add invoices with a remaining price greater than 0
             if ($invoice->remaining_price > 0) {
                 $validInvoices->push($invoice);
             }
         });
-    
         return response()->json(['purchaseInvoices' => $validInvoices]);
     }
 

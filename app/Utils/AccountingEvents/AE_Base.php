@@ -3,7 +3,7 @@
 namespace App\Utils\AccountingEvents;
 
 use Carbon\Carbon;
-use App\Utils\Journal;
+use App\Models\Journal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Utils\Accounting\AccountingManager;

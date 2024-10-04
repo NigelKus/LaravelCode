@@ -92,7 +92,7 @@
                                     <td>{{ $posting->journal->code }}</td>
                                     <td>{{ $posting->journal->name }}</td>
                                     <td>{{ $posting->journal->date }}</td>
-                                    <td>{{ $posting->amount }}</td>
+                                    <td>{{ number_format($posting->amount, 0, ',', '.') }}</td>
                                     <td>{{ $posting->journal->description }}</td>
                                     <td>
                                         <a href="{{ route('CoA.show', $CoA->id) }}" class="btn btn-info btn-sm">View</a>

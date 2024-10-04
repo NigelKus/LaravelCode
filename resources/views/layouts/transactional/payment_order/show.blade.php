@@ -95,6 +95,7 @@
                 
 
             <!-- Status Update Card -->
+        <div class ="card-body">
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="card-title">Change Status</h3>
@@ -121,6 +122,57 @@
                     </form>
                 </div>
             </div>
+        </div>
+
+            <div class ="card-body">
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Postings Account</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Journal</th>
+                                    <th>Name</th>
+                                    <th>Chart of Account</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($postings as $posting)
+                                    <tr>
+                                        @if ($loop->first)
+                                            <td>{{ $posting->journal->date }}</td>
+                                            <td>{{ $posting->journal->code }}</td>
+                                            <td>{{ $posting->journal->name }}</td>
+                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
+                                        @else
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
+                                        @endif
+                                        <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
+                                        <td>{{ $posting->amount < 0 ? '-' . number_format(abs($posting->amount)) : '' }}</td>
+                                        @php
+                                            $previousDate = $posting->journal->date; // Keep track of the previous date
+                                        @endphp
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div>
+            </div>
+
             <div class="card-footer">
                 <a href="{{ route('payment_order.edit', $paymentOrder->id) }}" class="btn btn-warning">Edit</a>
                 <a href="{{ route('payment_order.index') }}" class="btn btn-secondary">Back to List</a>

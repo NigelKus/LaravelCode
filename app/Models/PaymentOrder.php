@@ -21,6 +21,8 @@ class PaymentOrder extends Model
         'status'
     ];
 
+
+
     protected $dates = ['deleted_at']; // Specify the dates that should be treated as Carbon instances
 
     // Define any relationships here
@@ -32,5 +34,16 @@ class PaymentOrder extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function showPriceDetails()
+    {
+        $payments = $this->paymentDetails()->sum('price');  
+        return $payments;  
+    }
+
+    public function journal()
+    {
+        return $this->belongsTo(Journal::class, 'ref_id');
     }
 }

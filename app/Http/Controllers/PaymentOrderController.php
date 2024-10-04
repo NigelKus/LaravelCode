@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Journal;
+use App\Models\Posting;
 use App\Models\Customer;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
 use App\Models\PaymentOrder; // Ensure to import your model
+use App\Utils\AccountingEvents\AE_S04_FinishSalesPaymentKas;
+use App\Utils\AccountingEvents\AE_S03_FinishSalesPaymentBank;
 
 class PaymentOrderController extends Controller
 {
@@ -108,6 +112,7 @@ class PaymentOrderController extends Controller
             'requested.*' => 'required|numeric|min:0', // Validate requested amounts
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
             'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
+            'payment_type' => 'required',
         ]);
         
         // Generate the payment order code
@@ -148,6 +153,14 @@ class PaymentOrderController extends Controller
 
             $invoice->save();
         }
+        if($request['payment_type'] == 'bank')
+        {
+            AE_S03_FinishSalesPaymentBank::process($paymentOrder);
+        }else 
+        {
+            AE_S04_FinishSalesPaymentKas::process($paymentOrder);
+        }
+
         DB::commit();
         return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Payment Order created successfully.');
 
@@ -156,11 +169,21 @@ class PaymentOrderController extends Controller
     // Display the specified payment order
     public function show($id)
     {
-        $paymentOrder = PaymentOrder::with(['customer', 'paymentDetails.salesInvoice'])->findOrFail($id);
+        $paymentOrder = PaymentOrder::with(['customer', 'paymentDetails.salesInvoice', 'journal'])->findOrFail($id);
 
         // Calculate the total price from payment details
         $totalPrice = $paymentOrder->paymentDetails->sum(function ($detail) {
             return $detail->price;
+        });
+
+        $journal = Journal::where('ref_id', $paymentOrder->id)->first();
+    
+        // Fetch postings related to the journal
+        $postings = $journal ? $journal->postings : collect();
+    
+        // Map postings to get the Chart of Account
+        $coas = $postings->map(function ($posting) {
+            return $posting->account; // Adjust if necessary for your relationship
         });
         
         // dd($paymentOrder, $totalPrice);
@@ -168,6 +191,9 @@ class PaymentOrderController extends Controller
         return view('layouts.transactional.payment_order.show', [
             'paymentOrder' => $paymentOrder,
             'totalPrice' => $totalPrice,
+            'journal' => $journal,
+            'postings' => $postings,
+            'coa' => $coas,
         ]);
     }
 
@@ -177,7 +203,18 @@ class PaymentOrderController extends Controller
         // Fetch the payment order and its details
         $paymentOrder = PaymentOrder::with('paymentDetails')->findOrFail($id);
         $customers = $paymentOrder->customer;
-    
+
+        $journal = Journal::where('ref_id', $paymentOrder->id)->first();
+        $postings = Posting::where('journal_id', $journal->id)->get();
+
+        $paymentType = 'bank'; // Default to bank
+        foreach ($postings as $posting) {
+            // Set paymentType based on account_id
+            if ($posting->account_id == 1) {
+                $paymentType = 'kas'; // Set to kas if account_id is 1
+                break; // Exit the loop as we've determined the payment type
+            }
+        }
         // Fetch related sales invoices with status 'pending' or 'completed'
         $salesInvoices = SalesInvoice::where('customer_id', $customers->id)
             ->whereIn('status', ['pending', 'completed'])
@@ -185,11 +222,11 @@ class PaymentOrderController extends Controller
     
         // Prepare combined details and filter out invoices with remaining price 0
         $combinedDetails = $salesInvoices->map(function ($invoice) use ($paymentOrder) {
-            // Find the corresponding payment detail for this invoice
-            $paymentDetail = $paymentOrder->paymentDetails->firstWhere('invoicesales_id', $invoice->id);
-    
-            // Calculate remaining price
-            $remainingPrice = $invoice->calculatePriceRemaining() + ($paymentDetail->price ?? 0);
+        // Find the corresponding payment detail for this invoice
+        $paymentDetail = $paymentOrder->paymentDetails->firstWhere('invoicesales_id', $invoice->id);
+
+        // Calculate remaining price
+        $remainingPrice = $invoice->calculatePriceRemaining() + ($paymentDetail->price ?? 0);
     
             // Return only if remaining price is greater than 0
             if ($remainingPrice > 0) {
@@ -210,6 +247,7 @@ class PaymentOrderController extends Controller
             'combinedDetails' => $combinedDetails,
             'payment_order_id' => $paymentOrder->id, // Send payment order ID
             'payment_order_code' => $paymentOrder->code, // Send payment order code
+            'payment_type' => $paymentType
         ]);
     }
     
@@ -252,17 +290,53 @@ class PaymentOrderController extends Controller
             'requested.*' => 'required|numeric|min:0', // Validate requested amounts
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
             'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
+            'payment_type' => 'required',
         ]);
-
-
         $paymentOrder = PaymentOrder::findOrFail($request->payment_order_id); // Find payment order or fail
 
-        
         $paymentOrder->update([
             'description' => $request->description,
         ]);
         
         $orderDetails = $paymentOrder->paymentDetails;
+
+        $journal = Journal::where('ref_id', $paymentOrder->id)->first();
+
+        
+        if ($journal) {
+            // Fetch postings related to this journal
+            $postings = Posting::where('journal_id', $journal->id)->get();
+            $totalNewAmount = 0;
+
+            foreach ($request->requested as $requestedAmount) {
+                if (!empty($requestedAmount)) {
+                    $totalNewAmount += $requestedAmount; // Accumulate the requested amount
+                }
+            }
+            
+            if($request['payment_type'] == 'bank'){
+                $paymentType = 3;
+            }else{
+                $paymentType = 1;
+            }
+
+
+            $firstRun = true; // Initialize a flag to track the first run
+            foreach ($postings as $posting) {
+                if ($firstRun) {
+                    // Set to a positive amount on the first run
+                    $posting->amount = abs($totalNewAmount);
+                    $posting->account_id = $paymentType;
+                } else {
+                    // Set to a negative amount on the second run
+                    $posting->amount = -abs($totalNewAmount);
+                }
+        
+                $posting->save(); // Save each posting after updating
+                $firstRun = false; // Toggle flag after the first iteration
+            }
+        }
+        
 
         foreach($orderDetails as $detail)
         {
@@ -310,6 +384,7 @@ class PaymentOrderController extends Controller
     {
         // Find the payment order or fail
         $paymentOrder = PaymentOrder::findOrFail($id);
+        $journal = Journal::where('ref_id', $paymentOrder->id)->first();
     
         // Loop through the payment order details and set their status to 'deleted'
         foreach ($paymentOrder->paymentDetails as $detail) {
@@ -317,6 +392,26 @@ class PaymentOrderController extends Controller
             $invoice = SalesInvoice::with('details')->findOrFail($detail->invoicesales_id); // Assuming invoicesales_id is the related field
             $invoice->status = 'pending';
             $invoice->save(); // Save the updated status
+
+            if ($journal) {
+                // Fetch postings related to this journal
+                $postings = Posting::where('journal_id', $journal->id)->get();
+                foreach ($postings as $posting) {
+                    $posting->update([
+                        'status' => 'deleted'
+                    ]);
+
+                    $posting->save(); // Save each posting after updating
+                    $posting->delete();
+                }
+
+                $journal->update([
+                    'status' => 'deleted'
+                ]);
+
+                $journal->save(); // Save each posting after updating
+                $journal->delete();
+            }
         
             // Update payment detail status to 'deleted'
             $detail->update(['status' => 'deleted']);

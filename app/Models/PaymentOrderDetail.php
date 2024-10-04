@@ -18,8 +18,9 @@ class PaymentOrderDetail extends Model
         'invoicesales_id', 
         'price', 
         'status', 
-       
     ];
+
+    
 
     protected $dates = ['deleted_at']; // Specify the dates that should be treated as Carbon instances
 

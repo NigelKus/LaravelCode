@@ -14,15 +14,17 @@ class CodeFactory
      */
     public static function generateSalesOrderCode()
     {
-        // Get today's date in the format dd-mm-yy
-        $datePrefix = Carbon::now()->format('d-m-y');
-
+        // Get today's date in the format yyyy/mm/dd
+        $year = Carbon::now()->format('Y');
+        $month = Carbon::now()->format('m');
+        $day = Carbon::now()->format('d');
+    
         // Get the latest sales order code to determine the next sequential number
         $latestOrder = DB::table('mstr_salesOrder')
-            ->where('code', 'like', "{$datePrefix}-SO-%")
+            ->where('code', 'like', "SO/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
-
+    
         // Determine the next sequential number
         if ($latestOrder) {
             // Extract the sequential number from the latest order code
@@ -32,103 +34,119 @@ class CodeFactory
             // If no previous orders, start with 0001
             $nextNumber = '0001';
         }
-
+    
         // Generate the new sales order code
-        return "{$datePrefix}-SO-{$nextNumber}";
+        return "SO/{$year}/{$month}/{$day}/{$nextNumber}";
     }
-
+    
     public static function generateSalesInvoiceCode()
     {
-        $datePrefix = Carbon::now()->format('d-m-y');
-
+        $year = Carbon::now()->format('Y');
+        $month = Carbon::now()->format('m');
+        $day = Carbon::now()->format('d');
+    
         $latestOrder = DB::table('invoice_sales')
-            ->where('code', 'like', "{$datePrefix}-SI-%")
+            ->where('code', 'like', "SI/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
-
+    
         if ($latestOrder) {
             $lastNumber = (int)substr($latestOrder->code, -4);
             $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $nextNumber = '0001';
         }
-
-        return "{$datePrefix}-SI-{$nextNumber}";
+    
+        return "SI/{$year}/{$month}/{$day}/{$nextNumber}";
     }
-
+    
     public static function generatePaymentSalesCode()
     {
-        $datePrefix = Carbon::now()->format('d-m-y');
-
+        $year = Carbon::now()->format('Y');
+        $month = Carbon::now()->format('m');
+        $day = Carbon::now()->format('d');
+    
         $latestOrder = DB::table('mstr_payment')
-            ->where('code', 'like', "{$datePrefix}-PS-%")
+            ->where('code', 'like', "PS/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
-
+    
         if ($latestOrder) {
             $lastNumber = (int)substr($latestOrder->code, -4);
             $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $nextNumber = '0001';
         }
-
-        return "{$datePrefix}-PS-{$nextNumber}";
+    
+        return "PS/{$year}/{$month}/{$day}/{$nextNumber}";
     }
-
+    
     public static function generatePurchaseOrdersCode()
     {
-        $datePrefix = Carbon::now()->format('d-m-y');
-
+        $year = Carbon::now()->format('Y');
+        $month = Carbon::now()->format('m');
+        $day = Carbon::now()->format('d');
+    
         $latestOrder = DB::table('purchase_order')
-            ->where('code', 'like', "{$datePrefix}-PO-%")
+            ->where('code', 'like', "PO/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
-
+    
         if ($latestOrder) {
             $lastNumber = (int)substr($latestOrder->code, -4);
             $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $nextNumber = '0001';
         }
-
-        return "{$datePrefix}-PO-{$nextNumber}";
+    
+        return "PO/{$year}/{$month}/{$day}/{$nextNumber}";
     }
-
+    
     public static function generatePurchaseInvoiceCode()
     {
-        $datePrefix = Carbon::now()->format('d-m-y');
-
+        $year = Carbon::now()->format('Y');
+        $month = Carbon::now()->format('m');
+        $day = Carbon::now()->format('d');
+    
         $latestOrder = DB::table('purchase_invoice')
-            ->where('code', 'like', "{$datePrefix}-PI-%")
+            ->where('code', 'like', "PI/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
-
+    
         if ($latestOrder) {
             $lastNumber = (int)substr($latestOrder->code, -4);
             $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $nextNumber = '0001';
         }
-
-        return "{$datePrefix}-PI-{$nextNumber}";
+    
+        return "PI/{$year}/{$month}/{$day}/{$nextNumber}";
     }
+    
 
     public static function transactionCode()
     {
-        $datePrefix = Carbon::now()->format('d-m-y');
-
+        // Define a fixed date format for the prefix
+        $fixedPrefix = "JO/2024/10/04";
+    
+        // Get the latest transaction code with the fixed prefix
         $latestOrder = DB::table('acct_journals')
-            ->where('code', 'like', "{$datePrefix}-JI-%")
+            ->where('code', 'like', "{$fixedPrefix}/%")
             ->orderBy('code', 'desc')
             ->first();
-
+    
+        // Determine the next sequential number
         if ($latestOrder) {
-            $lastNumber = (int)substr($latestOrder->code, -4);
-            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            // Extract the sequential number from the latest order code
+            $lastNumber = (int)substr($latestOrder->code, -9); // Extract the last 9 characters
+            $nextNumber = str_pad($lastNumber + 1, 9, '0', STR_PAD_LEFT);
         } else {
-            $nextNumber = '0001';
+            // If no previous orders, start with 000000001
+            $nextNumber = str_pad(1, 9, '0', STR_PAD_LEFT);
         }
-
-        return "{$datePrefix}-JI-{$nextNumber}";
+    
+        // Generate the new transaction code
+        return "{$fixedPrefix}/{$nextNumber}";
     }
+    
 }

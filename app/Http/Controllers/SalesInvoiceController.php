@@ -304,37 +304,34 @@ class SalesInvoiceController extends Controller
             return str_replace(',', '', $price); // Remove commas
         }, $priceEachs);
 
+        // dd($priceEachsAcc,$requested);
 
         if ($journal) {
             // Fetch postings related to this journal
             $postings = Posting::where('journal_id', $journal->id)->get();
             $totalNewAmount = 0;
-            // Loop through each invoice detail and update postings accordingly
-            foreach ($invoiceDetails as $i => $productId) {
-                // Check if priceEachsAcc or requested is null or zero
-                if (!isset($priceEachsAcc[$i]) || $priceEachsAcc[$i] == 0 || !isset($requested[$i]) || $requested[$i] == 0) {
-                    continue; // Skip this iteration if any value is null or zero
+        
+            // Loop through requested items and calculate totalNewAmount
+            foreach ($requested as $i => $quantity) {
+                // Skip iteration if price or quantity is zero or empty
+                if (!empty($priceEachsAcc[$i]) && $priceEachsAcc[$i] != 0 && $quantity != 0) {
+                    $totalNewAmount += $priceEachsAcc[$i] * $quantity;
                 }
-            
-                // Accumulate the new amount
-                $totalNewAmount += $priceEachsAcc[$i] * $requested[$i];
             }
+        
             $firstRun = true; // Initialize a flag to track the first run
-
             foreach ($postings as $posting) {
                 if ($firstRun) {
-                    // For the first run, set to a positive amount
-                    $posting->amount = $totalNewAmount ?? 0; 
+                    // Set to a positive amount on the first run
+                    $posting->amount = abs($totalNewAmount);
                 } else {
-                    // For the second run, set to a negative amount
-                    $posting->amount = -abs($totalNewAmount) ?? 0; 
+                    // Set to a negative amount on the second run
+                    $posting->amount = -abs($totalNewAmount);
                 }
-            
+        
                 $posting->save(); // Save each posting after updating
-                
-                $firstRun = false; // Set the flag to false after the first iteration
+                $firstRun = false; // Toggle flag after the first iteration
             }
-            
         }
 
 
@@ -410,6 +407,7 @@ class SalesInvoiceController extends Controller
     {
         // Find the sales invoice or fail if not found
         $salesInvoice = SalesInvoice::findOrFail($id);
+        $journal = Journal::where('ref_id', $salesInvoice->id)->first();
 
         $hasPaymentOrderDetail = false;
 
@@ -432,6 +430,26 @@ class SalesInvoiceController extends Controller
             try {
                 // Find the corresponding sales order detail using an appropriate relation
                 $salesOrderDetail = $detail->salesOrderDetail; // Adjust this line as necessary
+
+                if ($journal) {
+                    // Fetch postings related to this journal
+                    $postings = Posting::where('journal_id', $journal->id)->get();
+                    foreach ($postings as $posting) {
+                        $posting->update([
+                            'status' => 'deleted'
+                        ]);
+
+                        $posting->save(); // Save each posting after updating
+                        $posting->delete();
+                    }
+
+                    $journal->update([
+                        'status' => 'deleted'
+                    ]);
+
+                    $journal->save(); // Save each posting after updating
+                    $journal->delete();
+                }
                 
                 // Call the adjustQuantityRemaining method on the SalesOrderDetail
                 $salesOrderDetail->adjustQuantityRemaining($detail->quantity); // Adjust the quantity sent

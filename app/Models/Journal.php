@@ -37,4 +37,8 @@ class Journal extends Model
         return $this->hasMany(SalesInvoice::class, 'ref_id'); // Assuming journal_id is the foreign key in the postings table
     }
     
+    public function paymentOrder()
+    {
+        return $this->hasMany(PaymentOrder::class, 'ref_id'); // Assuming journal_id is the foreign key in the postings table
+    }
 }

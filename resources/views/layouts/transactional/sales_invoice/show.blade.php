@@ -156,14 +156,14 @@
             <div class ="card-body">
                 <div class="card mt-4">
                     <div class="card-header">
-                        <h3 class="card-title">Journal Account</h3>
+                        <h3 class="card-title">Postings Account</h3>
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Code</th>
+                                    <th>Journal</th>
                                     <th>Name</th>
                                     <th>Chart of Account</th>
                                     <th>Debit</th>
@@ -177,12 +177,12 @@
                                             <td>{{ $posting->journal->date }}</td>
                                             <td>{{ $posting->journal->code }}</td>
                                             <td>{{ $posting->journal->name }}</td>
-                                            <td>{{ $posting->account->name }}</td>
+                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
                                         @else
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td>{{ $posting->account->name }}</td>
+                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
                                         @endif
                                         <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
                                         <td>{{ $posting->amount < 0 ? '-' . number_format(abs($posting->amount)) : '' }}</td>
@@ -199,33 +199,6 @@
                         </table>
                         
                     </div>
-                </div>
-            </div>
-
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h3 class="card-title">Approve Transaction</h3>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('sales_invoice.update_status', $salesInvoice->id) }}">
-                        @csrf
-                        @method('PATCH')
-                        <div class="form-group">
-                            <label for="status">Choose type of transaction</label>
-                            <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
-                                <option value="">Select Status</option>
-                                <option value="cash" {{ $salesInvoice->status === 'cash' ? 'selected' : '' }}>Cash</option>
-                                <option value="Bank" {{ $salesInvoice->status === 'Bank' ? 'selected' : '' }}>Bank</option>
-                                {{-- <option value="cancelled" {{ $salesInvoice->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option> --}}
-                            </select>
-                            @error('status')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-                        <button type="submit" class="btn btn-primary">Approve</button>
-                    </form>
                 </div>
             </div>
 
