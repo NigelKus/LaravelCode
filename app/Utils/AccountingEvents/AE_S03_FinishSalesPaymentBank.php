@@ -29,7 +29,7 @@ class AE_S03_FinishSalesPaymentBank extends AE_Base
         
 
         AccountingManager::debit( $journal,
-            2000,  // DEBIT :: Hutang Usaha
+            1200,  // DEBIT :: Hutang Usaha
             $amount,
             '',
             null,

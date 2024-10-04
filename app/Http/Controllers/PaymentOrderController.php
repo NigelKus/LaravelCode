@@ -316,7 +316,7 @@ class PaymentOrderController extends Controller
             }
             
             if($request['payment_type'] == 'bank'){
-                $paymentType = 3;
+                $paymentType = 8;
             }else{
                 $paymentType = 1;
             }

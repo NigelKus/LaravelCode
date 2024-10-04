@@ -14,7 +14,7 @@ use App\Models\PurchaseOrderDetail;
 use Database\Factories\CodeFactory;
 use Illuminate\Support\Facades\Log;
 use App\Models\PurchaseInvoiceDetail;
-use App\Utils\AccountingEvents\AE_P02_FinishPurchaseInvoice;
+use App\Utils\AccountingEvents\AE_PO2_FinishPurchaseInvoice;
 
 class PurchaseInvoiceController extends Controller
 
@@ -240,7 +240,7 @@ class PurchaseInvoiceController extends Controller
             }
             
             AE_PO2_FinishPurchaseInvoice::process($purchaseInvoice);
-
+            
 
             // Commit the transaction
             DB::commit();

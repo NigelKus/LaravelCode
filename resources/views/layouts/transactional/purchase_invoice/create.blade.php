@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="due_date">purchase Invoice Due Date</label>
+                    <label for="due_date">Purchase Invoice Due Date</label>
                     <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}">
                     @error('due_date')
                         <span class="invalid-feedback" role="alert">
@@ -71,7 +71,7 @@
                 
                 <!-- purchase Order Dropdown -->
                 <div class="form-group">
-                    <label for="purchaseorder_id">purchase Order</label>
+                    <label for="purchaseorder_id">Purchase Order</label>
                     <select class="form-control @error('purchaseorder_id') is-invalid @enderror" id="purchaseorder_id" name="purchaseorder_id" required>
                         <option value="">Select a purchase Order</option>
                         @foreach($purchaseOrders as $purchaseOrder)
