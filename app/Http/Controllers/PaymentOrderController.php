@@ -114,7 +114,7 @@ class PaymentOrderController extends Controller
             'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
             'payment_type' => 'required',
         ]);
-        
+        dd($request->all());
         // Generate the payment order code
         $salesPaymentCode = CodeFactory::generatePaymentSalesCode();
         DB::beginTransaction();
@@ -240,6 +240,7 @@ class PaymentOrderController extends Controller
             }
         })->filter(); // Use filter to remove null entries where remaining_price == 0
     
+
         // Continue with passing data to the view if needed
         return view('layouts.transactional.payment_order.edit', [
             'paymentOrder' => $paymentOrder,

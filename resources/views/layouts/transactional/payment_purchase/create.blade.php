@@ -153,11 +153,10 @@ $(document).ready(function() {
             url: '/admin/transactional/purchase_invoice/supplier/' + supplierId + '/invoices',
             type: 'GET',  
             success: function(response) {  
-                // console.log(response);
                 // Check if the response contains Purchaces invoices  
-                if (response.PurchacesInvoices && response.PurchacesInvoices.length > 0) {  
+                if (response.purchaseInvoices && response.purchaseInvoices.length > 0) {  
                     // Append each invoice with its total price  
-                    response.PurchacesInvoices.forEach(function(invoice) {  
+                    response.purchaseInvoices.forEach(function(invoice) {  
                         // console.log('Invoice:', invoice);
                     // Create a new row for the invoice  
                     var newRow = `  

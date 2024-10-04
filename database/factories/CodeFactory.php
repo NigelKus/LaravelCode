@@ -123,6 +123,26 @@ class CodeFactory
         return "PI/{$year}/{$month}/{$day}/{$nextNumber}";
     }
     
+    public static function generatePaymentPurchaseCode()
+    {
+        $year = Carbon::now()->format('Y');
+        $month = Carbon::now()->format('m');
+        $day = Carbon::now()->format('d');
+    
+        $latestOrder = DB::table('payment_purchase')
+            ->where('code', 'like', "PP/{$year}/{$month}/{$day}/%")
+            ->orderBy('code', 'desc')
+            ->first();
+    
+        if ($latestOrder) {
+            $lastNumber = (int)substr($latestOrder->code, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
+        }
+    
+        return "PP/{$year}/{$month}/{$day}/{$nextNumber}";
+    }
 
     public static function transactionCode()
     {

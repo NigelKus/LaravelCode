@@ -34,4 +34,15 @@ class PaymentPurchase extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
+    public function showPriceDetails()
+    {
+        $payments = $this->paymentDetails()->sum('price');  
+        return $payments;  
+    }
+
+    public function journal()
+    {
+        return $this->belongsTo(Journal::class, 'ref_id');
+    }
+
 }

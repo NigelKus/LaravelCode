@@ -58,7 +58,7 @@
                 <button type="submit" class="btn btn-primary ml-2">Search</button>
             </form>
 
-            <table class="table table-bpurchaseed">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th>Code</th>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Journal;
 use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use App\Models\PurchaseOrderDetail;
 use Database\Factories\CodeFactory;
 use Illuminate\Support\Facades\Log;
 use App\Models\PurchaseInvoiceDetail;
+use App\Utils\AccountingEvents\AE_P02_FinishPurchaseInvoice;
 
 class PurchaseInvoiceController extends Controller
 
@@ -126,7 +128,6 @@ class PurchaseInvoiceController extends Controller
                     
     public function getPurchaseInvoicesBySupplier($supplierId)
     {
-        dd($supplierId);
         // Fetch purchase invoices for the selected supplier, including their details
         $purchaseInvoices = PurchaseInvoice::with('details')
             ->where('supplier_id', $supplierId)
@@ -136,8 +137,6 @@ class PurchaseInvoiceController extends Controller
         // Initialize an empty collection for valid invoices
         $validInvoices = collect();
 
-        
-    
         // Process each invoice to calculate total and remaining price
         $purchaseInvoices->each(function ($invoice) use ($validInvoices) {
             $invoice->total_price = $invoice->details->sum(function ($detail) {
@@ -240,7 +239,7 @@ class PurchaseInvoiceController extends Controller
                 
             }
             
-            // AE_S02_FinishpurchaseInvoice::process($purchaseInvoice);
+            AE_PO2_FinishPurchaseInvoice::process($purchaseInvoice);
 
 
             // Commit the transaction
@@ -259,11 +258,24 @@ class PurchaseInvoiceController extends Controller
         $totalPrice = $purchaseInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
+
+        $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();
+    
+        // Fetch postings related to the journal
+        $postings = $journal ? $journal->postings : collect();
+    
+        // Map postings to get the Chart of Account
+        $coas = $postings->map(function ($posting) {
+            return $posting->account; // Adjust if necessary for your relationship
+        });
     
         // Return the view with the purchase invoice and its details
         return view('layouts.transactional.purchase_invoice.show', [
             'purchaseInvoice' => $purchaseInvoice,
             'totalPrice' => $totalPrice,
+            'journal' => $journal,
+            'postings' => $postings,
+            'coa' => $coas,
         ]);
     }
 
@@ -285,7 +297,6 @@ class PurchaseInvoiceController extends Controller
     
         // Check if the purchase order status is canceled or deleted
         if ($purchaseOrder->status === 'canceled' || $purchaseOrder->status === 'deleted') {
-            // Return an error message if the purchase order has been canceled or deleted
             return redirect()->route('purchase_invoice.show', $purchaseInvoice->id)->withErrors([
                 'error' => 'The purchase order has already been deleted or canceled.'
             ]);

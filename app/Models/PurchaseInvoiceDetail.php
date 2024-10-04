@@ -27,7 +27,7 @@ class PurchaseInvoiceDetail extends Model
     ];
 
     // Define relationships
-    public function purchaseinvoice()
+    public function purchaseInvoice()
     {
         return $this->belongsTo(PurchaseInvoice::class, 'purchaseinvoice_id');
     }

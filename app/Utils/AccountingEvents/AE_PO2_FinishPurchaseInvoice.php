@@ -2,18 +2,18 @@
 
 namespace App\Utils\AccountingEvents;
 
-use App\Models\Sales\SalesInvoice;
+use App\Models\PurchaseInvoice;
 
 use App\Utils\Accounting\AccountingManager;
 use App\Utils\Constants;
 use App\Utils\SelectHelper;
 use Illuminate\Support\Facades\DB;
 
-class AE_S02_FinishSalesInvoice extends AE_Base
+class AE_PO2_FinishPurchaseInvoice extends AE_Base
 {
-    const TYPE = 'S02';
-    const NAME = 'Finish Sales Invoice';
-    const REQUIRED_CLASS = SalesInvoice::class;
+    const TYPE = 'P02';
+    const NAME = 'Finish Purchase Invoice';
+    const REQUIRED_CLASS = PurchaseInvoice::class;
 
     public static function buildJournalContent($obj) {
         $journal = AccountingManager::createJournal(
@@ -28,16 +28,15 @@ class AE_S02_FinishSalesInvoice extends AE_Base
         
 
         AccountingManager::debit( $journal,
-            1100,  // DEBIT :: Piutang Usaha
+            4000,  // DEBIT :: Pendapatan
             $amount,
             '',
             null,
         );
         
-        
 
         AccountingManager::credit( $journal,
-        4000,  // CREDIT :: Penjualan
+        2000,  // CREDIT :: Utang Usaha
             $amount
         );
 
