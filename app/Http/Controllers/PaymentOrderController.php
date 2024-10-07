@@ -114,7 +114,8 @@ class PaymentOrderController extends Controller
             'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
             'payment_type' => 'required',
         ]);
-        dd($request->all());
+
+    
         // Generate the payment order code
         $salesPaymentCode = CodeFactory::generatePaymentSalesCode();
         DB::beginTransaction();
@@ -170,32 +171,27 @@ class PaymentOrderController extends Controller
     public function show($id)
     {
         $paymentOrder = PaymentOrder::with(['customer', 'paymentDetails.salesInvoice', 'journal'])->findOrFail($id);
-
-        // Calculate the total price from payment details
+    
         $totalPrice = $paymentOrder->paymentDetails->sum(function ($detail) {
             return $detail->price;
         });
-
+    
         $journal = Journal::where('ref_id', $paymentOrder->id)->first();
-    
-        // Fetch postings related to the journal
-        $postings = $journal ? $journal->postings : collect();
-    
-        // Map postings to get the Chart of Account
-        $coas = $postings->map(function ($posting) {
-            return $posting->account; // Adjust if necessary for your relationship
-        });
         
-        // dd($paymentOrder, $totalPrice);
+        $postings = $journal->postings->collect();
+        
+        $coas = $postings->account()->withTrashed()->get(); 
+    
         // Return the view with the payment order and its details
         return view('layouts.transactional.payment_order.show', [
             'paymentOrder' => $paymentOrder,
             'totalPrice' => $totalPrice,
             'journal' => $journal,
             'postings' => $postings,
-            'coa' => $coas,
+            'coas' => $coas,
         ]);
     }
+    
 
     // Show the form for editing the specified payment order
     public function edit($id)

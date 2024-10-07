@@ -157,7 +157,6 @@ class AccountingManager
             $journal->ref_type,
             $journal->ref_id,
             Carbon::parse($journal->date),
-            $journal->office_id,
         );
 
         foreach ($journal->postings as $posting) {

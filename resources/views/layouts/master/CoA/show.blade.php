@@ -95,7 +95,7 @@
                                     <td>{{ number_format($posting->amount, 0, ',', '.') }}</td>
                                     <td>{{ $posting->journal->description }}</td>
                                     <td>
-                                        <a href="{{ route('CoA.show', $CoA->id) }}" class="btn btn-info btn-sm">View</a>
+                                        <a href="{{ route('CoA.transaction.route', $posting->id) }}" class="btn btn-info btn-sm">View</a>
                                     </td>
                                 </tr>
                             @empty

@@ -39,9 +39,13 @@
                     <dl class="row">
                         <dt class="col-sm-3">Code</dt>
                         <dd class="col-sm-9">{{ $paymentOrder->code }}</dd>
-            
+
                         <dt class="col-sm-3">Date</dt>
                         <dd class="col-sm-9">{{ \Carbon\Carbon::parse($paymentOrder->date)->format('Y-m-d') }}</dd>
+
+                        
+                        <dt class="col-sm-3">Description</dt>
+                        <dd class="col-sm-9">{{ $paymentOrder->description }}</dd>
                     </dl>
                 </div>
                 <div class="col-md-6 text-md-right">
@@ -143,29 +147,50 @@
                             </thead>
                             <tbody>
                                 @forelse($postings as $posting)
-                                    <tr>
-                                        @if ($loop->first)
-                                            <td>{{ $posting->journal->date }}</td>
-                                            <td>{{ $posting->journal->code }}</td>
-                                            <td>{{ $posting->journal->name }}</td>
-                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
-                                        @else
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
-                                        @endif
-                                        <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
-                                        <td>{{ $posting->amount < 0 ? '-' . number_format(abs($posting->amount)) : '' }}</td>
-                                        @php
-                                            $previousDate = $posting->journal->date; // Keep track of the previous date
-                                        @endphp
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
-                                    </tr>
-                                @endforelse
+                                <tr>
+                                    @if ($loop->first)
+                                        <td>{{ $posting->journal->date }}</td>
+                                        <td>{{ $posting->journal->code }}</td>
+                                        <td>{{ $posting->journal->name }}</td>
+                                        <td>
+                                            @php
+                                                $account = $coas[$loop->index]; // Get the corresponding account from the coas
+                                            @endphp
+                                            @if ($account)  <!-- Check if the account exists -->
+                                                ({{ $account->code }}) {{ $account->name }}
+                                            @else
+                                                Account Deleted
+                                            @endif
+                                        </td>
+                                    @else
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            @php
+                                                $account = $coas[$loop->index]; // Get the corresponding account from the coas
+                                            @endphp
+                                            @if ($account)  <!-- Check if the account exists -->
+                                                ({{ $account->code }}) {{ $account->name }}
+                                                @if ($account->deleted_at) <!-- Check if account is soft deleted -->
+                                                    <span class="text-danger">(Deleted)</span>
+                                                @endif
+                                            @else
+                                                Account Deleted
+                                            @endif
+                                        </td>
+                                    @endif
+                                    <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
+                                    <td>{{ $posting->amount < 0 ? number_format(abs($posting->amount)) : '' }}</td>
+                                    @php
+                                        $previousDate = $posting->journal->date; // Keep track of the previous date
+                                    @endphp
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
+                                </tr>
+                            @endforelse
                             </tbody>
                         </table>
                         

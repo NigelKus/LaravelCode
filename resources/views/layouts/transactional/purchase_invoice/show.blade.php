@@ -57,6 +57,10 @@
             
                         <dt class="col-sm-3">Price Remaining</dt>
                         <dd class="col-sm-9">{{ number_format($purchaseInvoice->calculatePriceRemaining()) }}</dd>
+
+                        
+                        <dt class="col-sm-3">Description</dt>
+                        <dd class="col-sm-9">{{ $purchaseInvoice->description}}</dd>
                     </dl>
                 </div>
             
@@ -171,7 +175,17 @@
                                             <td>{{ $posting->journal->date }}</td>
                                             <td>{{ $posting->journal->code }}</td>
                                             <td>{{ $posting->journal->name }}</td>
-                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
+                                            <td>
+
+                                                @php
+                                                $account = $coas[$loop->index]; // Get the corresponding account from the coas
+                                            @endphp
+                                            @if ($account)  <!-- Check if the account exists -->
+                                                ({{ $account->code }}) {{ $account->name }}
+                                            @else
+                                                Account Deleted
+                                            @endif
+                                            </td>
                                         @else
                                             <td></td>
                                             <td></td>
@@ -179,7 +193,7 @@
                                             <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
                                         @endif
                                         <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
-                                        <td>{{ $posting->amount < 0 ? '-' . number_format(abs($posting->amount)) : '' }}</td>
+                                        <td>{{ $posting->amount < 0 ? number_format(abs($posting->amount)) : '' }}</td>
                                         @php
                                             $previousDate = $posting->journal->date; // Keep track of the previous date
                                         @endphp

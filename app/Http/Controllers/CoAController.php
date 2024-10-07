@@ -2,9 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use random;
+use Illuminate\Support\Str;
+use App\Models\Journal;
+use App\Models\Posting;
+use App\Models\PaymentOrder;
+use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
 use Illuminate\Support\Carbon;
+use App\Models\PaymentPurchase;
+use App\Models\PurchaseInvoice;
 use Illuminate\Validation\Rule;
 
 class CoAController extends Controller
@@ -39,8 +47,8 @@ class CoAController extends Controller
     {
         
         $request->validate([
-            'name' => 'required|string|max:255|unique:mstr_coa,name',
-            'code' => 'required|string|max:255|unique:mstr_coa,code',
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
             'description' => 'nullable|string',
         ], [
             'name.unique' => 'The name has already been taken.',
@@ -108,13 +116,17 @@ class CoAController extends Controller
     public function destroy($id)
     {
         $CoA = ChartOfAccount::findOrFail($id);
-    
+
+        $code = $CoA->code . '-del-' . Str::uuid(); 
+        
         // Update the status to 'deleted' and set the deleted_at timestamp
         $CoA->update([
-            'status' => ChartOfAccount::STATUS_DELETED,
-            'deleted_at' => Carbon::now() // Set the current timestamp for deleted_at
+            'code' => $code,
+            'status' => ChartOfAccount::STATUS_DELETED, 
         ]);
-    
+
+        $CoA->delete();
+
         return redirect()->route('CoA.index')->with('success', 'Chart of Account status updated to deleted.');
     }
     
@@ -131,4 +143,32 @@ class CoAController extends Controller
         
         return redirect()->route('CoA.show', $id)->with('success', 'Chart of Account status updated successfully.');
     }
+
+    public function routeTransaction($postingId)
+    {
+        $posting = Posting::findOrFail($postingId);
+
+        $journal = Journal::where('id', $posting->journal_id)->firstOrFail();
+    
+        // Get the first two words and determine the transaction type
+        $firstTwoLetters = substr($journal->description, 0, 2);
+        
+        switch ($firstTwoLetters) {
+            case 'SI':
+                $salesInvoice = SalesInvoice::where('code', $journal->description)->firstOrFail();
+                return redirect()->route('sales_invoice.show', $salesInvoice->id);
+            case 'PS':
+                $paymentOrder = PaymentOrder::where('code', $journal->description)->firstOrFail();
+                return redirect()->route('payment_order.show', $paymentOrder->id);
+            case 'PI':
+                $purchaseInvoice = PurchaseInvoice::where('code', $journal->description)->firstOrFail();
+                return redirect()->route('purchase_invoice.show', $purchaseInvoice->id);
+            case 'PP':
+                $paymentPurchase = PaymentPurchase::where('code', $journal->description)->firstOrFail();
+                return redirect()->route('payment_purchase.show', $paymentPurchase->id);
+            default:
+                return 'Unknown Transaction';
+        }
+    }
+    
 }

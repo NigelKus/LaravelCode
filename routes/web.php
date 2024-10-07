@@ -85,6 +85,7 @@ Route::prefix('admin/master/product')
         Route::put('{id}', [CoAController::class, 'update'])->name('update');
         Route::delete('{id}', [CoAController::class, 'destroy'])->name('destroy');
         Route::post('{id}/update-status', [CoAController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('transaction/{posting}', [CoAController::class, 'routeTransaction'])->name('transaction.route');
     });
 
 //All Transactional Routing

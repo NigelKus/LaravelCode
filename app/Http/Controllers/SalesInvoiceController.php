@@ -215,29 +215,28 @@ class SalesInvoiceController extends Controller
             return $detail->price * $detail->quantity;
         });
         
-        // Get the journal where ref_id matches the sales invoice ID
+        // Fetch the Journal by reference to the Sales Invoice ID
         $journal = Journal::where('ref_id', $salesInvoice->id)->first();
-    
-        // Fetch postings related to the journal
-        $postings = $journal ? $journal->postings : collect();
-    
-        // Map postings to get the Chart of Account
-        $coas = $postings->map(function ($posting) {
-            return $posting->account; // Adjust if necessary for your relationship
-        });
-    
-        if (Gate::allows('view', $salesInvoice)) {
-        // Return the view with the sales invoice and its details
-            return view('layouts.transactional.sales_invoice.show', [
-                'salesInvoice' => $salesInvoice,
-                'totalPrice' => $totalPrice,
-                'journal' => $journal,
-                'postings' => $postings,
-                'coa' => $coas,
-            ]);
-        }
 
-        abort(403);
+        // Fetch postings related to the journal, or return an empty collection if no journal exists
+        $postings = $journal ? $journal->postings : collect();
+
+        // Map postings to get the Chart of Accounts, including soft-deleted accounts
+        $coas = $postings->map(function ($posting) {
+            // Use withTrashed() to fetch soft-deleted accounts as well
+            $account = $posting->account()->withTrashed()->first(); // Get the account, including soft-deleted ones
+            
+        });
+        
+
+        // Return the view with the sales invoice and its details
+        return view('layouts.transactional.sales_invoice.show', [
+            'salesInvoice' => $salesInvoice,
+            'totalPrice' => $totalPrice,
+            'journal' => $journal,
+            'postings' => $postings,
+            'coa' => $coas,
+        ]);
     }
     
 

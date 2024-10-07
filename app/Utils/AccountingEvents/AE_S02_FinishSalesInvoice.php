@@ -2,12 +2,13 @@
 
 namespace App\Utils\AccountingEvents;
 
-use App\Models\Sales\SalesInvoice;
-
-use App\Utils\Accounting\AccountingManager;
 use App\Utils\Constants;
+
 use App\Utils\SelectHelper;
+use App\Models\Sales\SalesInvoice;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Accounting\AccountingManager;
+use App\Utils\Accounting\AccountingSetting;
 
 class AE_S02_FinishSalesInvoice extends AE_Base
 {
@@ -27,19 +28,18 @@ class AE_S02_FinishSalesInvoice extends AE_Base
         $amount = $obj->getTotalPriceAttribute();
         
 
-        AccountingManager::debit( $journal,
-            1100,  // DEBIT :: Piutang Usaha
-            $amount,
-            '',
-            null,
-        );
-        
-        
-
-        AccountingManager::credit( $journal,
-        4000,  // CREDIT :: Penjualan
-            $amount
-        );
+        AccountingManager::debit($journal,
+        AccountingSetting::PiutangUsaha,  // DEBIT :: Piutang Usaha
+        $amount,
+        '',
+        null
+    );
+    
+    AccountingManager::credit($journal,
+        AccountingSetting::Pendapatan,  // CREDIT :: Penjualan
+        $amount
+    );
+    
 
         return $journal;
     }

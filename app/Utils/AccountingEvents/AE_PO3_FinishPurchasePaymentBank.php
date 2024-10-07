@@ -2,12 +2,13 @@
 
 namespace App\Utils\AccountingEvents;
 
-use App\Models\PurchaseInvoice;
-
-use App\Utils\Accounting\AccountingManager;
 use App\Utils\Constants;
+
 use App\Utils\SelectHelper;
+use App\Models\PurchaseInvoice;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Accounting\AccountingManager;
+use App\Utils\Accounting\AccountingSetting;
 
 class AE_PO3_FinishPurchasePaymentBank extends AE_Base
 {
@@ -28,7 +29,7 @@ class AE_PO3_FinishPurchasePaymentBank extends AE_Base
         
 
         AccountingManager::debit( $journal,
-        2000,  // DEBIT :: Utang Usaha
+        AccountingSetting::UtangUsaha,  // DEBIT :: Utang Usaha
             $amount,
             '',
             null,
@@ -36,7 +37,7 @@ class AE_PO3_FinishPurchasePaymentBank extends AE_Base
         
 
         AccountingManager::credit( $journal,
-        1200,  // CREDIT :: Bank
+        AccountingSetting::Bank,  // CREDIT :: Bank
             $amount
         );
 

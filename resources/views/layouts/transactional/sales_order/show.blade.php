@@ -42,14 +42,16 @@
                             <dd class="col-sm-9">{{ $salesOrder->code }}</dd>  
                             <dt class="col-sm-3">Date</dt>  
                             <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesOrder->date)->format('Y-m-d') }}</dd>  
-                            <dt class="col-sm-3">Customer Name</dt>  
-                            <dd class="col-sm-9">{{ $salesOrder->customer->name }}</dd>  
+                            <dt class="col-sm-3">Description</dt>  
+                            <dd class="col-sm-9">{{ $salesOrder->description }}</dd>  
                         </dl>  
                     </div>  
                     <div class="col-md-6 text-right">  
                     <!-- Right Side: Customer Contact Details -->  
                         <h4>Customer Contact</h4>  
-                        <dl class="row">  
+                        <dl class="row">
+                            <dt class="col-sm-8">Customer Name</dt>  
+                            <dd class="col-sm-4">{{ $salesOrder->customer->name }}</dd>    
                             <dt class="col-sm-8 ">Address</dt>  
                             <dd class="col-sm-4 ">{{ $salesOrder->customer->address }}</dd>  
                             <dt class="col-sm-8 ">Phone</dt>  

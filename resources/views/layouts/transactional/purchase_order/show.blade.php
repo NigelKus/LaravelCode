@@ -39,17 +39,19 @@
                             <dt class="col-sm-3">ID</dt>  
                             <dd class="col-sm-9">{{ $purchaseOrder->id }}</dd>  
                             <dt class="col-sm-3">Code</dt>  
-                            <dd class="col-sm-9">{{ $purchaseOrder->code }}</dd>  
+                            <dd class="col-sm-9">{{ $purchaseOrder->code }}</dd>   
                             <dt class="col-sm-3">Date</dt>  
                             <dd class="col-sm-9">{{ \Carbon\Carbon::parse($purchaseOrder->date)->format('Y-m-d') }}</dd>  
-                            <dt class="col-sm-3">Supplier Name</dt>  
-                            <dd class="col-sm-9">{{ $purchaseOrder->supplier->name }}</dd>  
+                            <dt class="col-sm-3">Description</dt>  
+                            <dd class="col-sm-9">{{ $purchaseOrder->Description }}</dd> 
                         </dl>  
                     </div>  
                     <div class="col-md-6 text-right">  
                     <!-- Right Side: supplier Contact Details -->  
                         <h4>Supplier Contact</h4>  
                         <dl class="row">  
+                            <dt class="col-sm-8">Supplier Name</dt>  
+                            <dd class="col-sm-4">{{ $purchaseOrder->supplier->name }}</dd> 
                             <dt class="col-sm-8 ">Address</dt>  
                             <dd class="col-sm-4 ">{{ $purchaseOrder->supplier->address }}</dd>  
                             <dt class="col-sm-8 ">Phone</dt>  

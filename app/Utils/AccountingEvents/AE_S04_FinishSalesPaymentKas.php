@@ -2,13 +2,14 @@
 
 namespace App\Utils\AccountingEvents;
 
-use App\Models\PaymentOrder;
-use App\Models\Sales\SalesInvoice;
-
-use App\Utils\Accounting\AccountingManager;
 use App\Utils\Constants;
 use App\Utils\SelectHelper;
+
+use App\Models\PaymentOrder;
+use App\Models\Sales\SalesInvoice;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Accounting\AccountingManager;
+use App\Utils\Accounting\AccountingSetting;
 
 class AE_S04_FinishSalesPaymentKas extends AE_Base
 {
@@ -29,7 +30,7 @@ class AE_S04_FinishSalesPaymentKas extends AE_Base
         
 
         AccountingManager::debit( $journal,
-            1000,  // DEBIT :: Kas
+        AccountingSetting::Kas,  // DEBIT :: Kas
             $amount,
             '',
             null,
@@ -37,7 +38,7 @@ class AE_S04_FinishSalesPaymentKas extends AE_Base
         
 
         AccountingManager::credit( $journal,
-        1100,  // CREDIT :: Piutang
+        AccountingSetting::PiutangUsaha,  // CREDIT :: Piutang
             $amount
         );
 
