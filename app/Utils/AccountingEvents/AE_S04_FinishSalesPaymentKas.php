@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class AE_S04_FinishSalesPaymentKas extends AE_Base
 {
     const TYPE = 'S04';
-    const NAME = 'Finish Sales Payment Kas';
+    const NAME = 'Finish Sales Payment';
     const REQUIRED_CLASS = PaymentOrder::class;
 
     public static function buildJournalContent($obj) {

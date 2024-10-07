@@ -50,7 +50,7 @@
                     @enderror
                 </div>
 
-                {{-- <div class="form-group">
+                <div class="form-group">
                     <label for="payment_type">Payment Type</label>
                     <select class="form-control @error('payment_type') is-invalid @enderror" id="payment_type" name="payment_type" required>
                         <option value="">Select a Payment Type</option>
@@ -62,7 +62,7 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
-                </div> --}}
+                </div>
 
                 <!-- Description Field -->
                 <div class="form-group">

@@ -2,19 +2,18 @@
 
 namespace App\Utils\AccountingEvents;
 
-use App\Models\PaymentOrder;
-use App\Models\Sales\SalesInvoice;
+use App\Models\PurchaseInvoice;
 
 use App\Utils\Accounting\AccountingManager;
 use App\Utils\Constants;
 use App\Utils\SelectHelper;
 use Illuminate\Support\Facades\DB;
 
-class AE_S03_FinishSalesPaymentBank extends AE_Base
+class AE_PO4_FinishPurchasePaymentKas extends AE_Base
 {
-    const TYPE = 'S03';
-    const NAME = 'Finish Sales Payment';
-    const REQUIRED_CLASS = PaymentOrder::class;
+    const TYPE = 'P04';
+    const NAME = 'Finish Purchase Payment';
+    const REQUIRED_CLASS = PurchaseInvoice::class;
 
     public static function buildJournalContent($obj) {
         $journal = AccountingManager::createJournal(
@@ -29,7 +28,7 @@ class AE_S03_FinishSalesPaymentBank extends AE_Base
         
 
         AccountingManager::debit( $journal,
-            1200,  // DEBIT :: Bank
+            2000,  // DEBIT :: Utang Usaha
             $amount,
             '',
             null,
@@ -37,7 +36,7 @@ class AE_S03_FinishSalesPaymentBank extends AE_Base
         
 
         AccountingManager::credit( $journal,
-        1100,  // CREDIT :: Piutang
+        1000,  // CREDIT :: Kas
             $amount
         );
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Journal;
+use App\Models\Posting;
 use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -318,7 +319,7 @@ class PurchaseInvoiceController extends Controller
     }
     
     public function update(Request $request, $id)
-    {   
+    {  
         $purchaseInvoice = purchaseInvoice::findOrFail($id);
         
         // Update purchase invoice fields
@@ -331,6 +332,44 @@ class PurchaseInvoiceController extends Controller
         // Get existing purchase invoice details
         $purchaseInvoice = purchaseInvoice::with('details')->findOrFail($id);
         $invoiceDetails = $purchaseInvoice->details;
+
+        $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();
+
+        $productIds = $request['product_id'];
+        $requested = $request['requested'];
+        $priceEachs = $request['price_eachs'];
+
+        $priceEachsAcc = array_map(function($price) {
+            return str_replace(',', '', $price); // Remove commas
+        }, $priceEachs);
+
+        if ($journal) {
+            // Fetch postings related to this journal
+            $postings = Posting::where('journal_id', $journal->id)->get();
+            $totalNewAmount = 0;
+        
+            // Loop through requested items and calculate totalNewAmount
+            foreach ($requested as $i => $quantity) {
+                // Skip iteration if price or quantity is zero or empty
+                if (!empty($priceEachsAcc[$i]) && $priceEachsAcc[$i] != 0 && $quantity != 0) {
+                    $totalNewAmount += $priceEachsAcc[$i] * $quantity;
+                }
+            }
+        
+            $firstRun = true; // Initialize a flag to track the first run
+            foreach ($postings as $posting) {
+                if ($firstRun) {
+                    // Set to a positive amount on the first run
+                    $posting->amount = abs($totalNewAmount);
+                } else {
+                    // Set to a negative amount on the second run
+                    $posting->amount = -abs($totalNewAmount);
+                }
+        
+                $posting->save(); // Save each posting after updating
+                $firstRun = false; // Toggle flag after the first iteration
+            }
+        }
 
         // // Delete each detail
         foreach ($invoiceDetails as $detail) {
@@ -403,6 +442,8 @@ class PurchaseInvoiceController extends Controller
         // Find the purchase invoice or fail if not found
         $purchaseInvoice = purchaseInvoice::findOrFail($id);
 
+        $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();
+
         $hasPaymentOrderDetail = false;
 
         // Check if any payment order detail has the same purchase invoice ID
@@ -424,6 +465,26 @@ class PurchaseInvoiceController extends Controller
             try {
                 // Find the corresponding purchase order detail using an appropriate relation
                 $purchaseOrderDetail = $detail->purchaseOrderDetail; // Adjust this line as necessary
+
+                if ($journal) {
+                    // Fetch postings related to this journal
+                    $postings = Posting::where('journal_id', $journal->id)->get();
+                    foreach ($postings as $posting) {
+                        $posting->update([
+                            'status' => 'deleted'
+                        ]);
+
+                        $posting->save(); // Save each posting after updating
+                        $posting->delete();
+                    }
+
+                    $journal->update([
+                        'status' => 'deleted'
+                    ]);
+
+                    $journal->save(); // Save each posting after updating
+                    $journal->delete();
+                }
                 
                 // Call the adjustQuantityRemaining method on the purchaseOrderDetail
                 $purchaseOrderDetail->adjustQuantityRemaining($detail->quantity); // Adjust the quantity sent

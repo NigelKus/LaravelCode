@@ -11,6 +11,8 @@ use App\Models\PurchaseInvoice;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
+use App\Utils\AccountingEvents\AE_PO3_FinishPurchasePaymentBank;
+use App\Utils\AccountingEvents\AE_PO4_FinishPurchasePaymentKas;
 
 class PaymentPurchaseController extends Controller
 
@@ -149,14 +151,13 @@ class PaymentPurchaseController extends Controller
 
             $invoice->save();
         }
-        // if($request['payment_type'] == 'bank')
-        // {
-        //     AE_S03_FinishSalesPaymentBank::process($paymentPurchase);
-        // }else 
-        // {
-        //     AE_S04_FinishSalesPaymentKas::process($paymentPurchase);
-        // }
-
+        if($request['payment_type'] == 'bank')
+        {
+            AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);
+        }else 
+        {
+            AE_PO4_FinishPurchasePaymentKas::process($paymentPurchase);
+        }
         DB::commit();
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Payment Purchase created successfully.');
 
@@ -171,24 +172,24 @@ class PaymentPurchaseController extends Controller
             return $detail->price;
         });
 
-        // $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
+        $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
     
-        // // Fetch postings related to the journal
-        // $postings = $journal ? $journal->postings : collect();
+        // Fetch postings related to the journal
+        $postings = $journal ? $journal->postings : collect();
     
-        // // Map postings to get the Chart of Account
-        // $coas = $postings->map(function ($posting) {
-        //     return $posting->account; // Adjust if necessary for your relationship
-        // });
+        // Map postings to get the Chart of Account
+        $coas = $postings->map(function ($posting) {
+            return $posting->account; // Adjust if necessary for your relationship
+        });
         
         // dd($paymentPurchase, $totalPrice);
         // Return the view with the payment order and its details
         return view('layouts.transactional.payment_purchase.show', [
             'paymentPurchase' => $paymentPurchase,
             'totalPrice' => $totalPrice,
-            // 'journal' => $journal,
-            // 'postings' => $postings,
-            // 'coa' => $coas,
+            'journal' => $journal,
+            'postings' => $postings,
+            'coa' => $coas,
         ]);
     }
 
@@ -198,17 +199,17 @@ class PaymentPurchaseController extends Controller
         $paymentPurchase = PaymentPurchase::with('paymentDetails')->findOrFail($id);
         $suppliers = $paymentPurchase->supplier;
 
-        // $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
-        // $postings = Posting::where('journal_id', $journal->id)->get();
+        $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
+        $postings = Posting::where('journal_id', $journal->id)->get();
 
-        // $paymentType = 'bank'; // Default to bank
-        // foreach ($postings as $posting) {
-        //     // Set paymentType based on account_id
-        //     if ($posting->account_id == 1) {
-        //         $paymentType = 'kas'; // Set to kas if account_id is 1
-        //         break; // Exit the loop as we've determined the payment type
-        //     }
-        // }
+        $paymentType = 'bank'; // Default to bank
+        foreach ($postings as $posting) {
+            // Set paymentType based on account_id
+            if ($posting->account_id == 1) {
+                $paymentType = 'kas'; // Set to kas if account_id is 1
+                break; // Exit the loop as we've determined the payment type
+            }
+        }
         // Fetch related sales invoices with status 'pending' or 'completed'
         $purchaseInvoices = PurchaseInvoice::where('supplier_id', $suppliers->id)
             ->whereIn('status', ['pending', 'completed'])
@@ -242,7 +243,7 @@ class PaymentPurchaseController extends Controller
             'combinedDetails' => $combinedDetails,
             'payment_purchase_id' => $paymentPurchase->id, // Send payment order ID
             'payment_purchase_code' => $paymentPurchase->code, // Send payment order code
-            // 'payment_type' => $paymentType
+            'payment_type' => $paymentType
         ]);
     }
 
@@ -283,7 +284,7 @@ class PaymentPurchaseController extends Controller
             'requested.*' => 'required|numeric|min:0', // Validate requested amounts
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
             'invoice_id.*' => 'exists:purchase_invoice,id', // Validate each invoice ID exists
-            // 'payment_type' => 'required',
+            'payment_type' => 'required',
         ]);
         $paymentPurchase = PaymentPurchase::findOrFail($request->payment_purchase_id); // Find payment order or fail
 
@@ -293,43 +294,41 @@ class PaymentPurchaseController extends Controller
         
         $orderDetails = $paymentPurchase->paymentDetails;
 
-        // $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
+        $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
 
         
-        // if ($journal) {
-        //     // Fetch postings related to this journal
-        //     $postings = Posting::where('journal_id', $journal->id)->get();
-        //     $totalNewAmount = 0;
+        if ($journal) {
+            // Fetch postings related to this journal
+            $postings = Posting::where('journal_id', $journal->id)->get();
+            $totalNewAmount = 0;
 
-        //     foreach ($request->requested as $requestedAmount) {
-        //         if (!empty($requestedAmount)) {
-        //             $totalNewAmount += $requestedAmount; // Accumulate the requested amount
-        //         }
-        //     }
+            foreach ($request->requested as $requestedAmount) {
+                if (!empty($requestedAmount)) {
+                    $totalNewAmount += $requestedAmount; // Accumulate the requested amount
+                }
+            }
             
-        //     if($request['payment_type'] == 'bank'){
-        //         $paymentType = 3;
-        //     }else{
-        //         $paymentType = 1;
-        //     }
+            if($request['payment_type'] == 'bank'){
+                $paymentType = 8;
+            }else{
+                $paymentType = 1;
+            }
 
 
-        //     $firstRun = true; // Initialize a flag to track the first run
-        //     foreach ($postings as $posting) {
-        //         if ($firstRun) {
-        //             // Set to a positive amount on the first run
-        //             $posting->amount = abs($totalNewAmount);
-        //             $posting->account_id = $paymentType;
-        //         } else {
-        //             // Set to a negative amount on the second run
-        //             $posting->amount = -abs($totalNewAmount);
-        //         }
+            $firstRun = true; // Initialize a flag to track the first run
+            foreach ($postings as $posting) {
+                if ($firstRun) {
+                        $posting->amount = abs($totalNewAmount);
+                } else {
+                    // Set to a negative amount on the second run
+                    $posting->amount = -abs($totalNewAmount);
+                    $posting->account_id = $paymentType;
+                }
         
-        //         $posting->save(); // Save each posting after updating
-        //         $firstRun = false; // Toggle flag after the first iteration
-        //     }
-        // }
-        
+                $posting->save(); // Save each posting after updating
+                $firstRun = false; // Toggle flag after the first iteration
+            }
+        }
 
         foreach($orderDetails as $detail)
         {
@@ -368,7 +367,6 @@ class PaymentPurchaseController extends Controller
             $invoice->save();
         }
         
-        
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Payment Purchase updated successfully.');
     }
 
@@ -385,25 +383,25 @@ class PaymentPurchaseController extends Controller
             $invoice->status = 'pending';
             $invoice->save(); // Save the updated status
 
-            // if ($journal) {
-            //     // Fetch postings related to this journal
-            //     $postings = Posting::where('journal_id', $journal->id)->get();
-            //     foreach ($postings as $posting) {
-            //         $posting->update([
-            //             'status' => 'deleted'
-            //         ]);
+            if ($journal) {
+                // Fetch postings related to this journal
+                $postings = Posting::where('journal_id', $journal->id)->get();
+                foreach ($postings as $posting) {
+                    $posting->update([
+                        'status' => 'deleted'
+                    ]);
 
-            //         $posting->save(); // Save each posting after updating
-            //         $posting->delete();
-            //     }
+                    $posting->save(); // Save each posting after updating
+                    $posting->delete();
+                }
 
-            //     $journal->update([
-            //         'status' => 'deleted'
-            //     ]);
+                $journal->update([
+                    'status' => 'deleted'
+                ]);
 
-            //     $journal->save(); // Save each posting after updating
-            //     $journal->delete();
-            // }
+                $journal->save(); // Save each posting after updating
+                $journal->delete();
+            }
         
             // Update payment detail status to 'deleted'
             $detail->update(['status' => 'deleted']);

@@ -326,8 +326,12 @@ class PaymentOrderController extends Controller
             foreach ($postings as $posting) {
                 if ($firstRun) {
                     // Set to a positive amount on the first run
-                    $posting->amount = abs($totalNewAmount);
-                    $posting->account_id = $paymentType;
+                
+                    
+                        $posting->amount = abs($totalNewAmount);
+                        $posting->account_id = $paymentType;
+                    
+
                 } else {
                     // Set to a negative amount on the second run
                     $posting->amount = -abs($totalNewAmount);
