@@ -96,10 +96,9 @@
                         </tfoot>
                     </table>
                 </div>
+            </div>
                 
 
-            <!-- Status Update Card -->
-        <div class ="card-body">
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="card-title">Change Status</h3>
@@ -126,9 +125,8 @@
                     </form>
                 </div>
             </div>
-        </div>
+        
 
-            <div class ="card-body">
                 <div class="card mt-4">
                     <div class="card-header">
                         <h3 class="card-title">Postings Account</h3>
@@ -151,37 +149,40 @@
                                         <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
                                     </tr>
                                 @else
-                                    <tr>
-                                        <td>{{ $journal->date }}</td>
-                                        <td>{{ $journal->code }}</td>
-                                        <td>{{ $journal->name }}</td>
-                                        <td>
-                                            ({{ $coas[0]->code }}) {{ $coas[0]->name }}
-                                        </td>
-                                        <td>{{ number_format(abs($postings->first()->amount)) }}</td> <!-- Display amount for the first posting -->
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td>
-                                            ({{ $coas[1]->code }}) {{ $coas[1]->name }}
-                                        </td>
-                                        <td></td>
-                                        <td>{{ number_format(abs($postings->first()->amount)) }}</td> <!-- Display amount for the first posting -->
-                                    </tr>
+                                @foreach($postings as $index => $obj)
+                                    @if($index == 0)
+                                        <tr>
+                                            <td>{{ $journal->date }}</td>
+                                            <td>{{ $journal->code }}</td>
+                                            <td>{{ $journal->name }}</td>
+                                            <td>
+                                                ({{ $coas[$index]->code }}) {{ $coas[$index]->name }}
+                                            </td>
+                                            <td>{{ number_format(abs($obj->amount)) }}</td> 
+                                            <td></td>
+                                        </tr>
+                                        @else
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>
+                                                ({{ $coas[$index]->code }}) {{ $coas[$index]->name }}
+                                            </td>
+                                            <td></td>
+                                            <td>{{ number_format(abs($obj->amount)) }}</td> 
+                                        </tr>
+                                        @endif
+                                    @endforeach
                                 @endif
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-
-            <div class="card-footer">
-                <a href="{{ route('payment_order.edit', $paymentOrder->id) }}" class="btn btn-warning">Edit</a>
-                <a href="{{ route('payment_order.index') }}" class="btn btn-secondary">Back to List</a>
-            </div>
-        </div>
-    </div>
+            
+    
+        <div class="mt-3">
+            <a href="{{ route('payment_order.edit', $paymentOrder->id) }}" class="btn btn-warning">Edit</a>
+            <a href="{{ route('payment_order.index') }}" class="btn btn-secondary">Back to List</a>
+        </div> 
 @stop

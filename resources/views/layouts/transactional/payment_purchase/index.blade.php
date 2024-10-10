@@ -30,7 +30,7 @@
         <div class="card-body">
             <form method="GET" action="{{ route('payment_purchase.index') }}" class="form-inline mb-3">
                 <input type="text" name="code" class="form-control ml-2" placeholder="Search by Code" value="{{ request('code') }}">
-                <input type="text" name="supplier" class="form-control ml-2" placeholder="Search by supplier" value="{{ request('supplier') }}">
+                <input type="text" name="supplier" class="form-control ml-2" placeholder="Search by Supplier" value="{{ request('supplier') }}">
                 <input type="date" name="date" class="form-control ml-2" value="{{ request('date') }}">
 
                 <select class="form-control ml-2" id="sort" name="sort" onchange="this.form.submit()">

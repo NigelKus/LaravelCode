@@ -11,7 +11,7 @@ class SalesInvoiceDetail extends Model
     use HasFactory, SoftDeletes;
 
     // Define the table name
-    protected $table = 'invoicesales_detail';
+    protected $table = 'sales_invoice_detail';
 
     const STATUS_DELETED = 'deleted';
     protected $dates = ['date'];

@@ -186,7 +186,8 @@ class PaymentOrderController extends Controller
                 $coas[] = $posting->account()->withTrashed()->first(); 
             }
         }
-        
+
+        // dd($coas);
         return view('layouts.transactional.payment_order.show', [
             'paymentOrder' => $paymentOrder,
             'totalPrice' => $totalPrice,
@@ -325,13 +326,8 @@ class PaymentOrderController extends Controller
             $firstRun = true; // Initialize a flag to track the first run
             foreach ($postings as $posting) {
                 if ($firstRun) {
-                    // Set to a positive amount on the first run
-                
-                    
                         $posting->amount = abs($totalNewAmount);
                         $posting->account_id = $paymentType;
-                    
-
                 } else {
                     // Set to a negative amount on the second run
                     $posting->amount = -abs($totalNewAmount);
@@ -369,14 +365,8 @@ class PaymentOrderController extends Controller
             );
 
             $invoice = SalesInvoice::with('details')->findOrFail($invoiceId);
-            if ($invoice->calculatePriceRemaining() == 0) 
-            {
-                $invoice->status = 'completed';
-            }else 
-            {
-                $invoice->status = 'pending';   
-            }
 
+            ($invoice->calculatePriceRemaining() == 0)  ? $invoice->status = 'completed' : $invoice->status = 'pending';   
             $invoice->save();
         }
         

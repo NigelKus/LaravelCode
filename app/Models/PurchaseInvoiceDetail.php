@@ -11,7 +11,7 @@ class PurchaseInvoiceDetail extends Model
     use HasFactory, SoftDeletes;
 
     // Define the table name
-    protected $table = 'purchaseinvoice_detail';
+    protected $table = 'purchase_invoice_detail';
 
     const STATUS_DELETED = 'deleted';
     protected $dates = ['date'];

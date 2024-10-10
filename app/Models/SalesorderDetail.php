@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class SalesorderDetail extends Model
 {
     use HasFactory, SoftDeletes;
-
-    protected $table = 'salesorder_detail';
+    
+    protected $table = 'sales_order_detail';
     const STATUS_DELETED = 'deleted';
 
     protected $fillable = [

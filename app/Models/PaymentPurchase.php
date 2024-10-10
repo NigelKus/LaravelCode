@@ -10,7 +10,7 @@ class PaymentPurchase extends Model
 {
     use HasFactory, SoftDeletes; // Use SoftDeletes for soft deleting
 
-    protected $table = 'payment_purchase'; // Specify the table name if it's not the plural of the model name
+    protected $table = 'purchase_payment'; // Specify the table name if it's not the plural of the model name
 
     protected $fillable = [
         'id',

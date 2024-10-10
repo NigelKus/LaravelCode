@@ -11,7 +11,7 @@ class SalesOrder extends Model
     use HasFactory, SoftDeletes;
 
     // Define the table name
-    protected $table = 'mstr_salesorder';
+    protected $table = 'sales_order';
     const STATUS_DELETED = 'deleted';
     public $timestamps = true;
     protected $dates = ['date'];

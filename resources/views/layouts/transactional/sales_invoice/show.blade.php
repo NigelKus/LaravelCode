@@ -156,55 +156,59 @@
                 </div>
             </div>
 
-            <div class ="card-body">
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h3 class="card-title">Postings Account</h3>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered table-striped">
-                            <thead>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Postings Account</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Journal</th>
+                                <th>Name</th>
+                                <th>Chart of Account</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(is_null($journal) || $postings->isEmpty() || empty($coas) || is_null($coas[0]) || is_null($coas[1]))
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Journal</th>
-                                    <th>Name</th>
-                                    <th>Chart of Account</th>
-                                    <th>Debit</th>
-                                    <th>Credit</th>
+                                    <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @if(is_null($journal) || $postings->isEmpty() || empty($coas) || is_null($coas[0]) || is_null($coas[1]))
-                                    <tr>
-                                        <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
-                                    </tr>
-                                @else
+                            @else
+                            @foreach($postings as $index => $obj)
+                                @if($index == 0)
                                     <tr>
                                         <td>{{ $journal->date }}</td>
                                         <td>{{ $journal->code }}</td>
                                         <td>{{ $journal->name }}</td>
                                         <td>
-                                            ({{ $coas[0]->code }}) {{ $coas[0]->name }}
+                                            ({{ $coas[$index]->code }}) {{ $coas[$index]->name }}
                                         </td>
-                                        <td>{{ number_format(abs($postings->first()->amount)) }}</td> <!-- Display amount for the first posting -->
+                                        <td>{{ number_format(abs($obj->amount)) }}</td> 
                                         <td></td>
                                     </tr>
+                                    @else
                                     <tr>
                                         <td></td>
                                         <td></td>
                                         <td></td>
                                         <td>
-                                            ({{ $coas[1]->code }}) {{ $coas[1]->name }}
+                                            ({{ $coas[$index]->code }}) {{ $coas[$index]->name }}
                                         </td>
                                         <td></td>
-                                        <td>{{ number_format(abs($postings->first()->amount)) }}</td> <!-- Display amount for the first posting -->
+                                        <td>{{ number_format(abs($obj->amount)) }}</td> 
                                     </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            
 
             <!-- Edit and Back Buttons -->
             <div class="mt-3">

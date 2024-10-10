@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class PurchaseOrderDetail extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $table = 'purchaseorder_detail';
+    protected $table = 'purchase_order_detail';
     const STATUS_DELETED = 'deleted';
 
     protected $fillable = [
