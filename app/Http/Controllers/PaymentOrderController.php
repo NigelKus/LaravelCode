@@ -20,10 +20,11 @@ class PaymentOrderController extends Controller
     public function index(Request $request)
     {
         $statuses = ['pending', 'completed']; // Define your statuses
-        $query = PaymentOrder::query();
 
-        // Exclude invoices with status 'deleted' and 'canceled'
-        $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
+        $query = PaymentOrder::with(['customer' => function ($q) {
+            $q->withTrashed(); 
+        }])
+        ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
     
         // Apply status filter if present
@@ -112,7 +113,7 @@ class PaymentOrderController extends Controller
             'date' => 'required|date', // Validate date
             'requested.*' => 'required|numeric|min:0', // Validate requested amounts
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
-            'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
+            'invoice_id.*' => 'exists:sales_invoice,id', // Validate each invoice ID exists
             'payment_type' => 'required',
         ]);
 
@@ -170,7 +171,10 @@ class PaymentOrderController extends Controller
     
     public function show($id)
     {
-        $paymentOrder = PaymentOrder::with(['customer', 'paymentDetails.salesInvoice', 'journal'])->findOrFail($id);
+        $paymentOrder = PaymentOrder::with(['customer' => function ($query) {
+            $query->withTrashed();
+        }, 'paymentDetails.salesInvoice'])
+        ->findOrFail($id);
     
         $totalPrice = $paymentOrder->paymentDetails->sum(function ($detail) {
             return $detail->price;
@@ -291,7 +295,7 @@ class PaymentOrderController extends Controller
             'date' => 'required|date', // Validate date
             'requested.*' => 'required|numeric|min:0', // Validate requested amounts
             'invoice_id' => 'required|array', // Validate that invoice IDs are an array
-            'invoice_id.*' => 'exists:invoice_sales,id', // Validate each invoice ID exists
+            'invoice_id.*' => 'exists:sales_invoice,id', // Validate each invoice ID exists
             'payment_type' => 'required',
         ]);
         $paymentOrder = PaymentOrder::findOrFail($request->payment_order_id); // Find payment order or fail

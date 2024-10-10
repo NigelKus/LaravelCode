@@ -73,7 +73,9 @@
                     @forelse ($salesOrders as $order)
                         <tr>
                             <td>{{ $order->code }}</td>
-                            <td>{{ $order->customer->name ?? 'N/A' }}</td>
+                            <td>
+                                {{ $order->customer->name ?? 'N/A' }} 
+                            </td>                            
                             <td>{{ $order->description }}</td>
                             <td>{{ \Carbon\Carbon::parse($order->date)->format('Y-m-d') }}</td>
                             <td>{{ ucfirst($order->status) }}</td>

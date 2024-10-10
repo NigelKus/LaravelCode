@@ -437,6 +437,24 @@ return [
             ],
         ],
         ['header' => 'Report'],
+        [
+            'text' => 'Journal',
+            'url' => 'admin/master/user/index',
+            'icon' => 'fas fa-book',
+        ],
+        
+
+        [
+            'text' => 'Supplier',
+            'url' => 'admin/master/supplier/index',
+            'icon' => 'fas fa-truck',
+        ],
+
+        [
+            'text' => 'Chart of Account',
+            'url' => 'admin/master/CoA/index',
+            'icon' => 'fas fa-chart-bar',
+        ],
         // [
         //     'text' => 'Purchase',
         //     'icon' => 'fas fa-file-alt',

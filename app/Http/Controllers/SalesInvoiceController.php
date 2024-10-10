@@ -23,10 +23,10 @@ class SalesInvoiceController extends Controller
     {
         $statuses = ['pending', 'completed']; // Define your statuses
         $salesOrders = SalesOrder::all(); // Fetch all sales orders for the filter
-        $query = SalesInvoice::with('details', 'customer', 'salesOrder'); // Eager load the relationships
 
-
-        $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
+        $query = SalesInvoice::with(['customer' => function($q){
+            $q->withTrashed();
+        }])->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
         // Apply status filter if present
         if ($request->has('status') && $request->status != '') {
@@ -130,7 +130,7 @@ class SalesInvoiceController extends Controller
             'description' => 'nullable|string',
             'date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:date',
-            'salesorder_id' => 'required|exists:mstr_salesorder,id',
+            'salesorder_id' => 'required|exists:sales_order,id',
             'requested.*' => 'required|integer|min:1', // Validate requested quantity
             'qtys.*' => 'required|integer|min:1',
             'price_eachs.*' => 'required|numeric|min:0',
@@ -207,10 +207,11 @@ class SalesInvoiceController extends Controller
 
     public function show($id)
     {
-        // Fetch the sales invoice with customer, details including related products, and invoicedetails
-        $salesInvoice = SalesInvoice::with(['customer', 'details.product', 'salesOrder', 'journal'])->findOrFail($id);
-        
-        // Calculate total price from invoicedetails
+        $salesInvoice = SalesInvoice::with(['customer' => function ($query) {
+            $query->withTrashed();
+        }, 'details.product', 'salesOrder'])
+        ->findOrFail($id);
+
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
@@ -252,9 +253,7 @@ class SalesInvoiceController extends Controller
 
         $salesOrder = SalesOrder::findOrFail($salesInvoice->salesorder_id);
     
-        // Check if the sales order status is canceled or deleted
         if ($salesOrder->status === 'canceled' || $salesOrder->status === 'deleted') {
-            // Return an error message if the sales order has been canceled or deleted
             return redirect()->route('sales_invoice.show', $salesInvoice->id)->withErrors([
                 'error' => 'The sales order has already been deleted or canceled.'
             ]);

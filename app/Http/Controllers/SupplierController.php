@@ -138,9 +138,10 @@ class SupplierController extends Controller
     
         // Update the status to 'deleted' and set the deleted_at timestamp
         $supplier->update([
-            'status' => Supplier::STATUS_DELETED,
-            'deleted_at' => Carbon::now() // Set the current timestamp for deleted_at
+            'status' => Supplier::STATUS_DELETED
         ]);
+
+        $supplier->delete();
     
         return redirect()->route('supplier.index')->with('success', 'Supplier status updated to deleted.');
     }

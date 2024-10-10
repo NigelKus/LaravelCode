@@ -20,7 +20,7 @@ class CodeFactory
         $day = Carbon::now()->format('d');
     
         // Get the latest sales order code to determine the next sequential number
-        $latestOrder = DB::table('mstr_salesOrder')
+        $latestOrder = DB::table('sales_order')
             ->where('code', 'like', "SO/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
@@ -45,7 +45,7 @@ class CodeFactory
         $month = Carbon::now()->format('m');
         $day = Carbon::now()->format('d');
     
-        $latestOrder = DB::table('invoice_sales')
+        $latestOrder = DB::table('sales_invoice')
             ->where('code', 'like', "SI/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
@@ -66,7 +66,7 @@ class CodeFactory
         $month = Carbon::now()->format('m');
         $day = Carbon::now()->format('d');
     
-        $latestOrder = DB::table('mstr_payment')
+        $latestOrder = DB::table('sales_payment')
             ->where('code', 'like', "PS/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
@@ -129,7 +129,7 @@ class CodeFactory
         $month = Carbon::now()->format('m');
         $day = Carbon::now()->format('d');
     
-        $latestOrder = DB::table('payment_purchase')
+        $latestOrder = DB::table('purchase_payment')
             ->where('code', 'like', "PP/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();

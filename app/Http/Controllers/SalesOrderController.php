@@ -16,12 +16,13 @@ class SalesOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $statuses = ['pending', 'completed']; // Define your statuses
-        $query = SalesOrder::query();
-
-        // Exclude invoices with status 'deleted' and 'canceled'
-        $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
+        $statuses = ['pending', 'completed']; 
+        
+        $query = SalesOrder::with(['customer' => function ($q) {
+            $q->withTrashed(); 
+        }])
+        ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
+    
     
         // Apply status filter if present
         if ($request->has('status') && $request->status != '') {
@@ -66,7 +67,7 @@ class SalesOrderController extends Controller
         // Fetch only active customers
         $customers = Customer::where('status', 'active')->get();
         
-
+        
         // Fetch all products to populate the product dropdown
         $products = Product::where('status', 'active')->get();
     
@@ -187,11 +188,11 @@ class SalesOrderController extends Controller
     
     public function show($id)
     {
-        // Fetch the sales order and its details
-        $salesOrder = SalesOrder::with('customer', 'details.product')->findOrFail($id);
-
-        
-        // Calculate total price
+        $salesOrder = SalesOrder::with(['customer' => function ($query) {
+            $query->withTrashed();
+        }, 'details.product'])
+        ->findOrFail($id);
+    
         $totalPrice = $salesOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });

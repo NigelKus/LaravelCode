@@ -21,10 +21,11 @@ class PaymentPurchaseController extends Controller
     public function index(Request $request)
     {
         $statuses = ['pending', 'completed']; // Define your statuses
-        $query = PaymentPurchase::query();
 
-        // Exclude invoices with status 'deleted' and 'canceled'
-        $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
+        $query = PaymentPurchase::with(['supplier' => function ($q) {
+            $q->withTrashed(); 
+        }])
+        ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
     
         // Apply status filter if present
@@ -165,9 +166,11 @@ class PaymentPurchaseController extends Controller
 
     public function show($id)
     {
-        $paymentPurchase = PaymentPurchase::with(['supplier', 'paymentDetails.purchaseInvoice', 'journal'])->findOrFail($id);
+        $paymentPurchase = PaymentPurchase::with(['supplier' => function ($query) {
+            $query->withTrashed();
+        }, 'paymentDetails.purchaseInvoice'])
+        ->findOrFail($id);
 
-        // Calculate the total price from payment details
         $totalPrice = $paymentPurchase->paymentDetails->sum(function ($detail) {
             return $detail->price;
         });

@@ -17,10 +17,11 @@ class PurchaseOrderController extends Controller
     public function index(Request $request)
     {
         $statuses = ['pending', 'completed']; // Define your statuses
-        $query = PurchaseOrder::query();
 
-        // Exclude invoices with status 'deleted' and 'canceled'
-        $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
+        $query = PurchaseOrder::with(['supplier' => function ($q) {
+            $q->withTrashed(); 
+        }])
+        ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
     
         // Apply status filter if present
@@ -185,10 +186,12 @@ class PurchaseOrderController extends Controller
 
     public function show($id)
     {
-        // Fetch the sales order and its details
-        $purchaseOrder = PurchaseOrder::with('supplier', 'details.product')->findOrFail($id);
+        $purchaseOrder = PurchaseOrder::with(['supplier' => function ($query) {
+            $query->withTrashed();
+        }, 'details.product'])
+        ->findOrFail($id);
 
-        
+
         // Calculate total price
         $totalPrice = $purchaseOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
@@ -301,10 +304,8 @@ class PurchaseOrderController extends Controller
         $price_eachs = $request->input('price_eachs', []);
         $price_totals = $request->input('price_totals', []);
     
-        // Initialize an empty array to hold the combined details
         $purchaseOrderDetails = [];
     
-        // Determine the number of items in each array
         $length = count($product_ids);
     
         for ($i = 0; $i < $length; $i++) {

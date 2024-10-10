@@ -13,6 +13,7 @@
     </div>
 @stop
 
+
 @section('content')
     <div class="card">
         <div class="card-body">
@@ -56,7 +57,6 @@
                                 <option value="">Select Status</option>
                                 <option value="active" {{ $CoA->status === 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="trashed" {{ $CoA->status === 'trashed' ? 'selected' : '' }}>Trashed</option>
-                                {{-- <option value="cancelled" {{ $salesOrder->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option> --}}
                             </select>
                             @error('status')
                                 <span class="invalid-feedback" role="alert">

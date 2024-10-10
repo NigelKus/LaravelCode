@@ -146,7 +146,6 @@ class CustomerController extends Controller
         return redirect()->route('customer.show', $customer->id)->with('success', 'Customer updated successfully.');
     }
     
-    
 
     public function destroy($id)
     {
@@ -156,9 +155,10 @@ class CustomerController extends Controller
         // Update the status to 'deleted' and set the deleted_at timestamp
         $customer->update([
             'status' => Customer::STATUS_DELETED,
-            'deleted_at' => Carbon::now() // Set the current timestamp for deleted_at
         ]);
     
+        $customer->delete();
+
         // Redirect back to the customer index with a success message
         return redirect()->route('customer.index')->with('success', 'Customer status updated to deleted.');
     }

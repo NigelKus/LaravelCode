@@ -24,7 +24,10 @@ class PurchaseInvoiceController extends Controller
     {
         $statuses = ['pending', 'completed']; // Define your statuses
         $purchaseOrders = PurchaseOrder::all(); // Fetch all purchase orders for the filter
-        $query = PurchaseInvoice::with('details', 'supplier', 'purchaseOrder'); // Eager load the relationships
+
+        $query = PurchaseInvoice::with(['supplier' => function($q){
+            $q->withTrashed();
+        }])->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
 
         $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
@@ -252,9 +255,12 @@ class PurchaseInvoiceController extends Controller
 
     public function show($id)
     {
-        // Fetch the purchase invoice with supplier, details including related products, and invoicedetails
-        $purchaseInvoice = PurchaseInvoice::with(relations: ['supplier', 'details.product', 'purchaseOrder'])->findOrFail($id);
-        
+        $purchaseInvoice = PurchaseInvoice::with(['supplier' => function ($query) {
+            $query->withTrashed();
+        }, 'details.product', 'purchaseOrder'])
+
+
+        ->findOrFail($id);
         // Calculate total price from invoicedetails
         $totalPrice = $purchaseInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
