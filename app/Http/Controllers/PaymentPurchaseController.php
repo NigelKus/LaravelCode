@@ -173,23 +173,22 @@ class PaymentPurchaseController extends Controller
         });
 
         $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
-    
-        // Fetch postings related to the journal
-        $postings = $journal ? $journal->postings : collect();
-    
-        // Map postings to get the Chart of Account
-        $coas = $postings->map(function ($posting) {
-            return $posting->account; // Adjust if necessary for your relationship
-        });
-        
-        // dd($paymentPurchase, $totalPrice);
-        // Return the view with the payment order and its details
+        $coas = [];
+        $postings = collect();
+
+        if($journal){
+            $postings = Posting ::where('journal_id', $journal->id)->get();
+            foreach ($postings as $posting) {
+                $coas[] = $posting->account()->withTrashed()->first(); 
+            }
+        }
+
         return view('layouts.transactional.payment_purchase.show', [
             'paymentPurchase' => $paymentPurchase,
             'totalPrice' => $totalPrice,
             'journal' => $journal,
             'postings' => $postings,
-            'coa' => $coas,
+            'coas' => $coas,
         ]);
     }
 

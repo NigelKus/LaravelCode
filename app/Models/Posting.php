@@ -31,7 +31,7 @@ class Posting extends Model
     const STATUS_ACTIVE = 'active';
     const STATUS_TRASHED = 'trashed';
     const STATUS_DELETED = 'deleted';
-
+    
     public function account()
     {
         return $this->belongsTo(ChartOfAccount::class, 'account_id');

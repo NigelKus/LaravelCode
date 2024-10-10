@@ -261,22 +261,21 @@ class PurchaseInvoiceController extends Controller
         });
 
         $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();
-    
-        // Fetch postings related to the journal
-        $postings = $journal ? $journal->postings : collect();
-    
-        // Map postings to get the Chart of Account
-        $coas = $postings->map(function ($posting) {
-            return $posting->account; // Adjust if necessary for your relationship
-        });
-    
-        // Return the view with the purchase invoice and its details
+        $coas = [];
+        $postings = collect();
+        if($journal){
+            $postings = Posting ::where('journal_id', $journal->id)->get();
+            foreach ($postings as $posting) {
+                $coas[] = $posting->account()->withTrashed()->first(); 
+            }
+        }
+        
         return view('layouts.transactional.purchase_invoice.show', [
             'purchaseInvoice' => $purchaseInvoice,
             'totalPrice' => $totalPrice,
             'journal' => $journal,
             'postings' => $postings,
-            'coa' => $coas,
+            'coas' => $coas,
         ]);
     }
 

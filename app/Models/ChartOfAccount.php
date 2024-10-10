@@ -27,7 +27,7 @@ class ChartOfAccount extends Model
 
     public function postings()
     {
-        return $this->hasMany(Posting::class, 'account_id'); // Make sure this points to the correct foreign key
+        return $this->hasMany(Posting::class, 'account_id'); 
     }
 
 

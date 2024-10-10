@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Journal;
 use App\Models\Posting;
 use App\Models\Customer;
+use App\Models\ChartOfAccount;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -167,7 +168,6 @@ class PaymentOrderController extends Controller
 
     }
     
-    // Display the specified payment order
     public function show($id)
     {
         $paymentOrder = PaymentOrder::with(['customer', 'paymentDetails.salesInvoice', 'journal'])->findOrFail($id);
@@ -175,25 +175,29 @@ class PaymentOrderController extends Controller
         $totalPrice = $paymentOrder->paymentDetails->sum(function ($detail) {
             return $detail->price;
         });
-    
+
         $journal = Journal::where('ref_id', $paymentOrder->id)->first();
+        $coas = [];
+        $postings = collect();
         
-        $postings = $journal->postings->collect();
+        if ($journal) {
+            $postings = Posting::where('journal_id', $journal->id)->get();
+            foreach ($postings as $posting) {
+                $coas[] = $posting->account()->withTrashed()->first(); 
+            }
+        }
         
-        $coas = $postings->account()->withTrashed()->get(); 
-    
-        // Return the view with the payment order and its details
         return view('layouts.transactional.payment_order.show', [
             'paymentOrder' => $paymentOrder,
             'totalPrice' => $totalPrice,
             'journal' => $journal,
-            'postings' => $postings,
+            'postings' => $postings,  
             'coas' => $coas,
         ]);
+        
     }
     
 
-    // Show the form for editing the specified payment order
     public function edit($id)
     {
         // Fetch the payment order and its details

@@ -144,42 +144,34 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($postings as $posting)
-                                    <tr>
-                                        @if ($loop->first)
-                                            <td>{{ $posting->journal->date }}</td>
-                                            <td>{{ $posting->journal->code }}</td>
-                                            <td>{{ $posting->journal->name }}</td>
-                                            <td>                                            
-                                            @php
-                                                $account = $coas[$loop->index]; // Get the corresponding account from the coas
-                                            @endphp
-                                            @if ($account)  <!-- Check if the account exists -->
-                                                ({{ $account->code }}) {{ $account->name }}
-                                            @else
-                                                Account Deleted
-                                            @endif
-                                            </td>
-                                        @else
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td>({{ $posting->account->code }}){{ $posting->account->name }}</td>
-                                        @endif
-                                        <td>{{ $posting->amount > 0 ? number_format($posting->amount) : '' }}</td>
-                                        <td>{{ $posting->amount < 0 ? number_format(abs($posting->amount)) : '' }}</td>
-                                        @php
-                                            $previousDate = $posting->journal->date; // Keep track of the previous date
-                                        @endphp
-                                    </tr>
-                                @empty
+                                @if(is_null($journal) || $postings->isEmpty() || empty($coas) || is_null($coas[0]) || is_null($coas[1]))
                                     <tr>
                                         <td colspan="6" class="text-center">No postings found for this Chart of Account.</td>
                                     </tr>
-                                @endforelse
+                                @else
+                                    <tr>
+                                        <td>{{ $journal->date }}</td>
+                                        <td>{{ $journal->code }}</td>
+                                        <td>{{ $journal->name }}</td>
+                                        <td>
+                                            ({{ $coas[0]->code }}) {{ $coas[0]->name }}
+                                        </td>
+                                        <td>{{ number_format(abs($postings->first()->amount)) }}</td> <!-- Display amount for the first posting -->
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            ({{ $coas[1]->code }}) {{ $coas[1]->name }}
+                                        </td>
+                                        <td></td>
+                                        <td>{{ number_format(abs($postings->first()->amount)) }}</td> <!-- Display amount for the first posting -->
+                                    </tr>
+                                @endif
                             </tbody>
                         </table>
-                        
                     </div>
                 </div>
             </div>

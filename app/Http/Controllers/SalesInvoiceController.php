@@ -215,27 +215,23 @@ class SalesInvoiceController extends Controller
             return $detail->price * $detail->quantity;
         });
         
-        // Fetch the Journal by reference to the Sales Invoice ID
         $journal = Journal::where('ref_id', $salesInvoice->id)->first();
+        $coas = [];
+        $postings = collect();
 
-        // Fetch postings related to the journal, or return an empty collection if no journal exists
-        $postings = $journal ? $journal->postings : collect();
+        if($journal){
+            $postings = Posting ::where('journal_id', $journal->id)->get();
+            foreach ($postings as $posting) {
+                $coas[] = $posting->account()->withTrashed()->first(); 
+            }
+        }
 
-        // Map postings to get the Chart of Accounts, including soft-deleted accounts
-        $coas = $postings->map(function ($posting) {
-            // Use withTrashed() to fetch soft-deleted accounts as well
-            $account = $posting->account()->withTrashed()->first(); // Get the account, including soft-deleted ones
-            
-        });
-        
-
-        // Return the view with the sales invoice and its details
         return view('layouts.transactional.sales_invoice.show', [
             'salesInvoice' => $salesInvoice,
             'totalPrice' => $totalPrice,
             'journal' => $journal,
             'postings' => $postings,
-            'coa' => $coas,
+            'coas' => $coas,
         ]);
     }
     
