@@ -65,7 +65,9 @@ class SalesOrderController extends Controller
     {
         // Fetch only active customers
         $customers = Customer::where('status', 'active')->get();
-    
+        
+        dd($customers);
+        
         // Fetch all products to populate the product dropdown
         $products = Product::where('status', 'active')->get();
     
