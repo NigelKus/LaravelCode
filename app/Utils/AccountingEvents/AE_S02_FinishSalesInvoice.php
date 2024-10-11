@@ -24,6 +24,7 @@ class AE_S02_FinishSalesInvoice extends AE_Base
             $obj->id,
             null,
         );
+        
 
         $amount = $obj->getTotalPriceAttribute();
         

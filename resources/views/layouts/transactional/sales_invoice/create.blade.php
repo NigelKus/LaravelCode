@@ -15,10 +15,18 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <!-- Sales Order Form -->
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+                        <!-- Sales Order Form -->
             <form method="POST" action="/admin/transactional/sales_invoice/store" class="form-horizontal">
                 @csrf
-
                 <!-- Customer Dropdown -->
                 <div class="form-group">
                     <label for="customer_id">Customer</label>

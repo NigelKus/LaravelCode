@@ -76,13 +76,10 @@ class PaymentOrderController extends Controller
     }
     
 
-    // Store a newly created payment order in storage
     public function store(Request $request)
     {
-        // Get the raw data from the request
         $inputData = $request->all();
         
-        // Filter out any invoice lines where either the invoice_id or requested amount is null
         $filteredInvoiceIds = [];
         $filteredRequested = [];
         $filteredOriginalPrices = [];
@@ -90,7 +87,6 @@ class PaymentOrderController extends Controller
         
         foreach ($inputData['invoice_id'] as $index => $invoiceId) {
             if (!empty($invoiceId) && !empty($inputData['requested'][$index])) {
-                // Keep valid data
                 $filteredInvoiceIds[] = $invoiceId;
                 $filteredRequested[] = $inputData['requested'][$index];
                 $filteredOriginalPrices[] = $inputData['original_prices'][$index];
@@ -98,7 +94,6 @@ class PaymentOrderController extends Controller
             }
         }
         
-        // Update the input data with the filtered values
         $request->merge([
             'invoice_id' => $filteredInvoiceIds,
             'requested' => $filteredRequested,
@@ -106,22 +101,19 @@ class PaymentOrderController extends Controller
             'remaining_prices' => $filteredRemainingPrices,
         ]);
         
-        // Validate the request data (after filtering)
         $request->validate([
-            'customer_id' => 'required|exists:mstr_customer,id', // Validate customer ID
-            'description' => 'nullable|string|max:255', // Optional description
-            'date' => 'required|date', // Validate date
-            'requested.*' => 'required|numeric|min:0', // Validate requested amounts
-            'invoice_id' => 'required|array', // Validate that invoice IDs are an array
-            'invoice_id.*' => 'exists:sales_invoice,id', // Validate each invoice ID exists
+            'customer_id' => 'required|exists:mstr_customer,id',
+            'description' => 'nullable|string|max:255', 
+            'date' => 'required|date', 
+            'requested.*' => 'required|numeric|min:0', 
+            'invoice_id' => 'required|array', 
+            'invoice_id.*' => 'exists:sales_invoice,id',
             'payment_type' => 'required',
         ]);
 
     
-        // Generate the payment order code
         $salesPaymentCode = CodeFactory::generatePaymentSalesCode();
         DB::beginTransaction();
-        // Create the payment order
         $paymentOrder = PaymentOrder::create([
             'code' => $salesPaymentCode,
             'customer_id' => $request['customer_id'],
@@ -130,18 +122,13 @@ class PaymentOrderController extends Controller
             'status' => 'pending',
         ]);
         
-        // Loop through the filtered data and create invoice lines  
         foreach ($request['invoice_id'] as $index => $invoiceId) {
-            // Find the invoice
-            
-
             $requestedAmount = $request['requested'][$index];
             
-            // Create the payment detail for the invoice
             $paymentOrder->paymentDetails()->create([
                 'payment_id' => $paymentOrder->id,
                 'invoicesales_id' => $invoiceId,
-                'price' => $requestedAmount, // Use the requested price or total price
+                'price' => $requestedAmount, 
                 'status' => 'pending',
             ]);
             $invoice = SalesInvoice::with('details')->findOrFail($invoiceId);
@@ -156,6 +143,24 @@ class PaymentOrderController extends Controller
 
             $invoice->save();
         }
+        $codes = [1000, 1100, 1200];
+        $missingAccounts = [];
+        
+        foreach ($codes as $code) {
+            $account = ChartOfAccount::where("code", $code)->first();
+            if ($account === null) {
+                $missingAccounts[] = $code;
+            }
+        }
+        
+        if (!empty($missingAccounts)) {
+            DB::rollBack();
+        
+            $errorMessage = 'Chart of Account Code ' . implode(', ', $missingAccounts) . ' does not exist.';
+            return redirect()->back()->withErrors(['error' => $errorMessage]);
+        }
+        
+
         if($request['payment_type'] == 'bank')
         {
             AE_S03_FinishSalesPaymentBank::process($paymentOrder);

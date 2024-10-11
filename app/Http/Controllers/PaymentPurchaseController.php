@@ -6,13 +6,14 @@ use App\Models\Journal;
 use App\Models\Posting;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use App\Models\ChartOfAccount;
 use App\Models\PaymentPurchase;
 use App\Models\PurchaseInvoice;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
-use App\Utils\AccountingEvents\AE_PO3_FinishPurchasePaymentBank;
 use App\Utils\AccountingEvents\AE_PO4_FinishPurchasePaymentKas;
+use App\Utils\AccountingEvents\AE_PO3_FinishPurchasePaymentBank;
 
 class PaymentPurchaseController extends Controller
 
@@ -152,6 +153,23 @@ class PaymentPurchaseController extends Controller
 
             $invoice->save();
         }
+        $codes = [1000, 1100, 1200];
+        $missingAccounts = [];
+        
+        foreach ($codes as $code) {
+            $account = ChartOfAccount::where("code", $code)->first();
+            if ($account === null) {
+                $missingAccounts[] = $code;
+            }
+        }
+        
+        if (!empty($missingAccounts)) {
+            DB::rollBack();
+        
+            $errorMessage = 'Chart of Account Code ' . implode(', ', $missingAccounts) . ' does not exist.';
+            return redirect()->back()->withErrors(['error' => $errorMessage]);
+        }
+        
         if($request['payment_type'] == 'bank')
         {
             AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);

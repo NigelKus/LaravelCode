@@ -442,18 +442,16 @@ return [
             'url' => 'admin/master/user/index',
             'icon' => 'fas fa-book',
         ],
-        
-
         [
-            'text' => 'Supplier',
+            'text' => 'Balance Sheet',
             'url' => 'admin/master/supplier/index',
-            'icon' => 'fas fa-truck',
+            'icon' => 'fas fa-balance-scale',
         ],
 
         [
-            'text' => 'Chart of Account',
+            'text' => 'Profit Loss',
             'url' => 'admin/master/CoA/index',
-            'icon' => 'fas fa-chart-bar',
+            'icon' => 'fas fa-chart-line',
         ],
         // [
         //     'text' => 'Purchase',

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder;
+use App\Models\ChartOfAccount;
 use App\Models\PurchaseInvoice;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -243,10 +244,26 @@ class PurchaseInvoiceController extends Controller
                 
             }
             
+            $codes = [2000, 4000];
+            $missingAccounts = [];
+            
+            foreach ($codes as $code) {
+                $account = ChartOfAccount::where("code", $code)->first();
+                if ($account === null) {
+                    $missingAccounts[] = $code;
+                }
+            }
+            
+            if (!empty($missingAccounts)) {
+                DB::rollBack();
+            
+                $errorMessage = 'Chart of Account Code ' . implode(', ', $missingAccounts) . ' does not exist.';
+                return redirect()->back()->withErrors(['error' => $errorMessage]);
+            }
+
             AE_PO2_FinishPurchaseInvoice::process($purchaseInvoice);
             
 
-            // Commit the transaction
             DB::commit();
 
             return redirect()->route('purchase_invoice.show', $purchaseInvoice->id)

@@ -9,12 +9,14 @@ use App\Models\Customer;
 use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
+use App\Models\ChartOfAccount;
 use Illuminate\Support\Carbon;
 use App\Models\SalesorderDetail;
 use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory; 
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Redirect;
 use App\Utils\AccountingEvents\AE_S02_FinishSalesInvoice;
 
 class SalesInvoiceController extends Controller
@@ -192,12 +194,26 @@ class SalesInvoiceController extends Controller
                 SalesorderDetail::checkAndUpdateStatus($salesOrderId, $productId, $salesOrderDetailId);
                 
             }
+
+            $codes = [1200, 4000];
+            $missingAccounts = [];
             
+            foreach ($codes as $code) {
+                $account = ChartOfAccount::where("code", $code)->first();
+                if ($account === null) {
+                    $missingAccounts[] = $code;
+                }
+            }
+            
+            if (!empty($missingAccounts)) {
+                DB::rollBack();
+            
+                $errorMessage = 'Chart of Account Code ' . implode(', ', $missingAccounts) . ' does not exist.';
+                return redirect()->back()->withErrors(['error' => $errorMessage]);
+            }
             
             AE_S02_FinishSalesInvoice::process($salesInvoice);
-
-
-            // Commit the transaction
+            
             DB::commit();
 
             return redirect()->route('sales_invoice.show', $salesInvoice->id)

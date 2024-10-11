@@ -370,20 +370,16 @@ class SalesOrderController extends Controller
 
     public function destroy($id)
     {
-        // Find the sales order or fail if not found
         $salesOrder = SalesOrder::findOrFail($id);
 
-        // Initialize a flag to track if any product fails the check
         $hasInsufficientQuantity = false;
     
-        // Check each product in the sales order details
         foreach ($salesOrder->details as $detail) {
-            // You can debug here if needed
             // dd($detail->quantity_remaining, $detail->quantity);
             
             if ($detail->quantity_remaining < $detail->quantity) {
                 $hasInsufficientQuantity = true;
-                break; // Exit the loop if one fails the check
+                break; 
             }
         }
     
@@ -393,18 +389,16 @@ class SalesOrderController extends Controller
 
         foreach ($salesOrder->details as $detail) {
             $detail->update([
-                'status' => 'deleted', // Set status to deleted
+                'status' => 'deleted', 
             ]);
-            $detail->delete(); // Soft delete the detail
+            $detail->delete(); 
         }
     
-        // Set status to 'deleted' and then soft delete the sales order itself
         $salesOrder->update([
-            'status' => 'deleted', // Set status to deleted
+            'status' => 'deleted', 
         ]);
         $salesOrder->delete();
     
-        // Redirect back to the sales order index with a success message
         return redirect()->route('sales_order.index', $salesOrder->id)->with('success', 'Sales Order deleted successfully.');
     }
         
