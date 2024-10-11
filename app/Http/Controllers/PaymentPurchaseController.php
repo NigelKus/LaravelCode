@@ -197,6 +197,8 @@ class PaymentPurchaseController extends Controller
         }, 'paymentDetails.purchaseInvoice'])
         ->findOrFail($id);
 
+        $deleted = ($paymentPurchase->supplier->status == 'deleted');
+
         $totalPrice = $paymentPurchase->paymentDetails->sum(function ($detail) {
             return $detail->price;
         });
@@ -218,6 +220,7 @@ class PaymentPurchaseController extends Controller
             'journal' => $journal,
             'postings' => $postings,
             'coas' => $coas,
+            'deleted' => $deleted,
         ]);
     }
 
@@ -228,22 +231,22 @@ class PaymentPurchaseController extends Controller
         $suppliers = $paymentPurchase->supplier;
 
         $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
-        $postings = Posting::where('journal_id', $journal->id)->get();
+        $posting = Posting::where('journal_id', $journal->id)->orderBy('id', 'desc')->first();
 
-        $paymentType = 'bank'; // Default to bank
-        foreach ($postings as $posting) {
-            // Set paymentType based on account_id
-            if ($posting->account_id == 1) {
-                $paymentType = 'kas'; // Set to kas if account_id is 1
-                break; // Exit the loop as we've determined the payment type
-            }
-        }
-        // Fetch related sales invoices with status 'pending' or 'completed'
+
+        $account = ChartOfAccount::where('code', 1000)
+        ->where('status', 'active')
+        ->first();
+
+        if($posting->account_id == $account->id)
+        {
+            $paymentType = 'kas'; 
+        }else $paymentType = 'bank';
+
         $purchaseInvoices = PurchaseInvoice::where('supplier_id', $suppliers->id)
             ->whereIn('status', ['pending', 'completed'])
             ->get();
     
-        // Prepare combined details and filter out invoices with remaining price 0
         $combinedDetails = $purchaseInvoices->map(function ($invoice) use ($paymentPurchase) {
         // Find the corresponding payment detail for this invoice
         $paymentDetail = $paymentPurchase->paymentDetails->firstWhere('invoicepurchase_id', $invoice->id);
@@ -305,7 +308,7 @@ class PaymentPurchaseController extends Controller
         ]);
         
         $request->validate([
-            'payment_purchase_id' => 'required|exists:payment_purchase,id',
+            'payment_purchase_id' => 'required|exists:purchase_payment,id',
             'supplier_id' => 'required|exists:mstr_supplier,id', // Validate customer ID
             'description' => 'nullable|string|max:255', // Optional description
             'date' => 'required|date', // Validate date
@@ -314,6 +317,32 @@ class PaymentPurchaseController extends Controller
             'invoice_id.*' => 'exists:purchase_invoice,id', // Validate each invoice ID exists
             'payment_type' => 'required',
         ]);
+
+        $account1 = ChartOfAccount::where("code", 1000)->first();
+        $account2 = ChartOfAccount::where("code", 1100)->first();
+        $account3 = ChartOfAccount::where("code", 2000)->first();
+        if($account1 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1000 does not exist.']);
+        }elseif($account2 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 does not exist.']);
+        }elseif($account3 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 2000 does not exist.']);
+        }elseif($account1 == null && $account3 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1000 and 2000 does not exist.']);
+        }elseif($account3=2 == null && $account3 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 and 2000 does not exist.']);
+        }
+
         $paymentPurchase = PaymentPurchase::findOrFail($request->payment_purchase_id); // Find payment order or fail
 
         $paymentPurchase->update([
@@ -337,9 +366,9 @@ class PaymentPurchaseController extends Controller
             }
             
             if($request['payment_type'] == 'bank'){
-                $paymentType = 8;
+                $paymentType = $account2->id;
             }else{
-                $paymentType = 1;
+                $paymentType = $account1->id;
             }
 
 

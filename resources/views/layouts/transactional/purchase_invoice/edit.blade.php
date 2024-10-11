@@ -70,8 +70,8 @@
 
                 <!-- Order Date Field -->
                 <div class="form-group">
-                    <label for="date">purchase Invoice Date</label>
-                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $purchaseInvoice->date->format('Y-m-d')) }}" readonly>
+                    <label for="date">Purchase Invoice Date</label>
+                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $purchaseInvoice->date->format('Y-m-d')) }}" >
                     @error('date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -81,7 +81,7 @@
 
                 <!-- Due Date Field -->
                 <div class="form-group">
-                    <label for="due_date">purchase Invoice Due Date</label>
+                    <label for="due_date">Purchase Invoice Due Date</label>
                     <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date', $purchaseInvoice->due_date->format('Y-m-d')) }}">
                     @error('due_date')
                         <span class="invalid-feedback" role="alert">
@@ -122,7 +122,7 @@
                                 @endphp
                                 @include('layouts.transactional.purchase_invoice.partials.product_line_edit', [
                                     'product_id' => $purchaseOrderDetail->product_id,  
-                                    'requested' => $invoiceDetail ? $invoiceDetail->quantity : 0, // Check if $invoiceDetail is not null
+                                    'requested' => $invoiceDetail ? $invoiceDetail->quantity : 0, 
                                     'qty' => $invoiceDetail ? $invoiceDetail->quantity : 0, // Check if $invoiceDetail is not null
                                     'price' => $purchaseOrderDetail->price, // Assuming price is stored here
                                     'price_total' => $purchaseOrderDetail->price * $purchaseOrderDetail->quantity, 

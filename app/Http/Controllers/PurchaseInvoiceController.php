@@ -274,10 +274,10 @@ class PurchaseInvoiceController extends Controller
         $purchaseInvoice = PurchaseInvoice::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'details.product', 'purchaseOrder'])
-
-
         ->findOrFail($id);
-        // Calculate total price from invoicedetails
+
+        $deleted = ($purchaseInvoice->supplier->status == 'deleted');
+
         $totalPrice = $purchaseInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
@@ -298,6 +298,7 @@ class PurchaseInvoiceController extends Controller
             'journal' => $journal,
             'postings' => $postings,
             'coas' => $coas,
+            'deleted' => $deleted,
         ]);
     }
 

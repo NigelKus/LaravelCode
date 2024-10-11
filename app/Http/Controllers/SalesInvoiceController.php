@@ -226,6 +226,8 @@ class SalesInvoiceController extends Controller
         }, 'details.product', 'salesOrder'])
         ->findOrFail($id);
 
+        $deleted = ($salesInvoice->customer->status == 'deleted');
+
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
@@ -247,6 +249,7 @@ class SalesInvoiceController extends Controller
             'journal' => $journal,
             'postings' => $postings,
             'coas' => $coas,
+            'deleted' => $deleted,
         ]);
     }
     

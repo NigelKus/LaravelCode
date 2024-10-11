@@ -187,6 +187,8 @@ class PaymentOrderController extends Controller
             $query->withTrashed();
         }, 'paymentDetails.salesInvoice'])
         ->findOrFail($id);
+
+        $deleted = ($paymentOrder->customer->status == 'deleted');
     
         $totalPrice = $paymentOrder->paymentDetails->sum(function ($detail) {
             return $detail->price;
@@ -210,6 +212,7 @@ class PaymentOrderController extends Controller
             'journal' => $journal,
             'postings' => $postings,  
             'coas' => $coas,
+            'deleted' => $deleted,
         ]);
         
     }
@@ -217,54 +220,48 @@ class PaymentOrderController extends Controller
 
     public function edit($id)
     {
-        // Fetch the payment order and its details
         $paymentOrder = PaymentOrder::with('paymentDetails')->findOrFail($id);
         $customers = $paymentOrder->customer;
 
         $journal = Journal::where('ref_id', $paymentOrder->id)->first();
-        $postings = Posting::where('journal_id', $journal->id)->get();
+        $posting = Posting::where('journal_id', $journal->id)->first();
 
-        $paymentType = 'bank'; // Default to bank
-        foreach ($postings as $posting) {
-            // Set paymentType based on account_id
-            if ($posting->account_id == 1) {
-                $paymentType = 'kas'; // Set to kas if account_id is 1
-                break; // Exit the loop as we've determined the payment type
-            }
-        }
-        // Fetch related sales invoices with status 'pending' or 'completed'
+        $account = ChartOfAccount::where('code', 1000)
+        ->where('status', 'active')
+        ->first();
+
+        if($posting->account_id == $account->id)
+        {
+            $paymentType = 'kas'; 
+        }else $paymentType = 'bank';
+        
+
         $salesInvoices = SalesInvoice::where('customer_id', $customers->id)
             ->whereIn('status', ['pending', 'completed'])
             ->get();
     
-        // Prepare combined details and filter out invoices with remaining price 0
         $combinedDetails = $salesInvoices->map(function ($invoice) use ($paymentOrder) {
-        // Find the corresponding payment detail for this invoice
         $paymentDetail = $paymentOrder->paymentDetails->firstWhere('invoicesales_id', $invoice->id);
-
-        // Calculate remaining price
         $remainingPrice = $invoice->calculatePriceRemaining() + ($paymentDetail->price ?? 0);
     
-            // Return only if remaining price is greater than 0
             if ($remainingPrice > 0) {
                 return [
-                    'invoice_id' => $invoice->id, // Ensure this is assigned
+                    'invoice_id' => $invoice->id,
                     'invoice_code' => $invoice->code,
-                    'requested' => $paymentDetail ? $paymentDetail->price : '', // Existing payment detail, if any
+                    'requested' => $paymentDetail ? $paymentDetail->price : '', 
                     'original_price' => $invoice->getTotalPriceAttribute(),
-                    'remaining_price' => $remainingPrice,
+                    'remaining_price' => $remainingPrice
                 ];
             }
-        })->filter(); // Use filter to remove null entries where remaining_price == 0
+        })->filter();
     
 
-        // Continue with passing data to the view if needed
         return view('layouts.transactional.payment_order.edit', [
             'paymentOrder' => $paymentOrder,
-            'customers' => $customers, // Use singular for clarity
+            'customers' => $customers, 
             'combinedDetails' => $combinedDetails,
-            'payment_order_id' => $paymentOrder->id, // Send payment order ID
-            'payment_order_code' => $paymentOrder->code, // Send payment order code
+            'payment_order_id' => $paymentOrder->id,
+            'payment_order_code' => $paymentOrder->code, 
             'payment_type' => $paymentType
         ]);
     }
@@ -301,7 +298,7 @@ class PaymentOrderController extends Controller
         ]);
         
         $request->validate([
-            'payment_order_id' => 'required|exists:mstr_payment,id',
+            'payment_order_id' => 'required|exists:sales_payment,id',
             'customer_id' => 'required|exists:mstr_customer,id', // Validate customer ID
             'description' => 'nullable|string|max:255', // Optional description
             'date' => 'required|date', // Validate date
@@ -310,6 +307,32 @@ class PaymentOrderController extends Controller
             'invoice_id.*' => 'exists:sales_invoice,id', // Validate each invoice ID exists
             'payment_type' => 'required',
         ]);
+
+        $account1 = ChartOfAccount::where("code", 1000)->first();
+        $account2 = ChartOfAccount::where("code", 1100)->first();
+        $account3 = ChartOfAccount::where("code", 1200)->first();
+        if($account1 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1000 does not exist.']);
+        }elseif($account2 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 does not exist.']);
+        }elseif($account3 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1200 does not exist.']);
+        }elseif($account1 == null && $account3 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1000 and 1200 does not exist.']);
+        }elseif($account3=2 == null && $account3 == null)
+        {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 and 1200 does not exist.']);
+        }
+
         $paymentOrder = PaymentOrder::findOrFail($request->payment_order_id); // Find payment order or fail
 
         $paymentOrder->update([
@@ -333,9 +356,9 @@ class PaymentOrderController extends Controller
             }
             
             if($request['payment_type'] == 'bank'){
-                $paymentType = 8;
+                $paymentType = $account2->id;
             }else{
-                $paymentType = 1;
+                $paymentType = $account1->id;
             }
 
 

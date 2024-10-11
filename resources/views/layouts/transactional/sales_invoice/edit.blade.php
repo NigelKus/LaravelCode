@@ -71,7 +71,7 @@
                 <!-- Order Date Field -->
                 <div class="form-group">
                     <label for="date">Sales Invoice Date</label>
-                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $salesInvoice->date->format('Y-m-d')) }}" readonly>
+                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $salesInvoice->date->format('Y-m-d')) }}">
                     @error('date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>

@@ -126,14 +126,18 @@
                                 </span>
                             @enderror
                         </div>
-                        <button type="submit" class="btn btn-primary">Update Status</button>
+                        @if (!$deleted)
+                            <button type="submit" class="btn btn-primary">Update Status</button>
+                        @endif
                     </form>
                 </div>
             </div>
 
             <!-- Edit Button -->
             <div class="mt-3">
-                <a href="{{ route('sales_order.edit', $salesOrder->id) }}" class="btn btn-warning">Edit</a>
+                @if (!$deleted)
+                    <a href="{{ route('sales_order.edit', $salesOrder->id) }}" class="btn btn-warning">Edit</a>
+                @endif
                 <a href="{{ route('sales_order.index') }}" class="btn btn-secondary">Back to List</a>
             </div>
         </div>

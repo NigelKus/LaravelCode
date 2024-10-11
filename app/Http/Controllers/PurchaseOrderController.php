@@ -191,6 +191,8 @@ class PurchaseOrderController extends Controller
         }, 'details.product'])
         ->findOrFail($id);
 
+        $deleted = ($purchaseOrder->supplier->status == 'deleted');
+
 
         // Calculate total price
         $totalPrice = $purchaseOrder->details->sum(function ($detail) {
@@ -198,7 +200,7 @@ class PurchaseOrderController extends Controller
         });
         
         // Return the view with the sales order and its details
-        return view('layouts.transactional.purchase_order.show', compact('purchaseOrder', 'totalPrice'));
+        return view('layouts.transactional.purchase_order.show', compact('purchaseOrder', 'totalPrice', 'deleted'));
     }
 
     public function destroy($id)

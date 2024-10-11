@@ -34,7 +34,7 @@ class AE_Base
         if ( ! AccountingManager::isJournalBalanced($journal)) {
             abort(400, 'Debit and credit is not balanced!');
         }
-
+        
         DB::commit();
 
         return $journal;

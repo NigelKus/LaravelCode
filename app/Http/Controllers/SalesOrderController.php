@@ -192,13 +192,15 @@ class SalesOrderController extends Controller
             $query->withTrashed();
         }, 'details.product'])
         ->findOrFail($id);
+
+        $deleted = ($salesOrder->customer->status == 'deleted');
     
         $totalPrice = $salesOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
         
         // Return the view with the sales order and its details
-        return view('layouts.transactional.sales_order.show', compact('salesOrder', 'totalPrice'));
+        return view('layouts.transactional.sales_order.show', compact('salesOrder', 'totalPrice', 'deleted'));
     }
 
         public function updateStatus(Request $request, $id)

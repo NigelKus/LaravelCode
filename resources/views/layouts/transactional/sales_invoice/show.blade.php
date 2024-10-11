@@ -151,7 +151,9 @@
                                 </span>
                             @enderror
                         </div>
+                        @if (!$deleted)
                         <button type="submit" class="btn btn-primary">Update Status</button>
+                        @endif
                     </form>
                 </div>
             </div>
@@ -212,7 +214,9 @@
 
             <!-- Edit and Back Buttons -->
             <div class="mt-3">
-                <a href="{{ route('sales_invoice.edit', $salesInvoice->id) }}" class="btn btn-warning">Edit</a>
+                @if (!$deleted)
+                    <a href="{{ route('sales_invoice.edit', $salesInvoice->id) }}" class="btn btn-warning">Edit</a>
+                @endif
                 <a href="{{ route('sales_invoice.index') }}" class="btn btn-secondary">Back to List</a>
             </div>
         </div>
