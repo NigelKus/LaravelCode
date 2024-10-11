@@ -438,7 +438,7 @@ return [
         ],
         ['header' => 'Report'],
         [
-            'text' => 'Journal',
+            'text' => 'General Ledger',
             'url' => 'admin/master/user/index',
             'icon' => 'fas fa-book',
         ],
