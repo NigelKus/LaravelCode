@@ -439,7 +439,7 @@ return [
         ['header' => 'Report'],
         [
             'text' => 'General Ledger',
-            'url' => 'admin/master/user/index',
+            'url' => 'admin/reports/general_ledger/index',
             'icon' => 'fas fa-book',
         ],
         [

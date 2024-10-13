@@ -9,6 +9,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\PaymentOrderController;
 use App\Http\Controllers\SalesInvoiceController;
+use App\Http\Controllers\GeneralLedgerController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PaymentPurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
@@ -184,5 +185,8 @@ Route::prefix('admin/master/product')
     });
 
 //Reports Routing
-
-
+    Route::prefix('admin/reports/general_ledger')
+    ->name('general_ledger.')
+    ->group(function () {
+        Route::get('index', [GeneralLedgerController::class, 'index'])->name('index');
+    });
