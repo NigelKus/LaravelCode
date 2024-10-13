@@ -22,7 +22,7 @@ class AE_PO2_FinishPurchaseInvoice extends AE_Base
             $obj->code,
             self::REQUIRED_CLASS,
             $obj->id,
-            null,
+            $obj->date,
         );
 
         $amount = $obj->getTotalPriceAttribute();
@@ -32,13 +32,15 @@ class AE_PO2_FinishPurchaseInvoice extends AE_Base
         AccountingSetting::Pendapatan,  // DEBIT :: Pendapatan
             $amount,
             '',
-            null,
+            $obj->date,
         );
         
 
         AccountingManager::credit( $journal,
         AccountingSetting::UtangUsaha,  // CREDIT :: Utang Usaha
-            $amount
+            $amount,
+            '',
+            $obj->date,
         );
 
         return $journal;

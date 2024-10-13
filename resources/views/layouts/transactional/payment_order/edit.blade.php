@@ -78,7 +78,7 @@
                 <!-- Payment Date Field -->
                 <div class="form-group">
                     <label for="date">Payment Date</label>
-                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" readonly>
+                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{old('date', $paymentOrder->date) }}">
                     @error('date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>

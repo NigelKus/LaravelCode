@@ -307,46 +307,43 @@ class SalesInvoiceController extends Controller
         $invoiceDetails = $salesInvoice->details;
         
         $journal = Journal::where('ref_id', $salesInvoice->id)->first();
+        
         $productIds = $request['product_id'];
         $requested = $request['requested'];
         $priceEachs = $request['price_eachs'];
 
         $priceEachsAcc = array_map(function($price) {
-            return str_replace(',', '', $price); // Remove commas
+            return str_replace(',', '', $price); 
         }, $priceEachs);
 
-        // dd($priceEachsAcc,$requested);
 
         if ($journal) {
-            // Fetch postings related to this journal
+            $journal->date = Carbon::parse($request['date']);
+            $journal->save();
+
             $postings = Posting::where('journal_id', $journal->id)->get();
             $totalNewAmount = 0;
         
-            // Loop through requested items and calculate totalNewAmount
             foreach ($requested as $i => $quantity) {
-                // Skip iteration if price or quantity is zero or empty
                 if (!empty($priceEachsAcc[$i]) && $priceEachsAcc[$i] != 0 && $quantity != 0) {
                     $totalNewAmount += $priceEachsAcc[$i] * $quantity;
                 }
             }
         
-            $firstRun = true; // Initialize a flag to track the first run
+            $firstRun = true; 
             foreach ($postings as $posting) {
                 if ($firstRun) {
-                    // Set to a positive amount on the first run
                     $posting->amount = abs($totalNewAmount);
                 } else {
-                    // Set to a negative amount on the second run
                     $posting->amount = -abs($totalNewAmount);
                 }
-        
-                $posting->save(); // Save each posting after updating
-                $firstRun = false; // Toggle flag after the first iteration
+                
+                $posting->date = $journal->date;
+                $posting->save(); 
+                $firstRun = false; 
             }
         }
 
-
-        // // Delete each detail
         foreach ($invoiceDetails as $detail) {
             $detail->delete();
         }
@@ -354,7 +351,6 @@ class SalesInvoiceController extends Controller
         
         $sales_order_id = $request['sales_order_id'];
 
-        // dd($sales_order_id);
 
         foreach ($productIds as $i => $productId) {
             if ($productId !== null && (!empty($requested[$i]) && (int)$requested[$i] > 0)) { // Check if product ID is not null

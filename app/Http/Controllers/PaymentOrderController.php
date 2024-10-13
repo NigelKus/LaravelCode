@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Journal;
 use App\Models\Posting;
 use App\Models\Customer;
-use App\Models\ChartOfAccount;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
+use App\Models\ChartOfAccount;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
 use App\Models\PaymentOrder; // Ensure to import your model
@@ -270,11 +271,9 @@ class PaymentOrderController extends Controller
     // Update the specified payment order in storage
     public function update(Request $request, $id)
     {
-        // dd($request->all());
 
         $inputData = $request->all();
         
-        // Filter out any invoice lines where either the invoice_id or requested amount is null
         $filteredInvoiceIds = [];
         $filteredRequested = [];
         $filteredOriginalPrices = [];
@@ -337,6 +336,7 @@ class PaymentOrderController extends Controller
 
         $paymentOrder->update([
             'description' => $request->description,
+            'date' => $request->date,
         ]);
         
         $orderDetails = $paymentOrder->paymentDetails;
@@ -345,7 +345,9 @@ class PaymentOrderController extends Controller
 
         
         if ($journal) {
-            // Fetch postings related to this journal
+            $journal->date = Carbon::parse($request['date']);
+            $journal->save();
+
             $postings = Posting::where('journal_id', $journal->id)->get();
             $totalNewAmount = 0;
 
@@ -362,18 +364,18 @@ class PaymentOrderController extends Controller
             }
 
 
-            $firstRun = true; // Initialize a flag to track the first run
+            $firstRun = true; 
             foreach ($postings as $posting) {
                 if ($firstRun) {
                         $posting->amount = abs($totalNewAmount);
                         $posting->account_id = $paymentType;
                 } else {
-                    // Set to a negative amount on the second run
                     $posting->amount = -abs($totalNewAmount);
                 }
-        
-                $posting->save(); // Save each posting after updating
-                $firstRun = false; // Toggle flag after the first iteration
+
+                $posting->date = $journal->date;
+                $posting->save(); 
+                $firstRun = false; 
             }
         }
         

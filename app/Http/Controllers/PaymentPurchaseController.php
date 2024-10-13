@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Journal;
 use App\Models\Posting;
 use App\Models\Supplier;
@@ -81,7 +82,6 @@ class PaymentPurchaseController extends Controller
         // Get the raw data from the request
         $inputData = $request->all();
         
-        // Filter out any invoice lines where either the invoice_id or requested amount is null
         $filteredInvoiceIds = [];
         $filteredRequested = [];
         $filteredOriginalPrices = [];
@@ -347,6 +347,7 @@ class PaymentPurchaseController extends Controller
 
         $paymentPurchase->update([
             'description' => $request->description,
+            'date' => $request->date,
         ]);
         
         $orderDetails = $paymentPurchase->paymentDetails;
@@ -355,7 +356,9 @@ class PaymentPurchaseController extends Controller
 
         
         if ($journal) {
-            // Fetch postings related to this journal
+            $journal->date = Carbon::parse($request['date']);
+            $journal->save();
+
             $postings = Posting::where('journal_id', $journal->id)->get();
             $totalNewAmount = 0;
 
@@ -381,7 +384,8 @@ class PaymentPurchaseController extends Controller
                     $posting->amount = -abs($totalNewAmount);
                     $posting->account_id = $paymentType;
                 }
-        
+                
+                $posting->date = $journal->date;
                 $posting->save(); // Save each posting after updating
                 $firstRun = false; // Toggle flag after the first iteration
             }

@@ -23,7 +23,7 @@ class AE_S04_FinishSalesPaymentKas extends AE_Base
             $obj->code,
             self::REQUIRED_CLASS,
             $obj->id,
-            null,
+            $obj->date,
         );
 
         $amount = $obj->showPriceDetails();
@@ -33,13 +33,15 @@ class AE_S04_FinishSalesPaymentKas extends AE_Base
         AccountingSetting::Kas,  // DEBIT :: Kas
             $amount,
             '',
-            null,
+            $obj->date,
         );
         
 
         AccountingManager::credit( $journal,
         AccountingSetting::PiutangUsaha,  // CREDIT :: Piutang
             $amount
+            ,'',
+            $obj->date,
         );
 
         return $journal;

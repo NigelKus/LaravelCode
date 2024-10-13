@@ -29,6 +29,10 @@ class AE_Base
 
         DB::beginTransaction();
 
+        if (isset($model->date) && !$model->date instanceof Carbon\Carbon) {
+            $model->date = Carbon::parse($model->date);
+        }
+
         $journal = static::buildJournalContent($model);
 
         if ( ! AccountingManager::isJournalBalanced($journal)) {

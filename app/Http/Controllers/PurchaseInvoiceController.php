@@ -9,6 +9,7 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder;
 use App\Models\ChartOfAccount;
+use Illuminate\Support\Carbon;
 use App\Models\PurchaseInvoice;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -366,7 +367,9 @@ class PurchaseInvoiceController extends Controller
         }, $priceEachs);
 
         if ($journal) {
-            // Fetch postings related to this journal
+            $journal->date = Carbon::parse($request['date']);
+            $journal->save();
+
             $postings = Posting::where('journal_id', $journal->id)->get();
             $totalNewAmount = 0;
         
@@ -387,7 +390,8 @@ class PurchaseInvoiceController extends Controller
                     // Set to a negative amount on the second run
                     $posting->amount = -abs($totalNewAmount);
                 }
-        
+                
+                $posting->date = $journal->date;
                 $posting->save(); // Save each posting after updating
                 $firstRun = false; // Toggle flag after the first iteration
             }

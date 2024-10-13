@@ -31,9 +31,12 @@ class AccountingManager
      * @return Journal
      */
     public static function createJournal($name, $description, $refClass, $refId, Carbon $date = null) {
+        
         if (is_null($date)) {
             $date = Carbon::now();
         }
+
+
         $journal = new Journal;
         $journal->code = CodeFactory::transactionCode();
         $journal->date = $date;
