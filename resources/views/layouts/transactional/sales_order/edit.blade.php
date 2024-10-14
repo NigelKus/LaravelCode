@@ -55,14 +55,13 @@
                 <!-- Order Date Field -->
                 <div class="form-group">
                     <label for="date">Order Date</label>
-                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ $salesOrder->date->format('Y-m-d') }}">
+                    <input type="datetime-local" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ $salesOrder->date ? $salesOrder->date->format('Y-m-d\TH:i') : '' }}">
                     @error('date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
                 </div>
-
 
                 <!-- Products Card -->
                 <div class="card mt-4">

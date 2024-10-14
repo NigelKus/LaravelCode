@@ -60,7 +60,7 @@
                 <!-- Order Date Field -->
                 <div class="form-group">
                     <label for="date">Purchase Invoice Date</label>
-                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                    <input type="datetime-local" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ \Carbon\Carbon::now()->addHours(7)->format('Y-m-d\TH:i') }}">
                     @error('date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
@@ -70,7 +70,7 @@
 
                 <div class="form-group">
                     <label for="due_date">Purchase Invoice Due Date</label>
-                    <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ \Carbon\Carbon::now()->addDays(3)->format('Y-m-d') }}">
+                    <input type="datetime-local" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ \Carbon\Carbon::now()->addDays(3)->addHours(7)->format('Y-m-d\TH:i') }}">
                     @error('due_date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>

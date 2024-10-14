@@ -41,7 +41,7 @@
                             <dt class="col-sm-3">Code</dt>  
                             <dd class="col-sm-9">{{ $salesOrder->code }}</dd>  
                             <dt class="col-sm-3">Date</dt>  
-                            <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesOrder->date)->format('Y-m-d') }}</dd>  
+                            <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesOrder->date)->format('Y-m-d H:i') }}</dd>
                             <dt class="col-sm-3">Description</dt>  
                             <dd class="col-sm-9">{{ $salesOrder->description }}</dd>  
                         </dl>  

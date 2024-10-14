@@ -29,7 +29,7 @@ class AE_PO2_FinishPurchaseInvoice extends AE_Base
         
 
         AccountingManager::debit( $journal,
-        AccountingSetting::Pendapatan,  // DEBIT :: Pendapatan
+        AccountingSetting::Stock,  // DEBIT :: Pendapatan
             $amount,
             '',
             $obj->date,

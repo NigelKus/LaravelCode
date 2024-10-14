@@ -50,10 +50,10 @@
                         <dd class="col-sm-9">{{ $salesInvoice->salesOrder->code ?? 'N/A' }}</dd>
             
                         <dt class="col-sm-3">Date</dt>
-                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesInvoice->date)->format('Y-m-d') }}</dd>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesInvoice->date)->format('Y-m-d H:i') }}</dd>
             
                         <dt class="col-sm-3">Due Date</dt>
-                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesInvoice->due_date)->format('Y-m-d') }}</dd>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($salesInvoice->due_date)->format('Y-m-d H:i') }}</dd>
             
                         <dt class="col-sm-3">Price</dt>
                         <dd class="col-sm-9">{{ number_format($salesInvoice->getTotalPriceAttribute()) }}</dd>

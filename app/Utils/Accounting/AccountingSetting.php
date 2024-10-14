@@ -24,7 +24,6 @@ class AccountingSetting
     const Modal = 3000;
     const Pendapatan = 4000;
     const Beban = 5000;
-
-    
+    const Stock = 1300;
 
 }

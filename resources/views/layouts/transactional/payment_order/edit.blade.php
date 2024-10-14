@@ -78,13 +78,15 @@
                 <!-- Payment Date Field -->
                 <div class="form-group">
                     <label for="date">Payment Date</label>
-                    <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{old('date', $paymentOrder->date) }}">
+                    <input type="datetime-local" class="form-control @error('date') is-invalid @enderror" id="date" name="date" 
+                        value="{{ old('date', $paymentOrder->date ? \Carbon\Carbon::parse($paymentOrder->date)->format('Y-m-d\TH:i') : '') }}">
                     @error('date')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
                 </div>
+                               
 
                 <!-- Invoice Sales Section -->
                 <div class="card mt-4">

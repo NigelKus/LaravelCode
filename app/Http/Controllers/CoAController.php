@@ -74,7 +74,10 @@ class CoAController extends Controller
 
     public function show($id)
     {
-        $CoA = ChartOfAccount::with(['postings.journal'])->findOrFail($id);
+        $CoA = ChartOfAccount::with(['postings.journal' => function ($query) {
+            $query->orderBy('date', 'asc');
+        }])->findOrFail($id);
+    
         return view('layouts.master.CoA.show', compact('CoA'));
     }
     

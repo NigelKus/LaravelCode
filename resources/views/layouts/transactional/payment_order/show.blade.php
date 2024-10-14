@@ -41,7 +41,7 @@
                         <dd class="col-sm-9">{{ $paymentOrder->code }}</dd>
 
                         <dt class="col-sm-3">Date</dt>
-                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($paymentOrder->date)->format('Y-m-d') }}</dd>
+                        <dd class="col-sm-9">{{ \Carbon\Carbon::parse($paymentOrder->date)->format('Y-m-d H:i') }}</dd>
 
                         
                         <dt class="col-sm-3">Description</dt>
