@@ -9,12 +9,10 @@ class PurchaseOrder extends Model
 {
     use HasFactory;
 
-    // Define the table name
     protected $table = 'purchase_order';
 
     protected $dates = ['date'];
 
-    // Define fillable fields
     protected $fillable = [
         'code',
         'supplier_id',
@@ -23,7 +21,6 @@ class PurchaseOrder extends Model
         'date',
     ];
 
-    // Define relationships
     public function details()
     {
         return $this->hasMany(PurchaseOrderDetail::class, 'purchaseorder_id');

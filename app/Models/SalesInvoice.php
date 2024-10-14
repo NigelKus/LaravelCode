@@ -9,14 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class SalesInvoice extends Model
 {
     use HasFactory, SoftDeletes;
-
-    // Define the table name
     protected $table = 'sales_invoice';
 
     const STATUS_DELETED = 'deleted';
     protected $dates = ['date'];
 
-    // Define fillable fields
     protected $fillable = [
         'code',
         'salesorder_id',
@@ -48,7 +45,6 @@ class SalesInvoice extends Model
         return $payments;  
     }
 
-    // Define relationships
     public function salesOrder()
     {
         return $this->belongsTo(SalesOrder::class, 'salesorder_id');
@@ -59,7 +55,6 @@ class SalesInvoice extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-// SalesInvoice.php
     public function details()
     {
         return $this->hasMany(SalesInvoiceDetail::class, 'invoicesales_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table
@@ -75,8 +70,6 @@ class SalesInvoice extends Model
         return $this->belongsTo(Journal::class, 'ref_id');
     }
     
-
-
     /**
      * Get the latest sales order ID.
      *

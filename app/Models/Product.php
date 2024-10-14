@@ -10,7 +10,6 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Define the table associated with the model
     protected $table = 'mstr_product';
 
     public $timestamps = true;
@@ -19,7 +18,6 @@ class Product extends Model
     const STATUS_TRASHED = 'trashed';
     const STATUS_DELETED = 'deleted';
     
-    // Define the attributes that are mass assignable
     protected $fillable = [
         'code',
         'collection',
@@ -30,7 +28,6 @@ class Product extends Model
         'status',
     ];
 
-    // Optionally, you can define any casting for attributes
     protected $casts = [
         'weight' => 'decimal:2',
         'price' => 'decimal:2',
@@ -42,5 +39,4 @@ class Product extends Model
         return $this->hasMany(SalesorderDetail::class, 'product_id');
     }
 
-    // Define any relationships or custom methods as needed
 }

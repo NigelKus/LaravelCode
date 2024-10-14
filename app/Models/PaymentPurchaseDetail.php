@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PaymentPurchaseDetail extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes for soft deleting
+    use HasFactory, SoftDeletes; 
 
-    protected $table = 'purchase_payment_detail'; // Specify the table name if it's not the plural of the model name
+    protected $table = 'purchase_payment_detail'; 
 
     protected $fillable = [
         'id',
@@ -20,18 +20,15 @@ class PaymentPurchaseDetail extends Model
         'status', 
     ];
 
-    protected $dates = ['deleted_at']; // Specify the dates that should be treated as Carbon instances
+    protected $dates = ['deleted_at']; 
 
-    // Define any relationships here
     public function paymentPurchase()
     {
-        return $this->belongsTo(PaymentPurchase::class, 'payment_id'); // Explicitly define the foreign key
+        return $this->belongsTo(PaymentPurchase::class, 'payment_id'); 
     }
     
         public function purchaseInvoice()
     {
         return $this->belongsTo(PurchaseInvoice::class, 'invoicepurchase_id');
     }
-
-
 }

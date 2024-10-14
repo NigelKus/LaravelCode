@@ -10,13 +10,11 @@ class PurchaseInvoiceDetail extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Define the table name
     protected $table = 'purchase_invoice_detail';
 
     const STATUS_DELETED = 'deleted';
     protected $dates = ['date'];
 
-    // Define fillable fields
     protected $fillable = [
         'purchaseinvoice_id',
         'product_id',
@@ -26,7 +24,6 @@ class PurchaseInvoiceDetail extends Model
         'salesdetail_id',
     ];
 
-    // Define relationships
     public function purchaseInvoice()
     {
         return $this->belongsTo(PurchaseInvoice::class, 'purchaseinvoice_id');

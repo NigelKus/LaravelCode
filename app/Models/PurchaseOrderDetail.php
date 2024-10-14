@@ -54,48 +54,28 @@ class PurchaseOrderDetail extends Model
     
     public function adjustQuantityRemaining($amount)
     {
-        // Access the current quantity remaining
-        $currentRemaining = $this->quantity_remaining; // This uses the accessor
-
-        // Calculate the new remaining quantity
+        $currentRemaining = $this->quantity_remaining; 
         $currentRemaining = $currentRemaining += $amount;
-        
     }
     
     public static function checkAndUpdateStatus(int $purchaseOrderId, int $productId,int $purchaseOrderDetailId): bool
     {
-        // dd($salesOrderId,$productId, $salesOrderDetailId);
-        // Fetch the SalesOrder
         $purchaseOrder = PurchaseOrder::find($purchaseOrderId);
         if (!$purchaseOrder) {
-            return false; // Sales order not found
+            return false; 
         }
         
-        // Fetch the SalesOrderDetail
         $purchaseDetail = PurchaseOrderDetail::where('id', $purchaseOrderDetailId)
             ->where('product_id', $productId)
             ->first();
-        // dd($salesDetail);
         if (!$purchaseDetail) {
-            return false; // Sales order detail not found for the product
+            return false; 
         }
         
         $quantity_remaining = $purchaseDetail->quantity_remaining;  
         if ($quantity_remaining <= 0) {
-            $purchaseDetail->status = 'completed'; // Update status
+            $purchaseDetail->status = 'completed'; 
             $purchaseDetail->save();
-            
-            // $allCompleted = $salesOrder->details->every(function($detail) {
-            //     return $detail->status === 'completed'; // Ensure this returns a boolean
-            // });
-
-            // // Update SalesOrder status if all details are completed
-            //     if ($allCompleted) {
-            //         $salesOrder->status = 'completed';
-            //         $salesOrder->save();
-            //     }
-            //     return true;
-            
             if ($purchaseOrder->details->every(fn($detail) => $detail->status === 'completed')) {
                 $purchaseOrder->status = 'completed';
                 $purchaseOrder->save();
@@ -105,36 +85,24 @@ class PurchaseOrderDetail extends Model
             }
         $purchaseDetail->status = 'pending'; 
         $purchaseOrder->status = 'pending';
-        // dd($quantity_remaining, $salesDetail, $salesOrder);
         $purchaseOrder->save();
         $purchaseDetail->save();
-        
-        // dd($salesOrder, $salesDetail, $quantity_remaining, $salesDetail->quantity);
-        // Calculate the remaining quantity using accessor (optional for debugging)
-        
-
         return false;
     }   
 
     public function updatePurchaseOrderStatus(): void
     {
-        // Fetch the sales order record associated with this detail
         $purchaseOrder = PurchaseOrder::find($this->purchaseorder_id);
 
         if (!$purchaseOrder) {
             throw new \Exception('Purchase order not found.');
         }
-
-        // Check if all details are completed
         $allDetailsCompleted = self::where('purchaseorder_id', $this->purchaseorder_id)
             ->every(function ($detail) {
                 return $detail->status === 'completed';
             });
-
-        // Update sales order status based on details' statuses
         $purchaseOrder->status = $allDetailsCompleted ? 'completed' : 'pending';
 
-        // Save the sales order (wrap in try-catch for debugging)
         if (!$purchaseOrder->save()) {
             throw new \Exception('Failed to save purchase order');
         }

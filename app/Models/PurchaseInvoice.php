@@ -10,14 +10,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class PurchaseInvoice extends Model
 {
     use HasFactory, SoftDeletes;
-
-    // Define the table name
     protected $table = 'purchase_invoice';
 
     const STATUS_DELETED = 'deleted';
     protected $dates = ['date'];
 
-    // Define fillable fields
     protected $fillable = [
         'code',
         'purchaseorder_id',
@@ -49,7 +46,6 @@ class PurchaseInvoice extends Model
         return $payments;  
     }
 
-    // Define relationships
     public function purchaseOrder()
     {
         return $this->belongsTo(PurchaseOrder::class, 'purchaseorder_id');
@@ -60,7 +56,6 @@ class PurchaseInvoice extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
-// SalesInvoice.php
     public function details()
     {
         return $this->hasMany(PurchaseInvoiceDetail::class, 'purchaseinvoice_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table

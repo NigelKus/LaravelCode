@@ -10,13 +10,11 @@ class SalesOrder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Define the table name
     protected $table = 'sales_order';
     const STATUS_DELETED = 'deleted';
     public $timestamps = true;
     protected $dates = ['date'];
 
-    // Define fillable fields
     protected $fillable = [
         'code',
         'customer_id',
@@ -25,7 +23,6 @@ class SalesOrder extends Model
         'date',
     ];
 
-    // Define relationships
     public function details()
     {
         return $this->hasMany(SalesOrderDetail::class, 'salesorder_id');

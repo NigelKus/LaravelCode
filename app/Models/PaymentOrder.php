@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PaymentOrder extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes for soft deleting
+    use HasFactory, SoftDeletes; 
 
-    protected $table = 'sales_payment'; // Specify the table name if it's not the plural of the model name
+    protected $table = 'sales_payment'; 
 
     protected $fillable = [
         'id',
@@ -23,12 +23,11 @@ class PaymentOrder extends Model
 
 
 
-    protected $dates = ['deleted_at']; // Specify the dates that should be treated as Carbon instances
+    protected $dates = ['deleted_at'];
 
-    // Define any relationships here
     public function paymentDetails()
     {
-        return $this->hasMany(PaymentOrderDetail::class, 'payment_id'); // Example relationship
+        return $this->hasMany(PaymentOrderDetail::class, 'payment_id'); 
     }
 
     public function customer()
