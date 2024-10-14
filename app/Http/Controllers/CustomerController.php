@@ -27,20 +27,16 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        // Define the allowed statuses
         $allowedStatuses = ['active', 'trashed'];
     
-        // Get the status from the request, if any
         $status = $request->input('status');
     
-        // Build the query
         $customers = Customer::whereIn('status', $allowedStatuses)
             ->when($status && in_array($status, $allowedStatuses), function ($query) use ($status) {
                 return $query->where('status', $status);
             })
             ->get();
     
-        // Pass the customers and statuses to the view
         return view('layouts.master.customer.index', compact('customers', 'allowedStatuses'));
     }
     
@@ -149,17 +145,14 @@ class CustomerController extends Controller
 
     public function destroy($id)
     {
-        // Find the customer or fail if not found
         $customer = Customer::findOrFail($id);
     
-        // Update the status to 'deleted' and set the deleted_at timestamp
         $customer->update([
             'status' => Customer::STATUS_DELETED,
         ]);
     
         $customer->delete();
 
-        // Redirect back to the customer index with a success message
         return redirect()->route('customer.index')->with('success', 'Customer status updated to deleted.');
     }
     
@@ -180,14 +173,14 @@ class CustomerController extends Controller
     public function restore($id)
     {
         $customer = Customer::onlyTrashed()->findOrFail($id);
-        $customer->restore(); // Restores the soft deleted record
+        $customer->restore(); 
         return redirect()->route('customer.index')->with('success', 'Customer restored successfully');
     }
 
     public function forceDelete($id)
     {
         $customer = Customer::onlyTrashed()->findOrFail($id);
-        $customer->forceDelete(); // Permanently deletes the record
+        $customer->forceDelete(); 
         return redirect()->route('customer.index')->with('success', 'Customer permanently deleted');
     }
 }

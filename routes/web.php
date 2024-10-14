@@ -190,5 +190,5 @@ Route::prefix('admin/master/product')
     ->group(function () {
         Route::get('index', [GeneralLedgerController::class, 'index'])->name('index');
         Route::post('generate', [GeneralLedgerController::class, 'generate'])->name('generate');
-
+        
     });

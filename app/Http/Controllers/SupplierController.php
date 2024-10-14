@@ -13,13 +13,8 @@ class SupplierController extends Controller
 
     public function index(Request $request)
     {
-        // Define the allowed statuses
         $allowedStatuses = ['active', 'trashed'];
-
-        // Get the status from the request, if any
         $status = $request->input('status');
-    
-        // Build the query
         $suppliers = Supplier::whereIn('status', $allowedStatuses)
             ->when($status && in_array($status, $allowedStatuses), function ($query) use ($status) {
                 return $query->where('status', $status);
@@ -135,8 +130,6 @@ class SupplierController extends Controller
     public function destroy($id)
     {
         $supplier = Supplier::findOrFail($id);
-    
-        // Update the status to 'deleted' and set the deleted_at timestamp
         $supplier->update([
             'status' => Supplier::STATUS_DELETED
         ]);

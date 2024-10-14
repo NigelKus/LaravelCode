@@ -11,68 +11,57 @@ use App\Models\ChartOfAccount;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
-use App\Models\PaymentOrder; // Ensure to import your model
+use App\Models\PaymentOrder; 
 use App\Utils\AccountingEvents\AE_S04_FinishSalesPaymentKas;
 use App\Utils\AccountingEvents\AE_S03_FinishSalesPaymentBank;
 
 class PaymentOrderController extends Controller
 {
-    // Display a listing of the payment orders
     public function index(Request $request)
     {
-        $statuses = ['pending', 'completed']; // Define your statuses
+        $statuses = ['pending', 'completed']; 
 
         $query = PaymentOrder::with(['customer' => function ($q) {
             $q->withTrashed(); 
         }])
         ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
-    
-        // Apply status filter if present
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
     
-        // Apply code search filter if present
         if ($request->has('code') && $request->code != '') {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
     
-        // Apply customer search filter if present
         if ($request->has('customer') && $request->customer != '') {
             $query->whereHas('customer', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->customer . '%');
             });
         }
 
-        // Apply date filter if present
         if ($request->has('date') && $request->date != '') {
             $query->whereDate('date', $request->date);
         }
     
-        // Apply sorting based on recent or oldest
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
-                $query->orderBy('date', 'desc'); // Sort by date descending
+                $query->orderBy('date', 'desc'); 
             } elseif ($request->sort == 'oldest') {
-                $query->orderBy('date', 'asc'); // Sort by date ascending
+                $query->orderBy('date', 'asc'); 
             }
         }
     
-        // Determine items per page
-        $perPage = $request->get('perPage', 10); // Default to 10 if not specified
+        $perPage = $request->get('perPage', 10); 
         $paymentOrders = $query->paginate($perPage);
 
         return view('layouts.transactional.payment_order.index', compact('paymentOrders', 'statuses')); // Adjust the view as necessary
     }
 
-    // Show the form for creating a new payment order
     public function create()
     {
-        // Fetch all active customers
         $customers = Customer::where('status', 'active')->get();
     
-        // Return the view with only the customers
         return view('layouts.transactional.payment_order.create', compact('customers'));
     }
     
@@ -217,7 +206,6 @@ class PaymentOrderController extends Controller
         ]);
         
     }
-    
 
     public function edit($id)
     {
@@ -255,7 +243,6 @@ class PaymentOrderController extends Controller
                 ];
             }
         })->filter();
-    
 
         return view('layouts.transactional.payment_order.edit', [
             'paymentOrder' => $paymentOrder,
@@ -267,8 +254,6 @@ class PaymentOrderController extends Controller
         ]);
     }
     
-
-    // Update the specified payment order in storage
     public function update(Request $request, $id)
     {
 
@@ -281,7 +266,6 @@ class PaymentOrderController extends Controller
         
         foreach ($inputData['invoice_id'] as $index => $invoiceId) {
             if (!empty($invoiceId) && !empty($inputData['requested'][$index])) {
-                // Keep valid data
                 $filteredInvoiceIds[] = $invoiceId;
                 $filteredRequested[] = $inputData['requested'][$index];
                 $filteredOriginalPrices[] = $inputData['original_prices'][$index];
@@ -298,12 +282,12 @@ class PaymentOrderController extends Controller
         
         $request->validate([
             'payment_order_id' => 'required|exists:sales_payment,id',
-            'customer_id' => 'required|exists:mstr_customer,id', // Validate customer ID
-            'description' => 'nullable|string|max:255', // Optional description
-            'date' => 'required|date', // Validate date
-            'requested.*' => 'required|numeric|min:0', // Validate requested amounts
-            'invoice_id' => 'required|array', // Validate that invoice IDs are an array
-            'invoice_id.*' => 'exists:sales_invoice,id', // Validate each invoice ID exists
+            'customer_id' => 'required|exists:mstr_customer,id', 
+            'description' => 'nullable|string|max:255', 
+            'date' => 'required|date',
+            'requested.*' => 'required|numeric|min:0', 
+            'invoice_id' => 'required|array', 
+            'invoice_id.*' => 'exists:sales_invoice,id', 
             'payment_type' => 'required',
         ]);
 
@@ -332,7 +316,7 @@ class PaymentOrderController extends Controller
             return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 and 1200 does not exist.']);
         }
 
-        $paymentOrder = PaymentOrder::findOrFail($request->payment_order_id); // Find payment order or fail
+        $paymentOrder = PaymentOrder::findOrFail($request->payment_order_id);
 
         $paymentOrder->update([
             'description' => $request->description,
@@ -343,7 +327,6 @@ class PaymentOrderController extends Controller
 
         $journal = Journal::where('ref_id', $paymentOrder->id)->first();
 
-        
         if ($journal) {
             $journal->date = Carbon::parse($request['date']);
             $journal->save();
@@ -353,7 +336,7 @@ class PaymentOrderController extends Controller
 
             foreach ($request->requested as $requestedAmount) {
                 if (!empty($requestedAmount)) {
-                    $totalNewAmount += $requestedAmount; // Accumulate the requested amount
+                    $totalNewAmount += $requestedAmount; 
                 }
             }
             
@@ -384,7 +367,6 @@ class PaymentOrderController extends Controller
         {
             $invoice = SalesInvoice::with('details')->findOrFail($detail->invoicesales_id);
 
-            // If the status is 'completed', set it back to 'pending'
             if ($invoice->status === 'completed') {
                 $invoice->status = 'pending';
                 $invoice->save();
@@ -393,15 +375,13 @@ class PaymentOrderController extends Controller
             $detail->delete();
         }
 
-        // Update or create payment order details
         foreach ($request->invoice_id as $index => $invoiceId) {
-            // Create or update payment order details
             $paymentOrder->paymentDetails()->updateOrCreate(
                 ['invoicesales_id' => $invoiceId],
                 [
                     'price' => $request->requested[$index],
                     'status' => 'pending',
-                    'payment_id' => $paymentOrder->id, // Insert the payment_order_id here
+                    'payment_id' => $paymentOrder->id, 
                 ]
             );
 
@@ -415,29 +395,24 @@ class PaymentOrderController extends Controller
         return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Payment Order updated successfully.');
     }
 
-    // Remove the specified payment order from storage
     public function destroy($id)
     {
-        // Find the payment order or fail
         $paymentOrder = PaymentOrder::findOrFail($id);
         $journal = Journal::where('ref_id', $paymentOrder->id)->first();
     
-        // Loop through the payment order details and set their status to 'deleted'
         foreach ($paymentOrder->paymentDetails as $detail) {
-            // Retrieve the related sales invoice
-            $invoice = SalesInvoice::with('details')->findOrFail($detail->invoicesales_id); // Assuming invoicesales_id is the related field
+            $invoice = SalesInvoice::with('details')->findOrFail($detail->invoicesales_id); 
             $invoice->status = 'pending';
-            $invoice->save(); // Save the updated status
+            $invoice->save(); 
 
             if ($journal) {
-                // Fetch postings related to this journal
                 $postings = Posting::where('journal_id', $journal->id)->get();
                 foreach ($postings as $posting) {
                     $posting->update([
                         'status' => 'deleted'
                     ]);
 
-                    $posting->save(); // Save each posting after updating
+                    $posting->save();
                     $posting->delete();
                 }
 
@@ -445,14 +420,11 @@ class PaymentOrderController extends Controller
                     'status' => 'deleted'
                 ]);
 
-                $journal->save(); // Save each posting after updating
+                $journal->save(); 
                 $journal->delete();
             }
         
-            // Update payment detail status to 'deleted'
             $detail->update(['status' => 'deleted']);
-            
-            // Soft delete the payment order detail
             $detail->delete();
         }
         

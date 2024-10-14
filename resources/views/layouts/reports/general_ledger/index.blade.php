@@ -23,8 +23,8 @@
                 @csrf
                 <div class="form-group">
                     <label for="id">Chart of Account</label>
-                    <select class="form-control @error('id') is-invalid @enderror" id="id" name="id" required>
-                        <option value="">Select a Chart of Account</option>
+                    <select class="form-control @error('id') is-invalid @enderror" id="id" name="id">
+                        <option value="">Every Chart of Account</option>
                         @foreach($CoAs as $coa) 
                             <option value="{{ $coa->id }}" {{ old('id') == $coa->id ? 'selected' : '' }}>
                                 {{ $coa->name }}

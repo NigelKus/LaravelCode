@@ -22,7 +22,7 @@ class PaymentPurchaseController extends Controller
 
     public function index(Request $request)
     {
-        $statuses = ['pending', 'completed']; // Define your statuses
+        $statuses = ['pending', 'completed']; 
 
         $query = PaymentPurchase::with(['supplier' => function ($q) {
             $q->withTrashed(); 
@@ -30,39 +30,33 @@ class PaymentPurchaseController extends Controller
         ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
 
     
-        // Apply status filter if present
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
     
-        // Apply code search filter if present
         if ($request->has('code') && $request->code != '') {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
     
-        // Apply supplier search filter if present
         if ($request->has('supplier') && $request->supplier != '') {
             $query->whereHas('supplier', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->supplier . '%');
             });
         }
 
-        // Apply date filter if present
         if ($request->has('date') && $request->date != '') {
             $query->whereDate('date', $request->date);
         }
     
-        // Apply sorting based on recent or oldest
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
-                $query->orderBy('date', 'desc'); // Sort by date descending
+                $query->orderBy('date', 'desc'); 
             } elseif ($request->sort == 'oldest') {
-                $query->orderBy('date', 'asc'); // Sort by date ascending
+                $query->orderBy('date', 'asc');
             }
         }
     
-        // Determine items per page
-        $perPage = $request->get('perPage', 10); // Default to 10 if not specified
+        $perPage = $request->get('perPage', 10); 
         $paymentPurchases = $query->paginate($perPage);
 
         return view('layouts.transactional.payment_purchase.index', compact('paymentPurchases', 'statuses')); // Adjust the view as necessary
@@ -70,16 +64,13 @@ class PaymentPurchaseController extends Controller
 
     public function create()
     {
-        // Fetch all active customers
         $suppliers = Supplier::where('status', 'active')->get();
     
-        // Return the view with only the customers
         return view('layouts.transactional.payment_purchase.create', compact('suppliers'));
     }
 
     public function store(Request $request)
     {
-        // Get the raw data from the request
         $inputData = $request->all();
         
         $filteredInvoiceIds = [];
@@ -89,7 +80,6 @@ class PaymentPurchaseController extends Controller
         
         foreach ($inputData['invoice_id'] as $index => $invoiceId) {
             if (!empty($invoiceId) && !empty($inputData['requested'][$index])) {
-                // Keep valid data
                 $filteredInvoiceIds[] = $invoiceId;
                 $filteredRequested[] = $inputData['requested'][$index];
                 $filteredOriginalPrices[] = $inputData['original_prices'][$index];
@@ -97,7 +87,6 @@ class PaymentPurchaseController extends Controller
             }
         }
         
-        // Update the input data with the filtered values
         $request->merge([
             'invoice_id' => $filteredInvoiceIds,
             'requested' => $filteredRequested,
@@ -105,21 +94,18 @@ class PaymentPurchaseController extends Controller
             'remaining_prices' => $filteredRemainingPrices,
         ]);
         
-        // Validate the request data (after filtering)
         $request->validate([
-            'supplier_id' => 'required|exists:mstr_supplier,id', // Validate customer ID
-            'description' => 'nullable|string|max:255', // Optional description
-            'date' => 'required|date', // Validate date
-            'requested.*' => 'required|numeric|min:0', // Validate requested amounts
-            'invoice_id' => 'required|array', // Validate that invoice IDs are an array
-            'invoice_id.*' => 'exists:purchase_invoice,id', // Validate each invoice ID exists
+            'supplier_id' => 'required|exists:mstr_supplier,id', 
+            'description' => 'nullable|string|max:255', 
+            'date' => 'required|date', 
+            'requested.*' => 'required|numeric|min:0',
+            'invoice_id' => 'required|array', 
+            'invoice_id.*' => 'exists:purchase_invoice,id', 
             'payment_type' => 'required',
         ]);
         
-        // Generate the payment order code
         $purchasePaymentCode = CodeFactory::generatePaymentPurchaseCode();
         DB::beginTransaction();
-        // Create the payment order
         $paymentPurchase = PaymentPurchase::create([
             'code' => $purchasePaymentCode,
             'supplier_id' => $request['supplier_id'],
@@ -128,17 +114,13 @@ class PaymentPurchaseController extends Controller
             'status' => 'pending',
         ]);
         
-        // Loop through the filtered data and create invoice lines  
         foreach ($request['invoice_id'] as $index => $invoiceId) {
-            // Find the invoice
-
             $requestedAmount = $request['requested'][$index];
             
-            // Create the payment detail for the invoice
             $paymentPurchase->paymentDetails()->create([
                 'payment_id' => $paymentPurchase->id,
                 'invoicepurchase_id' => $invoiceId,
-                'price' => $requestedAmount, // Use the requested price or total price
+                'price' => $requestedAmount, 
                 'status' => 'pending',
             ]);
             $invoice = PurchaseInvoice::with('details')->findOrFail($invoiceId);
@@ -187,7 +169,6 @@ class PaymentPurchaseController extends Controller
         }
         DB::commit();
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Payment Purchase created successfully.');
-
     }
 
     public function show($id)
@@ -226,14 +207,11 @@ class PaymentPurchaseController extends Controller
 
     public function edit($id)
     {
-        // Fetch the payment order and its details
         $paymentPurchase = PaymentPurchase::with('paymentDetails')->findOrFail($id);
         $suppliers = $paymentPurchase->supplier;
 
         $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
         $posting = Posting::where('journal_id', $journal->id)->orderBy('id', 'desc')->first();
-
-
         $account = ChartOfAccount::where('code', 1000)
         ->where('status', 'active')
         ->first();
@@ -248,43 +226,33 @@ class PaymentPurchaseController extends Controller
             ->get();
     
         $combinedDetails = $purchaseInvoices->map(function ($invoice) use ($paymentPurchase) {
-        // Find the corresponding payment detail for this invoice
         $paymentDetail = $paymentPurchase->paymentDetails->firstWhere('invoicepurchase_id', $invoice->id);
-
-        // Calculate remaining price
         $remainingPrice = $invoice->calculatePriceRemaining() + ($paymentDetail->price ?? 0);
 
-        // Return only if remaining price is greater than 0
         if ($remainingPrice > 0) {
             return [
-                'invoice_id' => $invoice->id, // Ensure this is assigned
+                'invoice_id' => $invoice->id,
                 'invoice_code' => $invoice->code,
-                'requested' => $paymentDetail ? $paymentDetail->price : '', // Existing payment detail, if any
+                'requested' => $paymentDetail ? $paymentDetail->price : '',
                 'original_price' => $invoice->getTotalPriceAttribute(),
                 'remaining_price' => $remainingPrice,
             ];
         }
-        })->filter(); // Use filter to remove null entries where remaining_price == 0
+        })->filter();
         
-
-        // Continue with passing data to the view if needed
         return view('layouts.transactional.payment_purchase.edit', [
             'paymentPurchase' => $paymentPurchase,
-            'suppliers' => $suppliers, // Use singular for clarity
+            'suppliers' => $suppliers, 
             'combinedDetails' => $combinedDetails,
-            'payment_purchase_id' => $paymentPurchase->id, // Send payment order ID
-            'payment_purchase_code' => $paymentPurchase->code, // Send payment order code
+            'payment_purchase_id' => $paymentPurchase->id, 
+            'payment_purchase_code' => $paymentPurchase->code, 
             'payment_type' => $paymentType
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
-
         $inputData = $request->all();
-        
-        // Filter out any invoice lines where either the invoice_id or requested amount is null
         $filteredInvoiceIds = [];
         $filteredRequested = [];
         $filteredOriginalPrices = [];
@@ -292,7 +260,6 @@ class PaymentPurchaseController extends Controller
         
         foreach ($inputData['invoice_id'] as $index => $invoiceId) {
             if (!empty($invoiceId) && !empty($inputData['requested'][$index])) {
-                // Keep valid data
                 $filteredInvoiceIds[] = $invoiceId;
                 $filteredRequested[] = $inputData['requested'][$index];
                 $filteredOriginalPrices[] = $inputData['original_prices'][$index];
@@ -309,12 +276,12 @@ class PaymentPurchaseController extends Controller
         
         $request->validate([
             'payment_purchase_id' => 'required|exists:purchase_payment,id',
-            'supplier_id' => 'required|exists:mstr_supplier,id', // Validate customer ID
-            'description' => 'nullable|string|max:255', // Optional description
-            'date' => 'required|date', // Validate date
-            'requested.*' => 'required|numeric|min:0', // Validate requested amounts
-            'invoice_id' => 'required|array', // Validate that invoice IDs are an array
-            'invoice_id.*' => 'exists:purchase_invoice,id', // Validate each invoice ID exists
+            'supplier_id' => 'required|exists:mstr_supplier,id', 
+            'description' => 'nullable|string|max:255', 
+            'date' => 'required|date', 
+            'requested.*' => 'required|numeric|min:0', 
+            'invoice_id' => 'required|array',
+            'invoice_id.*' => 'exists:purchase_invoice,id', 
             'payment_type' => 'required',
         ]);
 
@@ -364,7 +331,7 @@ class PaymentPurchaseController extends Controller
 
             foreach ($request->requested as $requestedAmount) {
                 if (!empty($requestedAmount)) {
-                    $totalNewAmount += $requestedAmount; // Accumulate the requested amount
+                    $totalNewAmount += $requestedAmount; 
                 }
             }
             
@@ -375,27 +342,24 @@ class PaymentPurchaseController extends Controller
             }
 
 
-            $firstRun = true; // Initialize a flag to track the first run
+            $firstRun = true; 
             foreach ($postings as $posting) {
                 if ($firstRun) {
                         $posting->amount = abs($totalNewAmount);
                 } else {
-                    // Set to a negative amount on the second run
                     $posting->amount = -abs($totalNewAmount);
                     $posting->account_id = $paymentType;
                 }
                 
                 $posting->date = $journal->date;
-                $posting->save(); // Save each posting after updating
-                $firstRun = false; // Toggle flag after the first iteration
+                $posting->save(); 
+                $firstRun = false; 
             }
         }
 
         foreach($orderDetails as $detail)
         {
             $invoice = PurchaseInvoice::with('details')->findOrFail($detail->invoicepurchase_id);
-
-            // If the status is 'completed', set it back to 'pending'
             if ($invoice->status === 'completed') {
                 $invoice->status = 'pending';
                 $invoice->save();
@@ -404,15 +368,13 @@ class PaymentPurchaseController extends Controller
             $detail->delete();
         }
 
-        // Update or create payment order details
         foreach ($request->invoice_id as $index => $invoiceId) {
-            // Create or update payment order details
             $paymentPurchase->paymentDetails()->updateOrCreate(
                 ['invoicepurchase_id' => $invoiceId],
                 [
                     'price' => $request->requested[$index],
                     'status' => 'pending',
-                    'payment_id' => $paymentPurchase->id, // Insert the payment_order_id here
+                    'payment_id' => $paymentPurchase->id, 
                 ]
             );
 
@@ -433,26 +395,21 @@ class PaymentPurchaseController extends Controller
 
     public function destroy($id)
     {
-        // Find the payment order or fail
         $paymentPurchase = PaymentPurchase::findOrFail($id);
         $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
-    
-        // Loop through the payment order details and set their status to 'deleted'
         foreach ($paymentPurchase->paymentDetails as $detail) {
-            // Retrieve the related sales invoice
-            $invoice = PurchaseInvoice::with('details')->findOrFail($detail->invoicepurchase_id); // Assuming invoicesales_id is the related field
+            $invoice = PurchaseInvoice::with('details')->findOrFail($detail->invoicepurchase_id); 
             $invoice->status = 'pending';
-            $invoice->save(); // Save the updated status
+            $invoice->save(); 
 
             if ($journal) {
-                // Fetch postings related to this journal
                 $postings = Posting::where('journal_id', $journal->id)->get();
                 foreach ($postings as $posting) {
                     $posting->update([
                         'status' => 'deleted'
                     ]);
 
-                    $posting->save(); // Save each posting after updating
+                    $posting->save(); 
                     $posting->delete();
                 }
 
@@ -460,18 +417,13 @@ class PaymentPurchaseController extends Controller
                     'status' => 'deleted'
                 ]);
 
-                $journal->save(); // Save each posting after updating
+                $journal->save(); 
                 $journal->delete();
             }
         
-            // Update payment detail status to 'deleted'
             $detail->update(['status' => 'deleted']);
-            
-            // Soft delete the payment order detail
             $detail->delete();
         }
-        
-    
         $paymentPurchase->update([
             'status' => 'deleted',
         ]);

@@ -32,6 +32,7 @@ class CoAController extends Controller
             ->when($status && in_array($status, $allowedStatuses), function ($query) use ($status) {
                 return $query->where('status', $status);
             })
+            ->orderBy('code', 'asc')
             ->get();
     
         return view('layouts.master.CoA.index', compact('CoAs', 'allowedStatuses'));
@@ -122,7 +123,6 @@ class CoAController extends Controller
 
         $code = $CoA->code . '-del-' . Str::uuid(); 
         
-        // Update the status to 'deleted' and set the deleted_at timestamp
         $CoA->update([
             'code' => $code,
             'status' => ChartOfAccount::STATUS_DELETED, 
@@ -153,7 +153,6 @@ class CoAController extends Controller
 
         $journal = Journal::where('id', $posting->journal_id)->firstOrFail();
     
-        // Get the first two words and determine the transaction type
         $firstTwoLetters = substr($journal->description, 0, 2);
         
         switch ($firstTwoLetters) {

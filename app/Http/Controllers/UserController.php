@@ -14,19 +14,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Fetch all users from the database
         $users = User::all();
-
-        // Pass the users data to the view at 'layouts.master.user.index'
         return view('layouts.master.user.index', ['users' => $users]);
     }
 
     public function create()
     {
-        // Fetch all users from the database
         $users = User::all();
-
-        // Pass the users data to the view at 'layouts.master.user.index'
         return view('layouts.master.user.create', ['users' => $users]);
     }
 
