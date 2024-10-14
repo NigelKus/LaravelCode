@@ -58,12 +58,12 @@ class PurchaseInvoice extends Model
 
     public function details()
     {
-        return $this->hasMany(PurchaseInvoiceDetail::class, 'purchaseinvoice_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table
+        return $this->hasMany(PurchaseInvoiceDetail::class, 'purchaseinvoice_id');
     }
 
     public function paymentDetails()
     {
-        return $this->hasMany(PaymentPurchaseDetail::class, 'invoicepurchase_id'); // Adjust 'sales_invoice_id' to the actual foreign key in your table
+        return $this->hasMany(PaymentPurchaseDetail::class, 'invoicepurchase_id');
     }
 
     /**

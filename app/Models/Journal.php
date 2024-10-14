@@ -29,26 +29,26 @@ class Journal extends Model
 
     public function postings()
     {
-        return $this->hasMany(Posting::class, 'journal_id'); // Assuming journal_id is the foreign key in the postings table
+        return $this->hasMany(Posting::class, 'journal_id'); 
     }
 
     public function salesInvoice()
     {
-        return $this->hasMany(SalesInvoice::class, 'ref_id'); // Assuming journal_id is the foreign key in the postings table
+        return $this->hasMany(SalesInvoice::class, 'ref_id'); 
     }
 
     public function purchaseInvoice()
     {
-        return $this->hasMany(PurchaseInvoice::class, 'ref_id'); // Assuming journal_id is the foreign key in the postings table
+        return $this->hasMany(PurchaseInvoice::class, 'ref_id'); 
     }
     
     public function paymentOrder()
     {
-        return $this->hasMany(PaymentOrder::class, 'ref_id'); // Assuming journal_id is the foreign key in the postings table
+        return $this->hasMany(PaymentOrder::class, 'ref_id'); 
     }
 
     public function paymentPurchase()
     {
-        return $this->hasMany(PaymentPurchase::class, 'ref_id'); // Assuming journal_id is the foreign key in the postings table
+        return $this->hasMany(PaymentPurchase::class, 'ref_id'); 
     }
 }

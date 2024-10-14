@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Models\PurchaseOrderDetail;
 use Database\Factories\CodeFactory;
+use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderController extends Controller
 

@@ -49,7 +49,7 @@ class GeneralLedgerController extends Controller
                     })
                     ->orderBy('date', 'asc')
                     ->get();
-    
+                    
                 $results[] = [
                     'coa' => $coa,        
                     'starting' => $starting,
