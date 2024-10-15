@@ -185,9 +185,12 @@ Route::prefix('admin/master/product')
     });
 
 //Reports Routing
+Route::get('generateGeneralLedgerPDF', [App\Http\Controllers\PdfController::class, 'generateGeneralLedgerPDF']);
+
     Route::prefix('admin/reports/general_ledger')
     ->name('general_ledger.')
     ->group(function () {
         Route::get('index', [GeneralLedgerController::class, 'index'])->name('index');
         Route::post('generate', [GeneralLedgerController::class, 'generate'])->name('generate');
+        Route::post('pdf', [GeneralLedgerController::class, 'generateGeneralLedgerPDF'])->name('pdf');
     });

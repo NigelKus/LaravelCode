@@ -18,17 +18,22 @@
                     </ul>
                 </div>
             @endif
+            <form method="POST" action="{{ route('general_ledger.pdf') }}" class="form-horizontal">
+                @csrf
+            <input type="hidden" name="fromdate" value="{{ $fromdate }}">
+            <input type="hidden" name="todate" value="{{ $todate }}">
             <h2 class="text-left">General Ledger</h2>
             <p class="text-left"><strong>{{ $fromdate }} s/d {{ $todate }}</strong></p>
-
+            
             <hr>
             @if(isset($results))
             @foreach($results as $result)
             <table class="table table-bordered" style="margin-bottom: 40px;">
                 <thead>
-                    <th colspan="7">
+                    <th colspan="7" style="text-align: left;">
                         <strong>{{ $result['coa']->name }} ({{ $result['coa']->code }})</strong>
                     </th>
+                    
                     <tr>
                         <th>Kode</th>
                         <th>Tanggal</th>
@@ -87,9 +92,10 @@
         @else
             <table class="table table-bordered">
                 <thead>
-                    <tr>
+                    <th colspan="7" >
                         <strong>{{ $coa->name }} ({{ $coa->code }})</strong>
-                    </tr>
+                        <input type="hidden" name="coa_id" value="{{ $coa->id ?? '' }}">
+                    </th>
                     <tr>
                         <th>Kode</th>
                         <th>Tanggal</th>
@@ -151,6 +157,7 @@
                 <button type="submit" class="btn btn-primary">EXCEL</button>
                 <a href="{{ route('general_ledger.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
+            <form>
         </div>
     </div>
 @stop
