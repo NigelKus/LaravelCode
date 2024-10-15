@@ -1,4 +1,5 @@
 <?php
+use Barryvdh\DomPDF\ServiceProvider;
 
 return [
 
@@ -123,5 +124,11 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // 'providers' => ServiceProvider::defaultProviders()->merge([
+    //     Maatwebsite\Excel\ExcelServiceProvider::class,
+    // ])->toArray(),
 
+    // 'aliases' => Facade::defaultAliases()->merge([
+    //     'Excel'=>Maatwebsite\Excel\Facades\Excel::class
+    // ])->toArray(),
 ];

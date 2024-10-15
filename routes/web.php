@@ -193,4 +193,5 @@ Route::get('generateGeneralLedgerPDF', [App\Http\Controllers\PdfController::clas
         Route::get('index', [GeneralLedgerController::class, 'index'])->name('index');
         Route::post('generate', [GeneralLedgerController::class, 'generate'])->name('generate');
         Route::post('pdf', [GeneralLedgerController::class, 'generateGeneralLedgerPDF'])->name('pdf');
+        Route::post('excel', [GeneralLedgerController::class, 'generateGeneralLedgerExcel'])->name('excel');
     });
