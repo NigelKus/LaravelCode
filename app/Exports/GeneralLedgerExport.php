@@ -203,6 +203,8 @@ class GeneralLedgerExport implements FromCollection, WithHeadings, WithStyles
 
         $sheet->getStyle('E:G')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
+            
+
     }
 
 }
