@@ -28,7 +28,7 @@ class AE_S02_FinishSalesInvoice extends AE_Base
         $amount = $obj->getTotalPriceAttribute();
         
 
-        AccountingManager::debit($journal,
+    AccountingManager::debit($journal,
         AccountingSetting::PiutangUsaha,  // DEBIT :: Piutang Usaha
         $amount,
         '',

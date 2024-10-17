@@ -6,10 +6,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProfitLossController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\PaymentOrderController;
 use App\Http\Controllers\SalesInvoiceController;
 use App\Http\Controllers\GeneralLedgerController;
+use App\Http\Controllers\JournalManualController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PaymentPurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
@@ -185,7 +187,7 @@ Route::prefix('admin/master/product')
     });
 
 //Reports Routing
-Route::get('generateGeneralLedgerPDF', [App\Http\Controllers\PdfController::class, 'generateGeneralLedgerPDF']);
+    Route::get('generateGeneralLedgerPDF', [App\Http\Controllers\PdfController::class, 'generateGeneralLedgerPDF']);
 
     Route::prefix('admin/reports/general_ledger')
     ->name('general_ledger.')
@@ -194,4 +196,18 @@ Route::get('generateGeneralLedgerPDF', [App\Http\Controllers\PdfController::clas
         Route::post('generate', [GeneralLedgerController::class, 'generate'])->name('generate');
         Route::post('pdf', [GeneralLedgerController::class, 'generateGeneralLedgerPDF'])->name('pdf');
         Route::post('excel', [GeneralLedgerController::class, 'generateGeneralLedgerExcel'])->name('excel');
+    });
+
+    Route::prefix('admin/reports/profit_loss')
+    ->name('profit_loss.')
+    ->group(function () {
+        Route::get('index', [ProfitLossController::class, 'index'])->name('index');
+    });
+
+    Route::prefix('admin/reports/journal')
+    ->name('journal.')
+    ->group(function () {
+        Route::get('index', [JournalManualController::class, 'index'])->name('index');
+        Route::get('create', [JournalManualController::class, 'create'])->name('create');
+        Route::post('store', [JournalManualController::class, 'store'])->name('store');
     });

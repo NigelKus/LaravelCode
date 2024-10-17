@@ -444,14 +444,20 @@ return [
         ],
         [
             'text' => 'Balance Sheet',
-            'url' => 'admin/master/supplier/index',
+            'url' => 'admin/reports/balance_sheet/index',
             'icon' => 'fas fa-balance-scale',
         ],
 
         [
             'text' => 'Profit Loss',
-            'url' => 'admin/master/CoA/index',
+            'url' => 'admin/reports/profit_loss/index',
             'icon' => 'fas fa-chart-line',
+        ],
+
+        [
+            'text' => 'JO Manual',
+            'url' => 'admin/reports/journal/index',
+            'icon' => 'fas fa-clipboard',
         ],
         // [
         //     'text' => 'Purchase',

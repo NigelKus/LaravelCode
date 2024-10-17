@@ -20,10 +20,14 @@ class AccountingSetting
     const Kas = 1000;
     const Bank = 1100;
     const PiutangUsaha = 1200;
+    const Stock = 1300;
     const UtangUsaha = 2000;
     const Modal = 3000;
     const Pendapatan = 4000;
     const Beban = 5000;
-    const Stock = 1300;
+    const BebanHPP = 6000;
+    const BebanOperasional = 7000;
+    const BebanNonOperasional = 8000;
+    const BebanLainnya = 9000;
 
 }

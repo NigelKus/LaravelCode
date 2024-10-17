@@ -53,7 +53,7 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td>{{ $result['balance'] }}</td>
+                                    <td>{{ number_format($result['balance'], 0, ',', '.') }}</td>
                                 </tr>
                                 @php
                                     $totalCredit = 0; 
@@ -66,14 +66,14 @@
                                         <td>{{ $posting->journal->name }}</td> 
                                         <td>{{ $posting->journal->description }}</td>
                                         @if($posting->amount > 0)
-                                            <td>{{ $posting->amount }}</td>
+                                            <td>{{ number_format($posting->amount, 0, ',', '.') }}</td>
                                             <td></td>
-                                            <td>{{ $result['balance'] += $posting->amount }}</td>
+                                            <td>{{ number_format($result['balance'] += $posting->amount, 0, ',', '.') }}</td>
                                             @php $totalDebit += $posting->amount; @endphp
                                         @else
                                             <td></td>
-                                            <td>{{ abs($posting->amount) }}</td>
-                                            <td>{{ $result['balance'] += $posting->amount }}</td>
+                                            <td>{{ number_format(abs($posting->amount), 0, ',', '.') }}</td>
+                                            <td>{{ number_format($result['balance'] += $posting->amount, 0, ',', '.') }}</td>
                                             @php $totalCredit += abs($posting->amount); @endphp
                                         @endif
                                     </tr>
@@ -83,9 +83,9 @@
                                     <td></td>
                                     <td></td>
                                     <td>Total</td>
-                                    <td>{{ $totalDebit }}</td>
-                                    <td>{{ $totalCredit }}</td>
-                                    <td>{{ $result['balance'] }}</td>
+                                    <td>{{ number_format( $totalDebit, 0, ',', '.') }}</td>
+                                    <td>{{ number_format( $totalCredit, 0, ',', '.') }}</td>
+                                    <td>{{ number_format( $result['balance'], 0, ',', '.') }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -114,7 +114,7 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td>{{ $balance }}</td>
+                                <td>{{ number_format($balance, 0, ',', '.') }}</td>
                             </tr>
                             @php
                                 $totalCredit = 0; 
@@ -127,14 +127,14 @@
                                     <td>{{ $posting->journal->name }}</td> 
                                     <td>{{ $posting->journal->description }}</td>
                                     @if($posting->amount > 0)
-                                        <td>{{ $posting->amount }}</td>
+                                        <td>{{ number_format($posting->amount, 0, ',', '.') }}</td>
                                         <td></td>
-                                        <td>{{ $balance += $posting->amount }}</td>
+                                        <td>{{ number_format($balance += $posting->amount, 0, ',', '.') }}</td>
                                         @php $totalDebit += $posting->amount; @endphp
                                     @else
                                         <td></td>
-                                        <td>{{ abs($posting->amount) }}</td>
-                                        <td>{{ $balance += $posting->amount }}</td>
+                                        <td>{{ number_format(abs($posting->amount), 0, ',', '.') }}</td>
+                                        <td>{{ number_format($balance += $posting->amount, 0, ',', '.') }}</td>
                                         @php $totalCredit += abs($posting->amount); @endphp
                                     @endif
                                 </tr>
@@ -144,9 +144,9 @@
                                 <td></td>
                                 <td></td>
                                 <td>Total</td>
-                                <td>{{ $totalDebit }}</td>
-                                <td>{{ $totalCredit }}</td>
-                                <td>{{ $balance }}</td>
+                                <td>{{ number_format( $totalDebit, 0, ',', '.') }}</td>
+                                <td>{{ number_format( $totalCredit, 0, ',', '.') }}</td>
+                                <td>{{ number_format( $balance, 0, ',', '.') }}</td>
                             </tr>
                         </tbody>
                     </table>

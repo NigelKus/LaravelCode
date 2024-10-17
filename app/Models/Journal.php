@@ -51,4 +51,9 @@ class Journal extends Model
     {
         return $this->hasMany(PaymentPurchase::class, 'ref_id'); 
     }
+
+    public function journalManual()
+    {
+        return $this->hasMany(JournalManual::class, 'ref_id'); 
+    }
 }
