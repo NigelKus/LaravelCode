@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use random;
-use Illuminate\Support\Str;
 use App\Models\Journal;
 use App\Models\Posting;
+use Illuminate\Support\Str;
 use App\Models\PaymentOrder;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
+use App\Models\JournalVoucher;
 use Illuminate\Support\Carbon;
 use App\Models\PaymentPurchase;
 use App\Models\PurchaseInvoice;
@@ -87,7 +88,6 @@ class CoAController extends Controller
     {
         $CoA = ChartOfAccount::findOrFail($id);
 
-        
 
         return view('layouts.master.CoA.edit', compact('CoA'));
     }
@@ -154,6 +154,7 @@ class CoAController extends Controller
         $journal = Journal::where('id', $posting->journal_id)->firstOrFail();
     
         $firstTwoLetters = substr($journal->description, 0, 2);
+
         
         switch ($firstTwoLetters) {
             case 'SI':
@@ -168,6 +169,9 @@ class CoAController extends Controller
             case 'PP':
                 $paymentPurchase = PaymentPurchase::where('code', $journal->description)->firstOrFail();
                 return redirect()->route('payment_purchase.show', $paymentPurchase->id);
+            case 'JV':
+                $journalVoucher = JournalVoucher::where('code', $journal->description)->firstOrFail();
+                return redirect()->route('journal.show', $journalVoucher->id);
             default:
                 return 'Unknown Transaction';
         }

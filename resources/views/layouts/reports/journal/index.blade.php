@@ -41,11 +41,11 @@
         <div class="card-body">
             <form method="GET" action="{{ route('journal.index') }}" class="form-inline mb-3">
                 <input type="text" name="code" class="form-control ml-2" placeholder="Search by Code" value="{{ request('code') }}">
-                <select class="form-control ml-2" id="type" name="type" onchange="this.form.submit()">
+                {{-- <select class="form-control ml-2" id="type" name="type" onchange="this.form.submit()">
                     <option value="">Sort by Type</option>
                     <option value="in" {{ request('type') == 'in' ? 'selected' : '' }}>In</option>
                     <option value="out" {{ request('type') == 'out' ? 'selected' : '' }}>Out</option>
-                </select>
+                </select> --}}
                 <input type="text" name="name" class="form-control ml-2" placeholder="Search by name" value="{{ request('name') }}">
                 <input type="date" name="date" class="form-control ml-2" value="{{ request('date') }}">
                 <select class="form-control ml-2" id="sort" name="sort" onchange="this.form.submit()">
@@ -77,7 +77,6 @@
                 <thead>
                     <tr>
                         <th>Code</th>
-                        <th>Type</th>
                         <th>Name</th>
                         <th>Date</th>
                         <th>Status</th>
@@ -87,10 +86,7 @@
                 <tbody>
                     @forelse ($journalVouchers as $voucher)
                         <tr>
-                            <td>{{ $voucher->code }}</td>
-                            <td>
-                                {{ $voucher->type ?? 'N/A'}} 
-                            </td>                            
+                            <td>{{ $voucher->code }}</td>               
                             <td>{{ $voucher->name }}</td>
                             <td>{{ \Carbon\Carbon::parse($voucher->date)->format('Y-m-d') }}</td>
                             <td>{{ ucfirst($voucher->status) }}</td>

@@ -211,4 +211,8 @@ Route::prefix('admin/master/product')
         Route::get('create', [JournalVoucherController::class, 'create'])->name('create');
         Route::post('store', [JournalVoucherController::class, 'store'])->name('store');
         Route::get('{id}', [JournalVoucherController::class, 'show'])->name('show');
+        Route::delete('{id}', [JournalVoucherController::class, 'destroy'])->name('destroy');
+        Route::get('{id}/edit', [JournalVoucherController::class, 'edit'])->name('edit');
+        Route::patch('{id}/update-status', [JournalVoucherController::class, 'updateStatus'])->name('update_status');
+        Route::put('{id}', [JournalVoucherController::class, 'update'])->name('update');
     });

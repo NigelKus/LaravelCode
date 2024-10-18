@@ -30,9 +30,9 @@ class ChartOfAccount extends Model
         return $this->hasMany(Posting::class, 'account_id'); 
     }
 
-    public function manualdetail()
+    public function voucherDetail()
     {
-        return $this->hasMany(Posting::class, 'account_id'); 
+        return $this->hasMany(JournalVoucherDetail::class, 'account_id'); 
     }
 
 

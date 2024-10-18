@@ -13,6 +13,7 @@ class Journal extends Model
     protected $table = 'acct_journals';
 
     protected $fillable = [
+        'id',
         'code',
         'date',
         'ref_id',
@@ -52,8 +53,8 @@ class Journal extends Model
         return $this->hasMany(PaymentPurchase::class, 'ref_id'); 
     }
 
-    public function journalManual()
+    public function journalVoucher()
     {
-        return $this->hasMany(JournalManual::class, 'ref_id'); 
+        return $this->hasMany(JournalVoucher::class, 'ref_id'); 
     }
 }

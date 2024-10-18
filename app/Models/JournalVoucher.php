@@ -16,8 +16,8 @@ class JournalVoucher extends Model
     public $amounts = [];
     public $coa_ids1 = [];
     public $amounts1 = [];
-
     public $type;
+    public $journal_id;
 
     protected $fillable = [
         'code',
