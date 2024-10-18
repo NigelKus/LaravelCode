@@ -455,7 +455,7 @@ return [
         ],
 
         [
-            'text' => 'JO Manual',
+            'text' => 'Journal Voucher',
             'url' => 'admin/reports/journal/index',
             'icon' => 'fas fa-clipboard',
         ],

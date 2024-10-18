@@ -11,8 +11,8 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\PaymentOrderController;
 use App\Http\Controllers\SalesInvoiceController;
 use App\Http\Controllers\GeneralLedgerController;
-use App\Http\Controllers\JournalManualController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\JournalVoucherController;
 use App\Http\Controllers\PaymentPurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
 
@@ -207,7 +207,7 @@ Route::prefix('admin/master/product')
     Route::prefix('admin/reports/journal')
     ->name('journal.')
     ->group(function () {
-        Route::get('index', [JournalManualController::class, 'index'])->name('index');
-        Route::get('create', [JournalManualController::class, 'create'])->name('create');
-        Route::post('store', [JournalManualController::class, 'store'])->name('store');
+        Route::get('index', [JournalVoucherController::class, 'index'])->name('index');
+        Route::get('create', [JournalVoucherController::class, 'create'])->name('create');
+        Route::post('store', [JournalVoucherController::class, 'store'])->name('store');
     });

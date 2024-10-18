@@ -1,6 +1,6 @@
 <tr class="coa-line" id="coa-line-{{ $coa_id }}">
     <td>
-        <select name="coa_ids[]" class="select-coa form-control @error('coa_ids.*') is-invalid @enderror" data-coa-id="{{ $coa_id }}" >
+        <select name="coa_ids1[]" class="select-coa form-control @error('coa_ids.*') is-invalid @enderror" data-coa-id="{{ $coa_id }}" >
             <option value="">Select Chart of Account</option>
             @foreach($CoAs as $coa)
                 <option value="{{ $coa->code }}" {{ $coa_id == $coa->id ? 'selected' : '' }}>
@@ -15,7 +15,7 @@
         @enderror
     </td>
     <td>
-        <input type="number" name="amounts[]" class="form-control quantity @error('amounts.*') is-invalid @enderror" value="{{ old('amounts.' ) }}" min="1"  />
+        <input type="number" name="amounts1[]" class="form-control quantity @error('amounts.*') is-invalid @enderror" value="{{ old('amounts.' ) }}" min="1"  />
         @error('amounts.*')
             <span class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
@@ -23,7 +23,7 @@
         @enderror
     </td>
     <td>
-        <input type="text" name="descriptions[]" class="form-control quantity @error('descriptions.*') is-invalid @enderror" value="{{ old('descriptions.' ) }}"  />
+        <input type="text" name="descriptions1[]" class="form-control quantity @error('descriptions.*') is-invalid @enderror" value="{{ old('descriptions.' ) }}"  />
         @error('descriptions.*')
             <span class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>

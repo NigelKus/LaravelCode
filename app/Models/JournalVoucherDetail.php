@@ -6,41 +6,39 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Posting extends Model
+class JournalVoucherDetail extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'acct_postings';
+    protected $table = 'journal_voucher_detail';
 
     protected $fillable = [
         'code',
         'account_id',
-        'journal_id',
-        'amount',
+        'posting_id',
+        'voucher_id',
         'description',
-        'ref_id_1',
-        'ref_type_1',
-        'ref_id_2',
-        'ref_type_2',
-        'ref_id_3',
-        'ref_type_3',
+        'amount',
         'status',
-        'timestamp',
     ];
 
     const STATUS_ACTIVE = 'active';
     const STATUS_TRASHED = 'trashed';
     const STATUS_DELETED = 'deleted';
-    
+
+    public function voucher()
+    {
+        return $this->belongsTo(JournalVoucher::class, 'voucher_id');
+    }
+
     public function account()
     {
         return $this->belongsTo(ChartOfAccount::class, 'account_id');
     }
 
-    public function journal()
+    public function posting()
     {
-        return $this->belongsTo(Journal::class, 'journal_id');
+        return $this->belongsTo(Posting::class, 'posting_id');
     }
 
-    
 }

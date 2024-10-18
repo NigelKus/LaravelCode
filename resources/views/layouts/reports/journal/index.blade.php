@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Journal Manual Index')
+@section('title', 'Journal Voucher Index')
 
 @section('content_header')
-    <h1>Journal Manual</h1>
+    <h1>Journal Voucher</h1>
 @stop
 
 @section('content')
@@ -37,8 +37,10 @@
                     </ul>
                 </div>
             @endif
-
         </div>
+
+
+        
     </div>
 @stop
 

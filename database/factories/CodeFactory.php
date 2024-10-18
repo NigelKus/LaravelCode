@@ -144,14 +144,14 @@ class CodeFactory
         return "PP/{$year}/{$month}/{$day}/{$nextNumber}";
     }
 
-    public static function generateJournalManualCode()
+    public static function generateJournalVoucherCode()
     {
         $year = Carbon::now()->format('Y');
         $month = Carbon::now()->format('m');
         $day = Carbon::now()->format('d');
     
-        $latestOrder = DB::table('journal_manual')
-            ->where('code', 'like', "JM/{$year}/{$month}/{$day}/%")
+        $latestOrder = DB::table('journal_voucher')
+            ->where('code', 'like', "JV/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
     
@@ -162,7 +162,7 @@ class CodeFactory
             $nextNumber = '0001';
         }
     
-        return "JM/{$year}/{$month}/{$day}/{$nextNumber}";
+        return "JV/{$year}/{$month}/{$day}/{$nextNumber}";
     }
 
     public static function transactionCode()

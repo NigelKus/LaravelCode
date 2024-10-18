@@ -6,16 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class JournalManual extends Model
+class JournalVoucher extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'journal_manual';
+    protected $table = 'journal_voucher';
 
     public $coa_ids = [];
     public $amounts = [];
-    public $transaction;
-    public $amount;
+    public $coa_ids1 = [];
+    public $amounts1 = [];
+
+    public $type;
 
     protected $fillable = [
         'code',
@@ -24,7 +26,6 @@ class JournalManual extends Model
         'name',
         'description',
         'status',
-        'timestamp',
     ];
 
     const STATUS_ACTIVE = 'active';
@@ -34,6 +35,11 @@ class JournalManual extends Model
     public function journal()
     {
         return $this->belongsTo(Journal::class, 'ref_id');
+    }
+
+    public function detail()
+    {
+        return $this->hasMany(JournalVoucherDetail::class, 'voucher_id');
     }
 
 }

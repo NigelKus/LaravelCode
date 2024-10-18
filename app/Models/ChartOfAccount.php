@@ -30,5 +30,10 @@ class ChartOfAccount extends Model
         return $this->hasMany(Posting::class, 'account_id'); 
     }
 
+    public function manualdetail()
+    {
+        return $this->hasMany(Posting::class, 'account_id'); 
+    }
+
 
 }
