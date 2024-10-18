@@ -13,12 +13,48 @@ use App\Utils\AccountingEvents\AE_JM1_FinishJournalVoucher;
 
 class JournalVoucherController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $CoAs = ChartOfAccount::where('status', 'active')->get(); 
+        $query = JournalVoucher::where('status', 'pending');
 
-        return view('layouts.reports.journal.index', compact('CoAs'));
+    
+        $statuses = ['pending', 'completed'];
+    
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+    
+        if ($request->has('code') && $request->code != '') {
+            $query->where('code', 'like', '%' . $request->code . '%');
+        }
+    
+        if ($request->has('type') && $request->type != '') {
+            $query->where('type', 'like', '%' . $request->type . '%');
+        }
+    
+        if ($request->has('name') && $request->name != '') {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+    
+        if ($request->has('date') && $request->date != '') {
+            $query->whereDate('date', $request->date);
+        }
+    
+        if ($request->has('sort')) {
+            if ($request->sort == 'recent') {
+                $query->orderBy('date', 'desc');
+            } elseif ($request->sort == 'oldest') {
+                $query->orderBy('date', 'asc'); 
+            }
+        }
+
+        $perPage = $request->get('perPage', 10);
+        $journalVouchers = $query->paginate($perPage);
+
+        dd($journalVouchers);
+        return view('layouts.reports.journal.index', compact('journalVouchers', 'statuses'));
     }
+    
 
     public function create()
     {
@@ -131,5 +167,10 @@ class JournalVoucherController extends Controller
             return redirect()->route('journal.index')->with('success', 'Journal entry created successfully.');
         
         
+    }
+
+    public function show()
+    {
+
     }
 }

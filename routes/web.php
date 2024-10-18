@@ -210,4 +210,5 @@ Route::prefix('admin/master/product')
         Route::get('index', [JournalVoucherController::class, 'index'])->name('index');
         Route::get('create', [JournalVoucherController::class, 'create'])->name('create');
         Route::post('store', [JournalVoucherController::class, 'store'])->name('store');
+        Route::get('{id}', [JournalVoucherController::class, 'show'])->name('show');
     });
