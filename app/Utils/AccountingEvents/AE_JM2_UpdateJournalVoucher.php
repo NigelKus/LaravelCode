@@ -2,10 +2,11 @@
 
 namespace App\Utils\AccountingEvents;
 
-use App\Models\JournalManual;
+use App\Models\Journal;
 use App\Utils\Constants;
 
 use App\Utils\SelectHelper;
+use App\Models\JournalManual;
 use App\Models\PurchaseInvoice;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Accounting\AccountingManager;
@@ -19,8 +20,10 @@ class AE_JM2_UpdateJournalVoucher extends AE_Base
 
     public static function buildJournalContent($obj) {
 
-        $journal = $obj->journal_id;    
-    
+        $journal = $obj->journal_id;
+
+        $journal = Journal::find($journal);
+
         foreach($obj->coa_ids1 as $index => $coa_id)
         {
             $amounta = $obj->amounts1[$index]; 

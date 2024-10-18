@@ -11,6 +11,7 @@ use App\Models\JournalVoucher;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
 use App\Models\JournalVoucherDetail;
+use App\Utils\AccountingEvents\AE_JM1_FinishJournalVoucher;
 use App\Utils\AccountingEvents\AE_JM2_UpdateJournalVoucher;
 
 class JournalVoucherController extends Controller
@@ -277,21 +278,26 @@ class JournalVoucherController extends Controller
             $validatedData['descriptions'],
             $validatedData['descriptions1']
         );
+        DB::beginTransaction();
 
-        $journalVoucher = JournalVoucher::where('id', $validatedData['journal_id'])->first();
+        $journalVoucher = JournalVoucher::findOrFail($validatedData['journal_id']);
 
         $details = JournalVoucherDetail::where('voucher_id', $journalVoucher->id)->get();
 
-        dd($details);
+        // dd($details);
 
-        foreach($details as $detail)
-        {
-            $posting = Posting::where('id', $detail->$posting_id)->first();
-            $posting->delete();
+        foreach ($details as $detail) {
+            $posting = Posting::where('id', $detail->posting_id)->first();
+            
+            if ($posting) {
+                $posting->delete();
+            }
+            
             $detail->delete();
         }
+        
 
-        $journalVoucher::update([
+        $journalVoucher->update([
             'date' => $validatedData['date'],
             'description' => $validatedData['description'],
             'name' => $validatedData['name'],
@@ -310,25 +316,24 @@ class JournalVoucherController extends Controller
         if ($journal) {
             $journal->date = Carbon::parse($request['date']);
             $journal->save();
-
-            $postings = Posting::where('journal_id', $journal->id)->get();
-            $totalNewAmount = 0;
-
-            foreach ($request->requested as $requestedAmount) {
-                if (!empty($requestedAmount)) {
-                    $totalNewAmount += $requestedAmount; 
-                }
-            }
-
-
-
-
         }
 
-        DB::beginTransaction();
+        $postingacct = Posting::where('journal_id', $journalacct->id)->get();
+            
+        foreach ($postingacct as $index => $a) {
+            JournalVoucherDetail::create([
+                'account_id' => $a->account_id,
+                'posting_id' => $a->id,
+                'voucher_id' => $journalVoucher->id,
+                'amount' => $a->amount,
+                'description' => isset($descriptions[$index]) ? $descriptions[$index] : null,
+                'status' => 'pending',
+            ]);
+        }
+        DB::commit();
 
-        DB::rollBack();
+        // DB::rollBack();
         
-        return view('layouts.reports.journal.show');
+        return redirect()->route('journal.show', $journalVoucher->id)->with('success', 'Journal Voucher updated successfully.');
     }
 }
