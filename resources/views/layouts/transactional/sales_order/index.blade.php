@@ -19,7 +19,6 @@
                 </ul>
             </div>
         @endif
-            <!-- Filter Form -->
             <div class="card-tools">
                 <a href="{{ route('sales_order.create-copy') }}" class="btn btn-success btn-sm ml-2">
                     <i class="fas fa-plus"></i> Create
