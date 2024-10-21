@@ -26,154 +26,71 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
         $this->stock = $stock;
         $this->date = $date;
     }
-
     public function collection()
     {
         $data = collect();
-
-        $data->push(['']);
-
-        if($this->all == true){
-        foreach ($this->results as $result) {
-            $totalKredit = 0;
-            $totalDebit = 0;
-            $totalBalance = 0;
-
-            $startingBalance = !empty($result['starting_balance']) ? $result['starting_balance'] : 0;
-
+    
+        $data->push(['']); 
+        $data->push(['Keterangan', 'Jumlah', 'Total']);
+    
+        $totalPendapatan = 0; 
+        foreach ($this->pendapatan as $a) {
+            $jumlah = number_format(abs($a['total']), 2);
+            $totalPendapatan += abs($a['total']);
             $data->push([
-                'Chart of Account' => $result['coa'].'('.$result['coa_code'].')',
+                "{$a['coa']->name} ({$a['coa']->code})", 
+                $jumlah, 
+                '' 
             ]);
-            $data->push([
-                'Kode',
-                'Tanggal',
-                'Journal Name',
-                'Kode Transaksi',
-                'Debit',
-                'Kredit',
-                'Balance',
-            ]);
-
-            $data->push([
-                'Saldo Awal',
-                $this->date,
-                'Saldo Awal',
-                '',
-                '',
-                '',
-                number_format($startingBalance, 0, '.', ','), 
-            ]);
-            $totalBalance += $startingBalance;
-
-            foreach ($result['postings'] as $posting) {
-                $dataArray = [
-                    'Kode' => $posting->journal->code,
-                    'Tanggal' => $posting->date,
-                    'Journal Name' => $posting->journal->name,
-                    'Kode Transaksi' => $posting->journal->description,
-                    'Debit' => '',
-                    'Kredit' => '',
-                    'Balance' => '', 
-                ];
-
-                if ($posting->amount >= 0) {
-                    $dataArray['Debit'] = number_format($posting->amount, 0, '.', ',');
-                    $totalDebit += $posting->amount;
-                    $totalBalance += $posting->amount; 
-                } else {
-                    $dataArray['Kredit'] = number_format(abs($posting->amount), 0, '.', ','); 
-                    $totalKredit += abs($posting->amount);
-                    $totalBalance -= abs($posting->amount); 
-                }
-
-                $dataArray['Balance'] = number_format($totalBalance, 0, '.', ','); 
-                $data->push($dataArray);
-            }
-
-            $data->push([
-                '',
-                '',
-                '',
-                'Total',
-                number_format($totalDebit, 0, '.', ','), 
-                number_format($totalKredit, 0, '.', ','), 
-                number_format($totalBalance, 0, '.', ','), 
-            ]);
-
-            $data->push(['']);
         }
-            return $data;
-        }else{
-            $totalKredit = 0;
-            $totalDebit = 0;
-            $totalBalance = 0;
+        
+        $data->push([
+            'Total Pendapatan',
+            '',
+            number_format($totalPendapatan, 2) 
+        ]);
+    
+        $data->push([
+            'HPP',
+            '',
+            number_format($this->stock, 2), 
+        ]);
 
-            $startingBalance = !empty($this->balance) ? $this->balance : 0;
+        $labaKotor = $totalPendapatan - $this->stock;
 
+        $data->push([
+            'Laba Kotor',
+            '',
+            number_format($labaKotor, 2), 
+        ]);
+    
+        $totalBeban = 0; 
+        foreach ($this->beban as $a) {
+            $jumlah = number_format(abs($a['total']), 2);
+            $totalBeban += abs($a['total']); 
             $data->push([
-                'Chart of Account' => $this->coa->name.'('.$this->coa->code.')',
+                "{$a['coa']->name} ({$a['coa']->code})", 
+                $jumlah, 
+                '' 
             ]);
-            $data->push([
-                'Kode',
-                'Tanggal',
-                'Journal Name',
-                'Kode Transaksi',
-                'Debit',
-                'Kredit',
-                'Balance',
-            ]);
-
-            $data->push([
-                'Saldo Awal',
-                $this->date,
-                'Saldo Awal',
-                '',
-                '',
-                '',
-                number_format($startingBalance, 0, '.', ','), 
-            ]);
-            $totalBalance += $startingBalance;
-
-            foreach ($this->postings as $posting) {
-                $dataArray = [
-                    'Kode' => $posting->journal->code,
-                    'Tanggal' => $posting->date,
-                    'Journal Name' => $posting->journal->name,
-                    'Kode Transaksi' => $posting->journal->description,
-                    'Debit' => '',
-                    'Kredit' => '',
-                    'Balance' => '', 
-                ];
-
-                if ($posting->amount >= 0) {
-                    $dataArray['Debit'] = number_format($posting->amount, 0, '.', ',');
-                    $totalDebit += $posting->amount;
-                    $totalBalance += $posting->amount; 
-                } else {
-                    $dataArray['Kredit'] = number_format(abs($posting->amount), 0, '.', ','); 
-                    $totalKredit += abs($posting->amount);
-                    $totalBalance -= abs($posting->amount); 
-                }
-
-                $dataArray['Balance'] = number_format($totalBalance, 0, '.', ','); 
-                $data->push($dataArray);
-            }
-
-            $data->push([
-                '',
-                '',
-                '',
-                'Total',
-                number_format($totalDebit, 0, '.', ','), 
-                number_format($totalKredit, 0, '.', ','), 
-                number_format($totalBalance, 0, '.', ','), 
-            ]);
-
-            $data->push(['']);
         }
-
+    
+        $data->push([
+            'Total Beban',
+            '',
+            number_format($totalBeban, 2)
+        ]);
+    
+        $labaBersihSebelumPajak = $labaKotor - $totalBeban ; 
+        $data->push([
+            'Laba Bersih Sebelum Pajak',
+            '',
+            number_format($labaBersihSebelumPajak, 2) 
+        ]);
+    
         return $data;
     }
+    
 
     public function headings(): array
     {
@@ -188,11 +105,17 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getColumnDimension('A')->setWidth(25); // Keterangan
-        $sheet->getColumnDimension('B')->setWidth(30); // Jumlah
+        $sheet->getColumnDimension('A')->setWidth(27); // Keterangan
+        $sheet->getColumnDimension('B')->setWidth(32); // Jumlah
         $sheet->getColumnDimension('C')->setWidth(28); // Total
 
-        $sheet->getStyle('E:G')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('B:C')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        $sheet->getStyle('A1:A5')->getFont()->setBold(true);
+
+        $sheet->getStyle('A5:C5')->getFont()->setBold(true);
+
+        
     }
 
 }

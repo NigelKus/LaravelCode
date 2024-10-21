@@ -167,7 +167,8 @@ class ProfitLossController extends Controller
     
         $pendapatanIds = ChartOfAccount::where('code', '>=', 4000)
             ->where('code', '<', 5000)
-            ->pluck('id');
+            ->pluck('id')
+            ->sortByAsc('code');;
 
         
         $pendapatan = [];
@@ -189,7 +190,8 @@ class ProfitLossController extends Controller
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
             ->where('code', '<', 8999)
-            ->pluck('id');
+            ->pluck('id')
+            ->sortBy('asc','code');
         
         $beban = [];
     
@@ -221,7 +223,7 @@ class ProfitLossController extends Controller
             ->where('date', '<=', $todate) 
         ->sum('amount');
 
-        $stock = abs($persediaanAwal - $persediaanAkhir);
+        $stock = $persediaanAwal - $persediaanAkhir;
 
 
         return Excel::download(new ProfitLossExport($fromdate, $todate, $pendapatan, $beban, $stock, $date), 'Profit Loss.xlsx');
