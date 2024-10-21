@@ -26,59 +26,31 @@ class AE_JM1_FinishJournalVoucher extends AE_Base
             $obj->date,
         );
 
-        if($obj->type = 'in')
+        foreach($obj->coa_ids1 as $index => $coa_id)
         {
-            foreach($obj->coa_ids as $index => $coa_id)
-            {
-                $amounta = $obj->amounts[$index]; 
-            
-                AccountingManager::debit(
-                    $journal,
-                    $coa_id,          
-                    $amounta,           
-                    '',            
-                    $obj->date,        
-                );
-            }
-            foreach($obj->coa_ids1 as $index => $coa_id)
-            {
-                $amounta = $obj->amounts1[$index]; 
-            
-                AccountingManager::credit(
-                    $journal,
-                    $coa_id,          
-                    $amounta,           
-                    '',            
-                    $obj->date,        
-                );
-            }
-        }else
-        {
-            foreach($obj->coa_ids1 as $index => $coa_id)
-            {
-                $amounta = $obj->amounts1[$index]; 
-            
-                AccountingManager::debit(
-                    $journal,
-                    $coa_id,          
-                    $amounta,           
-                    '',            
-                    $obj->date,        
-                );
-            }
-            foreach($obj->coa_ids as $index => $coa_id)
-            {
-                $amounta = $obj->amounts[$index]; 
-            
-                AccountingManager::credit(
-                    $journal,
-                    $coa_id,          
-                    $amounta,           
-                    '',            
-                    $obj->date,        
-                );
-            }
+            $amounta = $obj->amounts[$index]; 
+        
+            AccountingManager::debit(
+                $journal,
+                $coa_id,          
+                $amounta,           
+                '',            
+                $obj->date,        
+            );
         }
+        foreach($obj->coa_ids as $index => $coa_id)
+        {
+            $amounta = $obj->amounts1[$index]; 
+        
+            AccountingManager::credit(
+                $journal,
+                $coa_id,          
+                $amounta,           
+                '',            
+                $obj->date,        
+            );
+        }
+
 
         return $journal;
     }

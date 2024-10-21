@@ -202,6 +202,9 @@ Route::prefix('admin/master/product')
     ->name('profit_loss.')
     ->group(function () {
         Route::get('index', [ProfitLossController::class, 'index'])->name('index');
+        Route::post('generate', [ProfitLossController::class, 'generate'])->name('generate');
+        Route::post('pdf', [ProfitLossController::class, 'generateProfitLossPDF'])->name('pdf');
+        Route::post('excel', [ProfitLossController::class, 'generateProfitLossExcel'])->name('excel');
     });
 
     Route::prefix('admin/reports/journal')

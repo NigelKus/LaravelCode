@@ -31,10 +31,6 @@ class JournalVoucherController extends Controller
             $query->where('code', 'like', '%' . $request->code . '%');
         }
     
-        if ($request->has('type') && $request->type != '') {
-            $query->where('type', 'like', '%' . $request->type . '%');
-        }
-    
         if ($request->has('name') && $request->name != '') {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
@@ -115,7 +111,6 @@ class JournalVoucherController extends Controller
             ]);
         
             $validatedData = $request->validate([
-                'type' => 'required',
                 'date' => 'required|date',
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -137,7 +132,6 @@ class JournalVoucherController extends Controller
             $journalVoucher = JournalVoucher::create([
                 'code' => $journalVoucherCode,
                 'date' => $validatedData['date'],
-                'type' => $validatedData['type'],
                 'name' => $validatedData['name'],
                 'description' => $validatedData['description'],
                 'status' => 'pending',
@@ -147,7 +141,7 @@ class JournalVoucherController extends Controller
             $journalVoucher->amounts = $validatedData['amounts'];
             $journalVoucher->coa_ids1 = $validatedData['coa_ids1'];
             $journalVoucher->amounts1 = $validatedData['amounts1'];
-            $journalVoucher->type = $validatedData['type'];
+            $journalVoucher->type = 'in';
 
             $journalacct = AE_JM1_FinishJournalVoucher::process($journalVoucher);
 
@@ -181,9 +175,15 @@ class JournalVoucherController extends Controller
     {
         $journalVoucher = JournalVoucher::with('journal')->findOrFail($id); 
 
-        $journal = Journal::where('ref_id', $id)->first();
+        $journal = Journal::withTrashed()->where('ref_id', $id)->first();
+
+        $details = JournalVoucherDetail::with(['account' => function ($query) {
+            $query->withTrashed();
+        }])->where('voucher_id', $journalVoucher->id)->get();
         
-        $details = JournalVoucherDetail::with('account')->where('voucher_id', $journalVoucher->id)->get();
+
+
+        // dd($details);
 
         return view('layouts.reports.journal.show', compact('journalVoucher', 'details', 'journal'));
     }
@@ -212,10 +212,37 @@ class JournalVoucherController extends Controller
         return view('layouts.reports.journal.edit', compact('CoAs', 'kasbank', 'journalVoucher','debitDetails', 'creditDetails'));
     }
 
-    public function destroy()
+    public function destroy($id)
     {
-        return view('layouts.reports.journal.show');
+        $journalVoucher = JournalVoucher::findOrFail($id); 
+    
+        $details = JournalVoucherDetail::where('voucher_id', $journalVoucher->id)->get();
+    
+        $journal = Journal::where('ref_id', $journalVoucher->id)->first();
+    
+        foreach ($details as $detail) {
+            
+            $posting = Posting::where('id', $detail->posting_id)->first();
+            
+            if ($posting) {
+                $posting->update(['status'=>'deleted']);
+                $posting->delete();
+            }
+            $detail->update(['status'=>'deleted']);
+            $detail->delete();
+        }
+    
+        if ($journal) {
+            $journal->update(['status'=>'deleted']);
+            $journal->delete();
+        }
+    
+        $journalVoucher->update(['status' => 'deleted']);
+        $journalVoucher->delete();
+    
+        return redirect()->route('journal.index')->with('success', 'Journal Voucher deleted successfully');
     }
+    
 
     public function update(Request $request)
     {
@@ -290,9 +317,15 @@ class JournalVoucherController extends Controller
             $posting = Posting::where('id', $detail->posting_id)->first();
             
             if ($posting) {
+                $posting->update([
+                    'status' => 'deleted',
+                ]);
                 $posting->delete();
             }
-            
+
+            $detail->update([
+                'status' => 'deleted',
+            ]);
             $detail->delete();
         }
         
@@ -309,7 +342,7 @@ class JournalVoucherController extends Controller
         $journalVoucher->amounts = $validatedData['amounts'];
         $journalVoucher->coa_ids1 = $validatedData['coa_ids1'];
         $journalVoucher->amounts1 = $validatedData['amounts1'];
-        $journalVoucher->journal_id = $validatedData['journal_id'];
+        $journalVoucher->journal_id = $journal->id;
 
         $journalacct = AE_JM2_UpdateJournalVoucher::process($journalVoucher);
 

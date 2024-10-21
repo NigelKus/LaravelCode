@@ -27,7 +27,7 @@
         <input type="text" name="quantity_remaining[]" class="form-control quantity-remaining" value="{{ $quantity_remaining }}" readonly />
     </td>
     <td>
-        <input type="text" name="price_eachs[]" class="form-control price-each" value="{{ $price }}" readonly />
+        <input type="text" name="price_eachs[]" class="form-control price-each" value="{{ $price }}"  />
     </td>
     <td>
         <input type="text" name="price_totals[]" class="form-control price-total" value="{{ $price_total }}" readonly />

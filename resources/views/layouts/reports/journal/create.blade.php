@@ -20,7 +20,7 @@
             @endif
             <form id="journal-form" method="POST" action="/admin/reports/journal/store" class="form-horizontal">
                 @csrf
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <label for="type">Type</label>
                     <select class="form-control @error('type') is-invalid @enderror" id="type" name="type" required>
                         <option value="">Select Type</option>
@@ -32,7 +32,7 @@
                             <strong>{{ $message }}</strong>
                         </span>
                     @enderror
-                    </div>
+                </div> --}}
 
                 <div class="form-group">
                     <label for="date">Date</label> 

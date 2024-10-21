@@ -8,27 +8,23 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class GeneralLedgerExport implements FromCollection, WithHeadings, WithStyles
+class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
 {
-    protected $results;
     protected $fromdate;
     protected $todate;
+    protected $pendapatan;
+    protected $beban;
+    protected $stock;
     protected $date;
-    protected $postings;
-    protected $balance;
-    protected $coa;
-    protected $all;
 
-    public function __construct(array $results = null, $fromdate, $todate, $date, $postings = null, $balance = null, $coa = null, $all = null)
+    public function __construct($fromdate, $todate, $pendapatan, $beban, $stock, $date)
     {
-        $this->results = $results;
         $this->fromdate = $fromdate;
         $this->todate = $todate;
+        $this->pendapatan = $pendapatan;
+        $this->beban = $beban;
+        $this->stock = $stock;
         $this->date = $date;
-        $this->postings = $postings;
-        $this->balance = $balance;
-        $this->coa = $coa;
-        $this->all = $all;
     }
 
     public function collection()
@@ -182,7 +178,7 @@ class GeneralLedgerExport implements FromCollection, WithHeadings, WithStyles
     public function headings(): array
     {
         return [
-            ['General Ledger Report'],
+            ['Profit Loss Report'],
             ['Date Range:', $this->fromdate . ' s/d ' . $this->todate],
             ['Created Date:', $this->date],
             [],
@@ -192,13 +188,9 @@ class GeneralLedgerExport implements FromCollection, WithHeadings, WithStyles
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getColumnDimension('A')->setWidth(25); // Kode
-        $sheet->getColumnDimension('B')->setWidth(30); // Tanggal
-        $sheet->getColumnDimension('C')->setWidth(28); // Journal Name
-        $sheet->getColumnDimension('D')->setWidth(25); // Kode Transaksi
-        $sheet->getColumnDimension('E')->setWidth(15); // Debit
-        $sheet->getColumnDimension('F')->setWidth(15); // Kredit
-        $sheet->getColumnDimension('G')->setWidth(15); // Balance
+        $sheet->getColumnDimension('A')->setWidth(25); // Keterangan
+        $sheet->getColumnDimension('B')->setWidth(30); // Jumlah
+        $sheet->getColumnDimension('C')->setWidth(28); // Total
 
         $sheet->getStyle('E:G')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     }

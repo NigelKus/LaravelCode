@@ -3,6 +3,7 @@
 namespace App\Utils\AccountingEvents;
 
 use App\Models\Journal;
+use App\Models\JournalVoucher;
 use App\Utils\Constants;
 
 use App\Utils\SelectHelper;
@@ -22,12 +23,12 @@ class AE_JM2_UpdateJournalVoucher extends AE_Base
 
         $journal = $obj->journal_id;
 
-        $journal = Journal::find($journal);
+        $journal = Journal::where('id', $obj->journal_id)->firstOrFail();
+
 
         foreach($obj->coa_ids1 as $index => $coa_id)
         {
             $amounta = $obj->amounts1[$index]; 
-        
             AccountingManager::debit(
                 $journal,
                 $coa_id,          

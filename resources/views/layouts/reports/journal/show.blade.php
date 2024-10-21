@@ -122,7 +122,7 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td>{{ $obj->description }}</td>
-                                                <td>({{ $obj->account->code }}) {{ $obj->account->name }}</td>
+                                                <td>({{ $obj->account->code ?? 0}}) {{ $obj->account->name ?? 0}}</td>
                                                 <td></td>
                                                 <td>{{ number_format(abs($obj->amount)) }}</td>
                                             @endif

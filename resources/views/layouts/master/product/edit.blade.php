@@ -68,7 +68,7 @@
 
                 <!-- Price Field -->
                 <div class="form-group">
-                    <label for="price">Price ($)</label>
+                    <label for="price">Price (Rp)</label>
                     <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price) }}" required>
                     @error('price')
                         <div class="invalid-feedback">
