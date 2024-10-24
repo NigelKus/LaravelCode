@@ -14,6 +14,8 @@ class SalesInvoice extends Model
     const STATUS_DELETED = 'deleted';
     protected $dates = ['date'];
 
+    public $HPP;
+
     protected $fillable = [
         'code',
         'salesorder_id',

@@ -165,6 +165,7 @@ class PaymentPurchaseController extends Controller
             AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);
         }else 
         {
+            
             AE_PO4_FinishPurchasePaymentKas::process($paymentPurchase);
         }
         DB::commit();
@@ -184,7 +185,11 @@ class PaymentPurchaseController extends Controller
             return $detail->price;
         });
 
-        $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
+        $refType = 'App\Models\PaymentPurchase';
+
+        $journal = Journal::where('ref_id', $paymentPurchase->id)
+                        ->where('ref_type', $refType)
+                        ->first();
         $coas = [];
         $postings = collect();
 
@@ -319,7 +324,11 @@ class PaymentPurchaseController extends Controller
         
         $orderDetails = $paymentPurchase->paymentDetails;
 
-        $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
+        $refType = 'App\Models\PaymentPurchase';
+
+        $journal = Journal::where('ref_id', $paymentPurchase->id)
+                        ->where('ref_type', $refType)
+                        ->first();
 
         
         if ($journal) {

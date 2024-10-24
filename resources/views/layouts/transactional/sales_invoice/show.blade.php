@@ -192,6 +192,17 @@
                                         <td>{{ number_format(abs($obj->amount)) }}</td> 
                                         <td></td>
                                     </tr>
+                                @elseif ($index == 2)
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                        ({{ $coas[$index]->code }}) {{ $coas[$index]->name }}
+                                    </td>
+                                    <td>{{ number_format(abs($obj->amount)) }}</td> 
+                                    <td></td>
+                                </tr>
                                     @else
                                     <tr>
                                         <td></td>

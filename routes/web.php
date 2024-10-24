@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BalanceSheetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CoAController;
 use App\Http\Controllers\UserController;
@@ -187,8 +188,6 @@ Route::prefix('admin/master/product')
     });
 
 //Reports Routing
-    Route::get('generateGeneralLedgerPDF', [App\Http\Controllers\PdfController::class, 'generateGeneralLedgerPDF']);
-
     Route::prefix('admin/reports/general_ledger')
     ->name('general_ledger.')
     ->group(function () {
@@ -196,6 +195,15 @@ Route::prefix('admin/master/product')
         Route::post('generate', [GeneralLedgerController::class, 'generate'])->name('generate');
         Route::post('pdf', [GeneralLedgerController::class, 'generateGeneralLedgerPDF'])->name('pdf');
         Route::post('excel', [GeneralLedgerController::class, 'generateGeneralLedgerExcel'])->name('excel');
+    });
+
+    Route::prefix('admin/reports/balance_sheet')
+    ->name('balance_sheet.')
+    ->group(function () {
+        Route::get('index', [BalanceSheetController::class, 'index'])->name('index');
+        Route::post('generate', [BalanceSheetController::class, 'generate'])->name('generate');
+        Route::post('pdf', [BalanceSheetController::class, 'generateBalanceSheetPDF'])->name('pdf');
+        Route::post('excel', [BalanceSheetController::class, 'generateBalanceSheetExcel'])->name('excel');
     });
 
     Route::prefix('admin/reports/profit_loss')

@@ -24,10 +24,10 @@ class AccountingSetting
     const UtangUsaha = 2000;
     const Modal = 3000;
     const Pendapatan = 4000;
+    const HargaPokokPenjualan = 4200;
     const Beban = 5000;
-    const BebanHPP = 6000;
-    const BebanOperasional = 7000;
-    const BebanNonOperasional = 8000;
-    const BebanLainnya = 9000;
+    const BebanOperasional = 6000;
+    const BebanNonOperasional = 7000;
+    const BebanLainnya = 8000;
 
 }

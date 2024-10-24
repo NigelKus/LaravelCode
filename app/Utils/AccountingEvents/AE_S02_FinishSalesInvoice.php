@@ -5,7 +5,7 @@ namespace App\Utils\AccountingEvents;
 use App\Utils\Constants;
 
 use App\Utils\SelectHelper;
-use App\Models\Sales\SalesInvoice;
+use App\Models\SalesInvoice;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Accounting\AccountingManager;
 use App\Utils\Accounting\AccountingSetting;
@@ -41,7 +41,20 @@ class AE_S02_FinishSalesInvoice extends AE_Base
         '',
         $obj->date
     );
-    
+
+        AccountingManager::debit($journal,
+        AccountingSetting::HargaPokokPenjualan,  // DEBIT :: Harga Pokok Penjualan
+        $obj->HPP,
+        '',
+        $obj->date
+    );
+
+        AccountingManager::credit($journal,
+        AccountingSetting::Stock,  // CREDIT :: Stock
+        $obj->HPP,
+        '',
+        $obj->date
+    );
 
         return $journal;
     }

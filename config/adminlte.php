@@ -422,17 +422,17 @@ return [
         ],
         [
             'text' => 'Payment',
-            'icon' => 'fas fa-money-bill-wave', // Changed icon for Payment
+            'icon' => 'fas fa-money-bill-wave', 
             'submenu' => [
                 [
                     'text' => 'Payment Sales',
                     'url' => 'admin/transactional/payment_order/index',
-                    'icon' => 'fas fa-receipt', // Changed icon for Payment Order
+                    'icon' => 'fas fa-receipt', 
                 ],
                 [
                     'text' => 'Payment Purchase',
                     'url' => 'admin/transactional/payment_purchase/index',
-                    'icon' => 'fas fa-file-invoice', // Changed icon for Payment Invoice
+                    'icon' => 'fas fa-file-invoice', 
                 ],
             ],
         ],

@@ -24,8 +24,9 @@ class ProfitLossController extends Controller
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
     
-        $pendapatanIds = ChartOfAccount::where('code', '>=', 4000)
-            ->where('code', '<', 5000)
+        $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+            ->where('code', 'not like', '42%')
+            ->orderBy('code', 'asc')
             ->pluck('id');
         
         $pendapatan = [];
@@ -46,8 +47,10 @@ class ProfitLossController extends Controller
         }
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
-            ->where('code', '<', 8999)
+            ->where('code', '<=', 8999)
+            ->orderBy('code', 'asc')
             ->pluck('id');
+    
         
         $beban = [];
     
@@ -66,23 +69,20 @@ class ProfitLossController extends Controller
             }
         }
 
-        $stockId = ChartOfAccount::where('code', 1300)->pluck('id')->first();
+        $HPP = ChartOfAccount::where('code', 4200)->first();
 
-        $persediaanAwal = Posting::where('account_id', $stockId)
-            ->where('amount', '>', 0)
-            ->where('date', '<', $fromdate) 
-            ->sum('amount');
+        $codeHPP = ChartOfAccount::where('code', 4200)
+            ->pluck('id')->first();
 
-        $persediaanAkhir = Posting::where('account_id', $stockId)
+
+        $totalHPP = Posting::where('account_id', $codeHPP)
             ->where('amount', '>', 0)
             ->where('date', '>=', $fromdate)  
             ->where('date', '<=', $todate) 
-        ->sum('amount');
+            ->sum('amount');
+        // dd($totalHPP);
 
-
-        $stock = abs($persediaanAwal - $persediaanAkhir);
-
-        return view('layouts.reports.profit_loss.report', compact('fromdate', 'todate', 'pendapatan', 'beban', 'stock'));
+        return view('layouts.reports.profit_loss.report', compact('fromdate', 'todate', 'pendapatan', 'beban', 'totalHPP', 'HPP'));
     }
     
 
@@ -94,8 +94,9 @@ class ProfitLossController extends Controller
         $todate = str_replace('T', ' ', $todate);
         $date = date('m/d/Y');
     
-        $pendapatanIds = ChartOfAccount::where('code', '>=', 4000)
-            ->where('code', '<', 5000)
+        $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+            ->where('code', 'not like', '42%')
+            ->orderBy('code', 'asc')
             ->pluck('id');
 
         
@@ -117,7 +118,8 @@ class ProfitLossController extends Controller
         }
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
-            ->where('code', '<', 8999)
+            ->where('code', '<=', 8999)
+            ->orderBy('code', 'asc')
             ->pluck('id');
         
         $beban = [];
@@ -137,23 +139,20 @@ class ProfitLossController extends Controller
             }
         }
 
-        $stockId = ChartOfAccount::where('code', 1300)->pluck('id')->first();
+        $HPP = ChartOfAccount::where('code', 4200)->first();
 
-        $persediaanAwal = Posting::where('account_id', $stockId)
-            ->where('amount', '>', 0)
-            ->where('date', '<', $fromdate) 
-            ->sum('amount');
+        $codeHPP = ChartOfAccount::where('code', 4200)
+            ->pluck('id')->first();
 
-        $persediaanAkhir = Posting::where('account_id', $stockId)
+
+        $totalHPP = Posting::where('account_id', $codeHPP)
             ->where('amount', '>', 0)
             ->where('date', '>=', $fromdate)  
             ->where('date', '<=', $todate) 
-        ->sum('amount');
-
-        $stock = abs($persediaanAwal - $persediaanAkhir);
+            ->sum('amount');
 
 
-        $pdf = PDF::loadView('layouts.reports.profit_loss.pdf', compact('fromdate', 'todate', 'pendapatan', 'beban', 'stock', 'date'));
+        $pdf = PDF::loadView('layouts.reports.profit_loss.pdf', compact('fromdate', 'todate', 'pendapatan', 'beban', 'HPP', 'date', 'totalHPP'));
         return $pdf->stream('profit-loss.pdf');
     }
 
@@ -165,12 +164,11 @@ class ProfitLossController extends Controller
         $todate = str_replace('T', ' ', $todate);
         $date = date('m/d/Y');
     
-        $pendapatanIds = ChartOfAccount::where('code', '>=', 4000)
-            ->where('code', '<', 5000)
-            ->pluck('id')
-            ->sortByAsc('code');;
-
-        
+        $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+            ->where('code', 'not like', '42%')
+            ->orderBy('code', 'asc')
+            ->pluck('id');
+    
         $pendapatan = [];
 
         foreach ($pendapatanIds as $id) {
@@ -189,12 +187,12 @@ class ProfitLossController extends Controller
         }
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
-            ->where('code', '<', 8999)
-            ->pluck('id')
-            ->sortBy('asc','code');
+            ->where('code', '<=', 8999)
+            ->orderBy('code', 'asc')
+            ->pluck('id');
         
         $beban = [];
-    
+
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
@@ -210,22 +208,19 @@ class ProfitLossController extends Controller
             }
         }
 
-        $stockId = ChartOfAccount::where('code', 1300)->pluck('id')->first();
+        $HPP = ChartOfAccount::where('code', 4200)->first();
 
-        $persediaanAwal = Posting::where('account_id', $stockId)
-            ->where('amount', '>', 0)
-            ->where('date', '<', $fromdate) 
-            ->sum('amount');
+        $codeHPP = ChartOfAccount::where('code', 4200)
+            ->pluck('id')->first();
 
-        $persediaanAkhir = Posting::where('account_id', $stockId)
+
+        $totalHPP = Posting::where('account_id', $codeHPP)
             ->where('amount', '>', 0)
             ->where('date', '>=', $fromdate)  
             ->where('date', '<=', $todate) 
-        ->sum('amount');
-
-        $stock = $persediaanAwal - $persediaanAkhir;
+            ->sum('amount');
 
 
-        return Excel::download(new ProfitLossExport($fromdate, $todate, $pendapatan, $beban, $stock, $date), 'Profit Loss.xlsx');
+        return Excel::download(new ProfitLossExport($fromdate, $todate, $pendapatan, $beban, $HPP, $date, $totalHPP), 'Profit Loss.xlsx');
     }
 }

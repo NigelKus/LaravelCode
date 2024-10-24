@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Customer;
 use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
+use Database\Factories\HPPFactory;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
 use Illuminate\Support\Carbon;
@@ -149,6 +150,8 @@ class SalesInvoiceController extends Controller
             $requestedQuantities = $request->input('requested');
             $priceEaches = $request->input('price_eachs');
             $salesDetail = $request->input('sales_order_detail_ids');
+
+            $HPP = 0;
             foreach ($salesDetail as $index => $salesOrderDetailId) {
                 $salesOrderDetail = $existingSalesOrder->details->where('id', $salesOrderDetailId)->first();
 
@@ -168,9 +171,13 @@ class SalesInvoiceController extends Controller
                 $salesInvoiceDetail->status = 'pending'; 
                 $salesInvoiceDetail->save();
 
+                $HPP = $HPP + ($requested * HPPFactory::generateHPP($productId,  $request->input('date')));
                 SalesorderDetail::checkAndUpdateStatus($salesOrderId, $productId, $salesOrderDetailId);
                 
             }
+
+            $salesInvoice->HPP = $HPP;
+
             $account1 = ChartOfAccount::where("code", 1200)->first();
             $account2 = ChartOfAccount::where("code", 4000)->first();
             if($account1 == null)
@@ -186,6 +193,7 @@ class SalesInvoiceController extends Controller
                 DB::rollBack();
                 return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1200 & 4000 does not exist.']);
             }
+            
             
             AE_S02_FinishSalesInvoice::process($salesInvoice);
             
@@ -209,7 +217,11 @@ class SalesInvoiceController extends Controller
             return $detail->price * $detail->quantity;
         });
         
-        $journal = Journal::where('ref_id', $salesInvoice->id)->first();
+        $refType = 'App\Models\SalesInvoice';
+
+        $journal = Journal::where('ref_id', $salesInvoice->id)
+                        ->where('ref_type', $refType)
+                        ->first();
         $coas = [];
         $postings = collect();
 
@@ -276,7 +288,12 @@ class SalesInvoiceController extends Controller
         $salesInvoice = SalesInvoice::with('details')->findOrFail($id);
         $invoiceDetails = $salesInvoice->details;
         
-        $journal = Journal::where('ref_id', $salesInvoice->id)->first();
+        
+        $refType = 'App\Models\SalesInvoice';
+
+        $journal = Journal::where('ref_id', $salesInvoice->id)
+                        ->where('ref_type', $refType)
+                        ->first();
         
         $productIds = $request['product_id'];
         $requested = $request['requested'];

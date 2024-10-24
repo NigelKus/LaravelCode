@@ -14,17 +14,20 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
     protected $todate;
     protected $pendapatan;
     protected $beban;
-    protected $stock;
+    protected $HPP;
     protected $date;
+    protected $totalHPP;
 
-    public function __construct($fromdate, $todate, $pendapatan, $beban, $stock, $date)
+
+    public function __construct($fromdate, $todate, $pendapatan, $beban, $HPP, $date, $totalHPP)
     {
         $this->fromdate = $fromdate;
         $this->todate = $todate;
         $this->pendapatan = $pendapatan;
         $this->beban = $beban;
-        $this->stock = $stock;
+        $this->HPP = $HPP;
         $this->date = $date;
+        $this->totalHPP = $totalHPP;
     }
     public function collection()
     {
@@ -51,12 +54,12 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
         ]);
     
         $data->push([
-            'HPP',
+            'Harga Pokok Penjualan (4200)',
             '',
-            number_format($this->stock, 2), 
+            number_format($this->totalHPP, 2), 
         ]);
 
-        $labaKotor = $totalPendapatan - $this->stock;
+        $labaKotor = $totalPendapatan - $this->totalHPP;
 
         $data->push([
             'Laba Kotor',

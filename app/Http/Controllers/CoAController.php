@@ -105,7 +105,6 @@ class CoAController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('mstr_coa', 'name')->ignore($id),
             ],
             'description' => 'nullable|string',
         ]);

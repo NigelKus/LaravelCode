@@ -5,6 +5,7 @@ namespace App\Utils\AccountingEvents;
 use App\Utils\Constants;
 
 use App\Utils\SelectHelper;
+use App\Models\PaymentPurchase;
 use App\Models\PurchaseInvoice;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Accounting\AccountingManager;
@@ -14,7 +15,7 @@ class AE_PO3_FinishPurchasePaymentBank extends AE_Base
 {
     const TYPE = 'P03';
     const NAME = 'Finish Purchase Payment';
-    const REQUIRED_CLASS = PurchaseInvoice::class;
+    const REQUIRED_CLASS = PaymentPurchase::class;
 
     public static function buildJournalContent($obj) {
         $journal = AccountingManager::createJournal(

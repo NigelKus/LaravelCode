@@ -14,28 +14,23 @@ class CodeFactory
      */
     public static function generateSalesOrderCode()
     {
-        // Get today's date in the format yyyy/mm/dd
         $year = Carbon::now()->format('Y');
         $month = Carbon::now()->format('m');
         $day = Carbon::now()->format('d');
     
-        // Get the latest sales order code to determine the next sequential number
         $latestOrder = DB::table('sales_order')
             ->where('code', 'like', "SO/{$year}/{$month}/{$day}/%")
             ->orderBy('code', 'desc')
             ->first();
     
-        // Determine the next sequential number
         if ($latestOrder) {
-            // Extract the sequential number from the latest order code
             $lastNumber = (int)substr($latestOrder->code, -4);
             $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
-            // If no previous orders, start with 0001
+            
             $nextNumber = '0001';
         }
     
-        // Generate the new sales order code
         return "SO/{$year}/{$month}/{$day}/{$nextNumber}";
     }
     
@@ -167,26 +162,20 @@ class CodeFactory
 
     public static function transactionCode()
     {
-        // Define a fixed date format for the prefix
         $fixedPrefix = "JO/2024/10/04";
     
-        // Get the latest transaction code with the fixed prefix
         $latestOrder = DB::table('acct_journals')
             ->where('code', 'like', "{$fixedPrefix}/%")
             ->orderBy('code', 'desc')
             ->first();
     
-        // Determine the next sequential number
         if ($latestOrder) {
-            // Extract the sequential number from the latest order code
-            $lastNumber = (int)substr($latestOrder->code, -9); // Extract the last 9 characters
+            $lastNumber = (int)substr($latestOrder->code, -9); 
             $nextNumber = str_pad($lastNumber + 1, 9, '0', STR_PAD_LEFT);
         } else {
-            // If no previous orders, start with 000000001
             $nextNumber = str_pad(1, 9, '0', STR_PAD_LEFT);
         }
     
-        // Generate the new transaction code
         return "{$fixedPrefix}/{$nextNumber}";
     }
     

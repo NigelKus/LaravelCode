@@ -49,15 +49,15 @@
                 </tr>
         
                 <tr>
-                    <td><strong>HPP</strong></td>
+                    <td>{{ $HPP->name }}({{ $HPP->code }})</td>
                     <td></td>
-                    <td><strong>{{ number_format($stock, 2) }}</strong></td>
+                    <td><strong>{{ number_format($totalHPP, 2) }}</strong></td>
                 </tr>
 
                 <tr>
                     <td><strong>Laba Kotor</strong></td>
                     <td></td>
-                    <td><strong>{{ number_format(array_sum(array_column($pendapatan, 'total')) - $stock, 2) }}</strong></td>
+                    <td><strong>{{ number_format(array_sum(array_column($pendapatan, 'total')) - $totalHPP, 2) }}</strong></td>
                 </tr>
                 
         
@@ -80,7 +80,7 @@
                     <td></td> 
                     <td>
                         <strong>
-                            {{ number_format(array_sum(array_column($pendapatan, 'total')) - array_sum(array_column($beban, 'total')) - $stock, 2) }}
+                            {{ number_format(array_sum(array_column($pendapatan, 'total')) - array_sum(array_column($beban, 'total')) - $totalHPP, 2) }}
                         </strong>
                     </td>
                     

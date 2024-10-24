@@ -249,7 +249,11 @@ class PurchaseInvoiceController extends Controller
             return $detail->price * $detail->quantity;
         });
 
-        $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();
+        $refType = 'App\Models\PurchaseInvoice';
+
+        $journal = Journal::where('ref_id', $purchaseInvoice->id)
+                        ->where('ref_type', $refType)
+                        ->first();
         $coas = [];
         $postings = collect();
         if($journal){
@@ -312,7 +316,11 @@ class PurchaseInvoiceController extends Controller
         $purchaseInvoice = purchaseInvoice::with('details')->findOrFail($id);
         $invoiceDetails = $purchaseInvoice->details;
 
-        $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();
+        $refType = 'App\Models\PurchaseInvoice';
+
+        $journal = Journal::where('ref_id', $purchaseInvoice->id)
+                        ->where('ref_type', $refType)
+                        ->first();
 
         $productIds = $request['product_id'];
         $requested = $request['requested'];

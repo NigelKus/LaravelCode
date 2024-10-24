@@ -26,8 +26,8 @@
             
                 <h2 class="text-left">General Ledger</h2>
                 <p class="text-left"><strong>{{ $fromdate }} s/d {{ $todate }}</strong></p>
-                
                 <hr>
+                
                 @if(isset($results))
                     @foreach($results as $result)
                         <table class="table table-bordered" style="margin-bottom: 40px;">

@@ -184,7 +184,11 @@ class PaymentOrderController extends Controller
             return $detail->price;
         });
 
-        $journal = Journal::where('ref_id', $paymentOrder->id)->first();
+        $refType = 'App\Models\PaymentOrder';
+
+        $journal = Journal::where('ref_id', $paymentOrder->id)
+                        ->where('ref_type', $refType)
+                        ->first();
         $coas = [];
         $postings = collect();
         
@@ -325,7 +329,11 @@ class PaymentOrderController extends Controller
         
         $orderDetails = $paymentOrder->paymentDetails;
 
-        $journal = Journal::where('ref_id', $paymentOrder->id)->first();
+        $refType = 'App\Models\PaymentOrder';
+
+        $journal = Journal::where('ref_id', $paymentOrder->id)
+                        ->where('ref_type', $refType)
+                        ->first();
 
         if ($journal) {
             $journal->date = Carbon::parse($request['date']);
