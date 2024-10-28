@@ -164,6 +164,7 @@
         integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
         <script>
             $(document).ready(function() {
+                $('#purchaseorder_id').empty().append('<option value="">Select a Purchase Order</option>');
                 // Initialize Select2 on the purchase order dropdown
                 $('#purchaseorder_id').select2({
                     placeholder: 'Select a purchase Order',

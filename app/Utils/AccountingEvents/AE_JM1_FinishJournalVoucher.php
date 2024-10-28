@@ -28,7 +28,7 @@ class AE_JM1_FinishJournalVoucher extends AE_Base
 
         foreach($obj->coa_ids1 as $index => $coa_id)
         {
-            $amounta = $obj->amounts[$index]; 
+            $amounta = $obj->amounts1[$index]; 
         
             AccountingManager::debit(
                 $journal,
@@ -40,7 +40,7 @@ class AE_JM1_FinishJournalVoucher extends AE_Base
         }
         foreach($obj->coa_ids as $index => $coa_id)
         {
-            $amounta = $obj->amounts1[$index]; 
+            $amounta = $obj->amounts[$index]; 
         
             AccountingManager::credit(
                 $journal,

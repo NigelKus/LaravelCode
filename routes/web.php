@@ -16,6 +16,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\JournalVoucherController;
 use App\Http\Controllers\PaymentPurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
+use App\Http\Controllers\OutstandingSalesController;
 
 
 Route::get('/', function () {
@@ -226,4 +227,12 @@ Route::prefix('admin/master/product')
         Route::get('{id}/edit', [JournalVoucherController::class, 'edit'])->name('edit');
         Route::patch('{id}/update-status', [JournalVoucherController::class, 'updateStatus'])->name('update_status');
         Route::put('{id}', [JournalVoucherController::class, 'update'])->name('update');
+    });
+
+    Route::prefix('admin/reports/outstanding_sales')
+    ->name('outstanding_sales.')
+    ->group(function () {
+        Route::get('index', [OutstandingSalesController::class, 'index'])->name('index');
+        Route::post('outstandingOrder', [BalanceSheetController::class, 'outstandingOrder'])->name('outstandingOrder');
+        Route::post('outstandingInvoice', [BalanceSheetController::class, 'outstandingInvoice'])->name('outstandingInvoice');
     });

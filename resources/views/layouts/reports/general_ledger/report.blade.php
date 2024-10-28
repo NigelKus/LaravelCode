@@ -73,7 +73,7 @@
                                         @else
                                             <td></td>
                                             <td>{{ number_format(abs($posting->amount), 0, ',', '.') }}</td>
-                                            <td>{{ number_format($result['balance'] += $posting->amount, 0, ',', '.') }}</td>
+                                            <td>{{ number_format($balance += $posting->amount, 0, ',', '.') }}</td>
                                             @php $totalCredit += abs($posting->amount); @endphp
                                         @endif
                                     </tr>

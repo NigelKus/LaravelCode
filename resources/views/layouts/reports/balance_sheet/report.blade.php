@@ -20,7 +20,7 @@
             @endif
             <form action="{{ route('balance_sheet.excel') }}" method="POST" class="form-horizontal" id="exportForm">
                 @csrf
-
+                <input type="hidden" name="fromdate" value="{{ $dateStringDisplay }}">
                 <h2 class="text-left">Balance Sheet</h2>
                 <p class="text-left"><strong>{{ $dateStringDisplay }}</strong></p>
                 <hr>
@@ -83,12 +83,18 @@
                                     <td></td>
                                 </tr>
                                 <tr>
+                                    @if(empty($totalModal))
+                                    @else
                                     <td>{{ $codeModal->name }}({{ $codeModal->code }})</td>
                                     <td>{{ number_format($totalModal, 2) }}</td>
+                                    @endif
                                 </tr>
                                 <tr>
+                                    @if(empty($totalLaba))
+                                    @else
                                     <td>Laba Berjalan({{ $codeLaba->code}})</td>
                                     <td>{{ number_format($totalLaba, 2) }}</td>
+                                    @endif
                                 </tr>
                                 <tr>
                                     <td><strong>Total Liabilities & Equity</strong></td>

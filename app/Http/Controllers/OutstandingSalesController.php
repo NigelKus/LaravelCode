@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Carbon\Carbon;
+use App\Models\Journal;
+use App\Models\Posting;
+use Illuminate\Http\Request;
+use App\Models\ChartOfAccount;
+use App\Models\JournalVoucher;
+use Illuminate\Support\Facades\DB;
+use Database\Factories\CodeFactory;
+use App\Models\JournalVoucherDetail;
+use App\Utils\AccountingEvents\AE_JM1_FinishJournalVoucher;
+use App\Utils\AccountingEvents\AE_JM2_UpdateJournalVoucher;
+use PhpOffice\PhpSpreadsheet\Chart\Layout;
+
+class OutstandingSalesController extends Controller
+{
+    public function index()
+    {   
+        return view('layouts.reports.outstanding_sales.index');
+    }
+}

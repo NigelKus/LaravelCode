@@ -164,6 +164,7 @@
         <script>
             $(document).ready(function() {
                 // Initialize Select2 on the sales order dropdown
+                $('#salesorder_id').empty().append('<option value="">Select a Sales Order</option>');
                 $('#salesorder_id').select2({
                     placeholder: 'Select a Sales Order',
                     allowClear: true

@@ -53,9 +53,12 @@
                         </tr>
                 
                         <tr>
-                            <td>{{ $HPP->name }}({{ $HPP->code }})</td>
-                            <td></td>
-                            <td><strong>{{ number_format($totalHPP, 2) }}</strong></td>
+                            @if(empty($totalHPP))
+                            @else
+                                <td>{{ $HPP->name }} ({{ $HPP->code }})</td>
+                                <td></td>
+                                <td><strong>{{ number_format($totalHPP, 2) }}</strong></td>
+                            @endif
                         </tr>
 
                         <tr>

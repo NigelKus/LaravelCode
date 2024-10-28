@@ -459,6 +459,19 @@ return [
             'url' => 'admin/reports/journal/index',
             'icon' => 'fas fa-clipboard',
         ],
+
+        [
+            'text' => 'Outstanding Sales',
+            'url' => 'admin/reports/outstanding_sales/index',
+            'icon' => 'fas fa-file-invoice-dollar', 
+        ],
+        
+        [
+            'text' => 'Outstanding Purchase',
+            'url' => 'admin/reports/oustanding_purchase/index',
+            'icon' => 'fas fa-money-bill-wave', 
+        ],
+        
         // [
         //     'text' => 'Purchase',
         //     'icon' => 'fas fa-file-alt',

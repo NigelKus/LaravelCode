@@ -143,6 +143,7 @@ class JournalVoucherController extends Controller
             $journalVoucher->amounts1 = $validatedData['amounts1'];
             $journalVoucher->type = 'in';
 
+
             $journalacct = AE_JM1_FinishJournalVoucher::process($journalVoucher);
 
             $postingacct = Posting::where('journal_id', $journalacct->id)->get();
