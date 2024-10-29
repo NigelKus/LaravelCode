@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\BalanceSheetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CoAController;
 use App\Http\Controllers\UserController;
@@ -9,6 +8,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProfitLossController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\BalanceSheetController;
 use App\Http\Controllers\PaymentOrderController;
 use App\Http\Controllers\SalesInvoiceController;
 use App\Http\Controllers\GeneralLedgerController;
@@ -17,6 +17,7 @@ use App\Http\Controllers\JournalVoucherController;
 use App\Http\Controllers\PaymentPurchaseController;
 use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\OutstandingSalesController;
+use App\Http\Controllers\OutStandingPurchaseController;
 
 
 Route::get('/', function () {
@@ -239,4 +240,16 @@ Route::prefix('admin/master/product')
         Route::post('pdfInvoice', [OutstandingSalesController::class, 'generateInvoicePDF'])->name('pdfInvoice');
         Route::post('excelOrder', [OutstandingSalesController::class, 'generateOrderExcel'])->name('excelOrder');
         Route::post('excelInvoice', [OutstandingSalesController::class, 'generateInvoiceExcel'])->name('excelInvoice');
+    });
+
+    Route::prefix('admin/reports/outstanding_purchase')
+    ->name('outstanding_purchase.')
+    ->group(function () {
+        Route::get('index', [OutStandingPurchaseController::class, 'index'])->name('index');
+        Route::post('outstandingOrder', [OutStandingPurchaseController::class, 'outstandingOrder'])->name('outstandingOrder');
+        Route::post('outstandingInvoice', [OutStandingPurchaseController::class, 'outstandingInvoice'])->name('outstandingInvoice');
+        Route::post('pdfOrder', [OutStandingPurchaseController::class, 'generateOrderPDF'])->name('pdfOrder');
+        Route::post('pdfInvoice', [OutStandingPurchaseController::class, 'generateInvoicePDF'])->name('pdfInvoice');
+        Route::post('excelOrder', [OutStandingPurchaseController::class, 'generateOrderExcel'])->name('excelOrder');
+        Route::post('excelInvoice', [OutStandingPurchaseController::class, 'generateInvoiceExcel'])->name('excelInvoice');
     });

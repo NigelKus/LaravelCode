@@ -1,0 +1,256 @@
+<?php
+
+namespace App\Http\Controllers;
+
+
+use App\Models\SalesOrder;
+use App\Models\PaymentOrder;
+use App\Models\SalesInvoice;
+use Illuminate\Http\Request;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseInvoice;
+use Barryvdh\DomPDF\Facade\PDF;
+use App\Models\PaymentOrderDetail;
+use App\Exports\BalanceSheetExport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Models\PaymentPurchaseDetail;
+use App\Exports\OutstandingSalesOrder;
+use App\Exports\OutstandingSalesInvoice;
+use App\Exports\OutstandingPurchaseOrder;
+use App\Exports\OutstandingPurchaseInvoice;
+
+class OutStandingPurchaseController extends Controller
+{
+    public function index()
+    {   
+        return view('layouts.reports.outstanding_purchase.index');
+    }
+
+    public function outstandingOrder(Request $request)
+    {
+        $dates = $request['date'];
+    
+        $purchaseOrder = PurchaseOrder::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+        
+        $purchaseInvoice = PurchaseInvoice::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+    
+            foreach ($purchaseOrder as $order) {
+                $order->total_quantity = $order->details->sum('quantity');
+                
+                $relatedInvoices = $purchaseInvoice->where('purchaseorder_id', $order->id);
+
+                $order->total_quantity_sent = $relatedInvoices->sum(function ($invoice) {
+                    return $invoice->details->sum('quantity');
+                });
+
+                $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
+
+                if ($order->quantity_difference !== 0) {
+                    $order->status = 'pending'; 
+                }
+            }
+    
+        $purchaseOrder = $purchaseOrder->filter(function ($order) {
+            return $order->quantity_difference !== 0;
+        });
+    
+        return view('layouts.reports.outstanding_purchase.outstandingOrder', compact('dates', 'purchaseOrder'));
+    }
+    
+
+    public function outstandingInvoice(Request $request)
+    {
+        $dates = $request['date'];
+    
+        $purchaseInvoice = PurchaseInvoice::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+        
+        $purchasePayment = PaymentPurchaseDetail::with('paymentPurchase')
+            ->whereHas('paymentPurchase', function($query) use ($dates) {
+                $query->whereDate('date', '<=', $dates);
+            })
+            ->get();
+    
+        foreach ($purchaseInvoice as $invoice) {
+            $invoice->total_price = $invoice->details->sum(function ($detail) {
+                return $detail->price * $detail->quantity; 
+            });
+
+            $relatedPayments = $purchasePayment->where('invoicepurchase_id', $invoice->id);
+    
+            $invoice->paid = $relatedPayments->sum(function ($payment) {
+                return $payment->price; 
+            });
+    
+            $invoice->remaining_price = $invoice->total_price - $invoice->paid;
+
+            if ($invoice->remaining_price !== 0) {
+                $invoice->status = 'pending'; 
+            }
+        }
+
+        $purchaseInvoice = $purchaseInvoice->filter(function ($invoice) {
+            return $invoice->remaining_price !== 0;
+        });
+    
+        return view('layouts.reports.outstanding_purchase.outstandingInvoice', compact('dates', 'purchaseInvoice'));
+    }
+    
+    public function generateOrderPdf(Request $request)
+    {   
+        $dates = $request['dates'];
+
+            $purchaseOrder = PurchaseOrder::with('details')
+                ->whereDate('date', '<=', $dates)
+                ->get();
+
+            $purchaseInvoice = PurchaseInvoice::with('details')
+                ->whereDate('date', '<=', $dates)
+                ->get();
+
+            foreach ($purchaseOrder as $order) {
+                $order->total_quantity = $order->details->sum('quantity');
+                
+                $relatedInvoices = $purchaseInvoice->filter(function ($invoice) use ($order) {
+                    return $invoice->purchaseorder_id === $order->id;
+                });
+
+                $order->total_quantity_sent = $relatedInvoices->sum(function ($invoice) {
+                    return $invoice->details->sum('quantity');
+                });
+
+                $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
+
+                if ($order->quantity_difference !== 0) {
+                    $order->status = 'pending'; 
+                }
+            }
+
+            $purchaseOrder = $purchaseOrder->filter(function ($order) {
+                return $order->quantity_difference !== 0;
+            });
+
+        $pdf = PDF::loadView('layouts.reports.outstanding_purchase.pdfOrder', compact('dates', 'purchaseOrder'));
+        return $pdf->stream('outstanding-purchase-order.pdf');
+    }
+
+    public function generateInvoicePdf(Request $request)
+    {   
+        $dates = $request['dates'];
+
+        $purchaseInvoice = PurchaseInvoice::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+        
+        $purchasePayment = PaymentPurchaseDetail::with('paymentPurchase')
+            ->whereHas('paymentPurchase', function($query) use ($dates) {
+                $query->whereDate('date', '<=', $dates);
+            })
+            ->get();
+    
+        foreach ($purchaseInvoice as $invoice) {
+            $invoice->total_price = $invoice->details->sum(function ($detail) {
+                return $detail->price * $detail->quantity; 
+            });
+
+            $relatedPayments = $purchasePayment->where('invoicepurchase_id', $invoice->id);
+    
+            $invoice->paid = $relatedPayments->sum(function ($payment) {
+                return $payment->price; 
+            });
+    
+            $invoice->remaining_price = $invoice->total_price - $invoice->paid;
+
+            if ($invoice->remaining_price !== 0) {
+                $invoice->status = 'pending'; 
+            }
+        }
+
+        $purchaseInvoice = $purchaseInvoice->filter(function ($invoice) {
+            return $invoice->remaining_price !== 0;
+        });
+
+
+        $pdf = PDF::loadView('layouts.reports.outstanding_purchase.pdfInvoice', compact('dates', 'purchaseInvoice'));
+        return $pdf->stream('outstanding-purchase-invoice.pdf');
+    }
+
+    public function generateOrderExcel(Request $request)
+    {   
+        $dates = $request['dates'];
+        
+        $purchaseOrder = PurchaseOrder::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+        
+        $purchaseInvoice = PurchaseInvoice::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+    
+            foreach ($purchaseOrder as $order) {
+                $order->total_quantity = $order->details->sum('quantity');
+                
+                $relatedInvoices = $purchaseInvoice->where('purchaseorder_id', $order->id);
+
+                $order->total_quantity_sent = $relatedInvoices->sum(function ($invoice) {
+                    return $invoice->details->sum('quantity');
+                });
+
+                $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
+
+                if ($order->quantity_difference !== 0) {
+                    $order->status = 'pending'; 
+                }
+            }
+    
+        $purchaseOrder = $purchaseOrder->filter(function ($order) {
+            return $order->quantity_difference !== 0;
+        });
+
+        return Excel::download(new OutstandingPurchaseOrder($purchaseOrder, $dates), 'Outstanding Purchase Order.xlsx');
+    }
+
+    public function generateInvoiceExcel(Request $request)
+    {   
+        $dates = $request['dates'];
+        
+        $purchaseInvoice = PurchaseInvoice::with('details')
+            ->whereDate('date', '<=', $dates)
+            ->get();
+        
+        $purchasePayment = PaymentPurchaseDetail::with('paymentPurchase')
+            ->whereHas('paymentPurchase', function($query) use ($dates) {
+                $query->whereDate('date', '<=', $dates);
+            })
+            ->get();
+    
+        foreach ($purchaseInvoice as $invoice) {
+            $invoice->total_price = $invoice->details->sum(function ($detail) {
+                return $detail->price * $detail->quantity; 
+            });
+
+            $relatedPayments = $purchasePayment->where('invoicepurchase_id', $invoice->id);
+    
+            $invoice->paid = $relatedPayments->sum(function ($payment) {
+                return $payment->price; 
+            });
+    
+            $invoice->remaining_price = $invoice->total_price - $invoice->paid;
+
+            if ($invoice->remaining_price !== 0) {
+                $invoice->status = 'pending'; 
+            }
+        }
+
+        $purchaseInvoice = $purchaseInvoice->filter(function ($invoice) {
+            return $invoice->remaining_price !== 0;
+        });
+
+        return Excel::download(new OutstandingPurchaseInvoice($purchaseInvoice, $dates), 'Outstanding Purchase Invoice.xlsx');
+    }
+}

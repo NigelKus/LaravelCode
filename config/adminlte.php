@@ -468,7 +468,7 @@ return [
         
         [
             'text' => 'Outstanding Purchase',
-            'url' => 'admin/reports/oustanding_purchase/index',
+            'url' => 'admin/reports/outstanding_purchase/index',
             'icon' => 'fas fa-money-bill-wave', 
         ],
         
