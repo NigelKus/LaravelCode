@@ -26,6 +26,7 @@ class ProfitLossController extends Controller
     
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
             ->where('code', 'not like', '42%')
+            ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
         
@@ -48,6 +49,7 @@ class ProfitLossController extends Controller
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
             ->where('code', '<=', 8999)
+            ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
     
@@ -69,9 +71,12 @@ class ProfitLossController extends Controller
             }
         }
 
-        $HPP = ChartOfAccount::where('code', 4200)->first();
+        $HPP = ChartOfAccount::where('code', 4200)
+            ->where('status', 'active')
+            ->first();
 
         $codeHPP = ChartOfAccount::where('code', 4200)
+            ->where('status', 'active')
             ->pluck('id')->first();
 
 
@@ -96,6 +101,7 @@ class ProfitLossController extends Controller
     
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
             ->where('code', 'not like', '42%')
+            ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
 
@@ -107,6 +113,7 @@ class ProfitLossController extends Controller
                 ->where('amount', '<', 0)
                 ->where('date', '>=', $fromdate)  
                 ->where('date', '<=', $todate) 
+                
                 ->sum('amount');
             
             if ($sum != 0) {
@@ -119,6 +126,7 @@ class ProfitLossController extends Controller
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
             ->where('code', '<=', 8999)
+            ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
         
@@ -139,9 +147,12 @@ class ProfitLossController extends Controller
             }
         }
 
-        $HPP = ChartOfAccount::where('code', 4200)->first();
+        $HPP = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')    
+        ->first();
 
         $codeHPP = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')
             ->pluck('id')->first();
 
 
@@ -165,6 +176,7 @@ class ProfitLossController extends Controller
         $date = date('m/d/Y');
     
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+            ->where('status', 'active')  
             ->where('code', 'not like', '42%')
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -187,6 +199,7 @@ class ProfitLossController extends Controller
         }
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
+        ->where('status', 'active')  
             ->where('code', '<=', 8999)
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -208,9 +221,12 @@ class ProfitLossController extends Controller
             }
         }
 
-        $HPP = ChartOfAccount::where('code', 4200)->first();
+        $HPP = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
+        ->first();
 
         $codeHPP = ChartOfAccount::where('code', 4200)
+            ->where('status', 'active')  
             ->pluck('id')->first();
 
 

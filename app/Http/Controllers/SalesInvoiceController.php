@@ -178,20 +178,18 @@ class SalesInvoiceController extends Controller
 
             $salesInvoice->HPP = $HPP;
 
-            $account1 = ChartOfAccount::where("code", 1200)->first();
-            $account2 = ChartOfAccount::where("code", 4000)->first();
-            if($account1 == null)
-            {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1200 does not exist.']);
-            }elseif($account2 == null)
-            {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Chart of Account Code 4000 does not exist.']);
-            }elseif($account1 == null && $account2 == null )
-            {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1200 & 4000 does not exist.']);
+            $requiredAccounts = [
+                1200 => "Chart of Account Code 1200 does not exist.",
+                4000 => "Chart of Account Code 4000 does not exist.",
+                4200 => "Chart of Account Code 4200 does not exist.",
+                1300 => "Chart of Account Code 1300 does not exist.",
+            ];
+
+            foreach ($requiredAccounts as $code => $errorMessage) {
+                if (!ChartOfAccount::where("code", $code)->exists()) {
+                    DB::rollBack();
+                    return redirect()->back()->withErrors(['error' => $errorMessage]);
+                }
             }
             
             

@@ -135,29 +135,18 @@ class PaymentPurchaseController extends Controller
 
             $invoice->save();
         }
-        $account1 = ChartOfAccount::where("code", 1000)->first();
-        $account2 = ChartOfAccount::where("code", 1100)->first();
-        $account3 = ChartOfAccount::where("code", 2000)->first();
-        if($account1 == null)
-        {
-            DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1000 does not exist.']);
-        }elseif($account2 == null)
-        {
-            DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 does not exist.']);
-        }elseif($account3 == null)
-        {
-            DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 2000 does not exist.']);
-        }elseif($account1 == null && $account3 == null)
-        {
-            DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1000 and 2000 does not exist.']);
-        }elseif($account3=2 == null && $account3 == null)
-        {
-            DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Chart of Account Code 1100 and 2000 does not exist.']);
+
+        $requiredAccounts = [
+            1000 => "Chart of Account Code 1000 does not exist.",
+            1100 => "Chart of Account Code 1100 does not exist.",
+            2000 => "Chart of Account Code 2000 does not exist.",
+        ];
+
+        foreach ($requiredAccounts as $code => $errorMessage) {
+            if (!ChartOfAccount::where("code", $code)->exists()) {
+                DB::rollBack();
+                return redirect()->back()->withErrors(['error' => $errorMessage]);
+            }
         }
         
         if($request['payment_type'] == 'bank')

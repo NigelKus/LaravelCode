@@ -212,20 +212,16 @@ class PurchaseInvoiceController extends Controller
                 
             }
             
-            $account1 = ChartOfAccount::where("code", 2000)->first();
-            $account2 = ChartOfAccount::where("code", 4000)->first();
-            if($account1 == null)
-            {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Chart of Account Code 2000 does not exist.']);
-            }elseif($account2 == null)
-            {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Chart of Account Code 4000 does not exist.']);
-            }elseif($account1 == null && $account2 == null )
-            {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => 'Chart of Account Code 2000 & 4000 does not exist.']);
+            $requiredAccounts = [
+                1300 => "Chart of Account Code 1300 does not exist.",
+                2000 => "Chart of Account Code 2000 does not exist.",
+            ];
+
+            foreach ($requiredAccounts as $code => $errorMessage) {
+                if (!ChartOfAccount::where("code", $code)->exists()) {
+                    DB::rollBack();
+                    return redirect()->back()->withErrors(['error' => $errorMessage]);
+                }
             }
             
             AE_PO2_FinishPurchaseInvoice::process($purchaseInvoice);

@@ -36,6 +36,7 @@ class BalanceSheetController extends Controller
 
         //Activa
         $assetIds = ChartOfAccount::where('code', 'like', '1%')
+        ->where('status', 'active')  
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
@@ -64,6 +65,7 @@ class BalanceSheetController extends Controller
         //Pasiva
         //Utang Usaha
         $UtangIds = ChartOfAccount::where('code', 'like', '2%')
+        ->where('status', 'active')  
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
@@ -90,12 +92,15 @@ class BalanceSheetController extends Controller
 
         //Modal
         $Modalds = ChartOfAccount::where('code', 'like', '3%')
+        ->where('status', 'active')  
             ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
 
 
-        $codeModal = ChartOfAccount::where('code', 3000)->first();
+        $codeModal = ChartOfAccount::where('code', 3000)
+        ->where('status', 'active')  
+        ->first();
 
         $totalModal = Posting::where('account_id', $Modalds)
             ->where('date', '>=', $dateStringStart)  
@@ -110,6 +115,7 @@ class BalanceSheetController extends Controller
         $totalLaba = 0;
 
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+            ->where('status', 'active')  
             ->where('code', 'not like', '42%')
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -128,6 +134,7 @@ class BalanceSheetController extends Controller
 
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
+            ->where('status', 'active')  
             ->where('code', '<=', 8999)
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -145,9 +152,12 @@ class BalanceSheetController extends Controller
         }
         
         $labaId = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
             ->pluck('id')->first();
 
-        $codeLaba = ChartOfAccount::where('code', 4200)->first();
+        $codeLaba = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
+        ->first();
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
@@ -208,6 +218,7 @@ class BalanceSheetController extends Controller
 
         //Utang Usaha
         $UtangIds = ChartOfAccount::where('code', 'like', '2%')
+        
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
@@ -254,6 +265,7 @@ class BalanceSheetController extends Controller
         $totalLaba = 0;
 
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+        ->where('status', 'active')  
             ->where('code', 'not like', '42%')
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -289,9 +301,12 @@ class BalanceSheetController extends Controller
         }
         
         $labaId = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
             ->pluck('id')->first();
 
-        $codeLaba = ChartOfAccount::where('code', 4200)->first();
+        $codeLaba = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
+        ->first();
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
@@ -383,7 +398,9 @@ class BalanceSheetController extends Controller
             ->pluck('id');
 
 
-        $codeModal = ChartOfAccount::where('code', 3000)->first();
+        $codeModal = ChartOfAccount::where('code', 3000)
+        ->where('status', 'active')  
+        ->first();
 
         $totalModal = Posting::where('account_id', $Modalds)
             ->where('date', '>=', $dateStringStart)  
@@ -398,6 +415,7 @@ class BalanceSheetController extends Controller
         $totalLaba = 0;
 
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
+        ->where('status', 'active')  
             ->where('code', 'not like', '42%')
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -416,6 +434,7 @@ class BalanceSheetController extends Controller
 
     
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
+        ->where('status', 'active')  
             ->where('code', '<=', 8999)
             ->orderBy('code', 'asc')
             ->pluck('id');
@@ -433,9 +452,13 @@ class BalanceSheetController extends Controller
         }
         
         $labaId = ChartOfAccount::where('code', 4200)
-            ->pluck('id')->first();
+            ->pluck('id')
+            ->where('status', 'active')  
+            ->first();
 
-        $codeLaba = ChartOfAccount::where('code', 4200)->first();
+        $codeLaba = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
+        ->first();
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
