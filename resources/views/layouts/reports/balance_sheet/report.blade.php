@@ -20,7 +20,7 @@
             @endif
             <form action="{{ route('balance_sheet.excel') }}" method="POST" class="form-horizontal" id="exportForm">
                 @csrf
-                <input type="hidden" name="fromdate" value="{{ $dateStringDisplay }}">
+                <input type="hidden" name="dateStringDisplay" value="{{ $dateStringDisplay }}">
                 <h2 class="text-left">Balance Sheet</h2>
                 <p class="text-left"><strong>{{ $dateStringDisplay }}</strong></p>
                 <hr>

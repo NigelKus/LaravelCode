@@ -62,7 +62,6 @@ class BalanceSheetController extends Controller
         }
 
         //Pasiva
-
         //Utang Usaha
         $UtangIds = ChartOfAccount::where('code', 'like', '2%')
         ->where('status', 'active')

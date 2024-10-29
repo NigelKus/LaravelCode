@@ -235,4 +235,8 @@ Route::prefix('admin/master/product')
         Route::get('index', [OutstandingSalesController::class, 'index'])->name('index');
         Route::post('outstandingOrder', [OutstandingSalesController::class, 'outstandingOrder'])->name('outstandingOrder');
         Route::post('outstandingInvoice', [OutstandingSalesController::class, 'outstandingInvoice'])->name('outstandingInvoice');
+        Route::post('pdfOrder', [OutstandingSalesController::class, 'generateOrderPDF'])->name('pdfOrder');
+        Route::post('pdfInvoice', [OutstandingSalesController::class, 'generateInvoicePDF'])->name('pdfInvoice');
+        Route::post('excelOrder', [OutstandingSalesController::class, 'generateOrderExcel'])->name('excelOrder');
+        Route::post('excelInvoice', [OutstandingSalesController::class, 'generateInvoiceExcel'])->name('excelInvoice');
     });

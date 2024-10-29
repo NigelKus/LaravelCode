@@ -22,7 +22,7 @@
             <form method="POST" action="/admin/reports/outstanding_sales/outstandingOrder" class="form-horizontal">
                 @csrf
                 <div class="form-group">
-                    <label for="date">Outstanding Sales Invoice</label> 
+                    <label for="date">Outstanding Sales Order</label> 
                     <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', \Carbon\Carbon::now()->format('Y-m-d')) }}">
                     @error('date')
                         <span class="invalid-feedback" role="alert">
