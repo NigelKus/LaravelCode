@@ -233,6 +233,6 @@ Route::prefix('admin/master/product')
     ->name('outstanding_sales.')
     ->group(function () {
         Route::get('index', [OutstandingSalesController::class, 'index'])->name('index');
-        Route::post('outstandingOrder', [BalanceSheetController::class, 'outstandingOrder'])->name('outstandingOrder');
-        Route::post('outstandingInvoice', [BalanceSheetController::class, 'outstandingInvoice'])->name('outstandingInvoice');
+        Route::post('outstandingOrder', [OutstandingSalesController::class, 'outstandingOrder'])->name('outstandingOrder');
+        Route::post('outstandingInvoice', [OutstandingSalesController::class, 'outstandingInvoice'])->name('outstandingInvoice');
     });
