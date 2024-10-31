@@ -140,7 +140,7 @@ Route::prefix('admin/master/product')
             Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
             Route::put('{id}', [PurchaseOrderController::class, 'update'])->name('update');
             Route::get('supplier/{supplierId}/orders', [PurchaseOrderController::class, 'getPurchaseOrdersBySupplier'])
-            ->name('supplier.orders'); // New route for fetching sales orders
+            ->name('supplier.orders');
             Route::get('{id}/products', [PurchaseOrderController::class, 'getProducts'])->name('products');
     });
 
