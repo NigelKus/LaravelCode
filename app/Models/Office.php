@@ -6,30 +6,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Customer extends Model
+class Office extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $table = 'mstr_customer';
+    protected $table = 'mstr_office';
 
     protected $fillable = [
         'name',
         'code',
-        'sales_category',
-        'address',
+        'location',
         'phone',
-        'description',
-        'birth_date',
-        'birth_city',
-        'email',
-    'status',
+        'opening_date',
+        'status',
         'timestamp',
-    ];
-
-    protected $casts = [
-        'birth_date' => 'date', 
     ];
 
     const STATUS_ACTIVE = 'active';
     const STATUS_TRASHED = 'trashed';
     const STATUS_DELETED = 'deleted';
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'office_id'); 
+    }
 }

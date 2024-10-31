@@ -169,18 +169,4 @@ class CustomerController extends Controller
         
         return redirect()->route('customer.show', $id)->with('success', 'Customer status updated successfully.');
     }
-
-    public function restore($id)
-    {
-        $customer = Customer::onlyTrashed()->findOrFail($id);
-        $customer->restore(); 
-        return redirect()->route('customer.index')->with('success', 'Customer restored successfully');
-    }
-
-    public function forceDelete($id)
-    {
-        $customer = Customer::onlyTrashed()->findOrFail($id);
-        $customer->forceDelete(); 
-        return redirect()->route('customer.index')->with('success', 'Customer permanently deleted');
-    }
 }

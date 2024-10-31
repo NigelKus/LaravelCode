@@ -15,6 +15,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasRoles;
 
     
+    protected $table = 'users';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,7 +24,14 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'office_id',
         'email',
+        'role',
+        'phone',
+        'birth_date',
+        'birth_location',
+        'location',
+        'status',
         'password',
     ];
 
@@ -48,4 +57,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function office()
+    {
+        return $this->belongsTo(Office::class, 'office_id');
+    }
+
 }

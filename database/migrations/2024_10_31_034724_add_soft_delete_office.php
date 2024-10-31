@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('mstr_coa', function (Blueprint $table) {
-            $table->dropUnique(['code']);
+        Schema::table('mstr_office', function (Blueprint $table) {
+            $table->softDeletes();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mstr_coa', function (Blueprint $table) {
-            $table->dropUnique(['code']);
+        Schema::table('mstr_office', function (Blueprint $table) {
+            $table->dropSoftDeletes();
         });
     }
 };

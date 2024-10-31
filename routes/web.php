@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OfficeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CoAController;
 use App\Http\Controllers\UserController;
@@ -65,6 +66,12 @@ Route::prefix('admin/master/product')
     ->group(function () {
         Route::get('index', [UserController::class, 'index'])->name('index');
         Route::get('create', [UserController::class, 'create'])->name('create');
+        Route::post('store', [UserController::class, 'store'])->name('store');
+        Route::get('{id}', [UserController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('{id}', [UserController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/update-status', [UserController::class, 'updateStatus'])->name('updateStatus');
     });
 
     Route::prefix('admin/master/supplier')
@@ -92,6 +99,19 @@ Route::prefix('admin/master/product')
         Route::delete('{id}', [CoAController::class, 'destroy'])->name('destroy');
         Route::post('{id}/update-status', [CoAController::class, 'updateStatus'])->name('updateStatus');
         Route::get('transaction/{posting}', [CoAController::class, 'routeTransaction'])->name('transaction.route');
+    });
+
+    Route::prefix('admin/master/office')
+    ->name('office.')
+    ->group(function () {
+        Route::get('index', [OfficeController::class, 'index'])->name('index');
+        Route::get('create', [OfficeController::class, 'create'])->name('create');
+        Route::post('store', [OfficeController::class, 'store'])->name('store');
+        Route::get('{id}', [OfficeController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [OfficeController::class, 'edit'])->name('edit');
+        Route::put('{id}', [OfficeController::class, 'update'])->name('update');
+        Route::delete('{id}', [OfficeController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/update-status', [OfficeController::class, 'updateStatus'])->name('updateStatus');
     });
 
 //All Transactional Routing

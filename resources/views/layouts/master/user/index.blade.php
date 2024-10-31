@@ -27,6 +27,7 @@
                             <th>ID</th> 
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Role</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -35,8 +36,9 @@
                             <td>{{ $user->id }}</td> 
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>{{ $user->role }}</td>
                             <td>
-                                <a href="{{ route('customer.show', $user->id) }}" class="btn btn-info btn-sm">View</a>
+                                <a href="{{ route('user.show', $user->id) }}" class="btn btn-info btn-sm">View</a>
                             </td>
                         </tr>
                         @endforeach

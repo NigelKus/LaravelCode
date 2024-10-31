@@ -375,6 +375,12 @@ return [
             'icon' => 'fas fa-chart-bar',
         ],
 
+        [
+            'text' => 'Office',
+            'url' => 'admin/master/office/index',
+            'icon' => 'fas fa-building',
+        ],
+
 
         // ['header' => 'Transactional'],
         // [

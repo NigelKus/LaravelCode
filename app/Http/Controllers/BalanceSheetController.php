@@ -30,13 +30,12 @@ class BalanceSheetController extends Controller
 
         $dateStringStart = Carbon::createFromDate($year, $month)->startOfMonth()->format('Y-m-d H:i:s'); 
         $dateStringEnd = Carbon::createFromDate($year, $month)->endOfMonth()->format('Y-m-d H:i:s'); 
-
+        
         $totalActiva = 0;
         $totalPasiva = 0;
 
         //Activa
         $assetIds = ChartOfAccount::where('code', 'like', '1%')
-        ->where('status', 'active')  
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
