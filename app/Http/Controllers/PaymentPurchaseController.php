@@ -21,7 +21,7 @@ class PaymentPurchaseController extends Controller
 
     public function index(Request $request)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -67,9 +67,10 @@ class PaymentPurchaseController extends Controller
 
     public function create(Request $request)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $suppliers = Supplier::where('status', 'active')->get();
     
@@ -78,9 +79,10 @@ class PaymentPurchaseController extends Controller
 
     public function store(Request $request)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $inputData = $request->all();
         
@@ -174,9 +176,10 @@ class PaymentPurchaseController extends Controller
 
     public function show(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $paymentPurchase = PaymentPurchase::with(['supplier' => function ($query) {
             $query->withTrashed();
@@ -216,9 +219,10 @@ class PaymentPurchaseController extends Controller
 
     public function edit(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $paymentPurchase = PaymentPurchase::with('paymentDetails')->findOrFail($id);
         $suppliers = $paymentPurchase->supplier;
@@ -265,9 +269,10 @@ class PaymentPurchaseController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $inputData = $request->all();
         $filteredInvoiceIds = [];
@@ -416,9 +421,10 @@ class PaymentPurchaseController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $paymentPurchase = PaymentPurchase::findOrFail($id);
         $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
@@ -461,9 +467,10 @@ class PaymentPurchaseController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
+
 
         $request->validate([
             'status' => 'required|in:pending,completed',
