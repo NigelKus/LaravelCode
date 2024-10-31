@@ -30,71 +30,73 @@ class AuthServiceProvider extends ServiceProvider
 {
     $this->registerPolicies();
 
-    // Define gates for Master menu based on roles
     Gate::define('view-master', function ($user) {
-        return $user->hasRole('Admin'); // Change 'Admin' to your desired role
+        return $user->hasRole('Admin')|| $user->hasRole('Accountant'); 
     });
 
     Gate::define('view-customers', function ($user) {
-        return $user->hasRole('Admin'); // Define roles for Customer
+        return $user->hasRole('Admin'); 
     });
 
     Gate::define('view-products', function ($user) {
-        return $user->hasRole('Admin'); // Define roles for Product
+        return $user->hasRole('Admin'); 
     });
 
     Gate::define('view-users', function ($user) {
-        return $user->hasRole('Admin'); // Define roles for User
+        return $user->hasRole('Admin'); 
     });
 
     Gate::define('view-suppliers', function ($user) {
-        return $user->hasRole('Admin'); // Define roles for Supplier
+        return $user->hasRole('Admin'); 
     });
 
     Gate::define('view-chart-accounts', function ($user) {
-        return $user->hasRole('Admin'); // Define roles for Chart of Account
+        return $user->hasRole('Admin') || $user->hasRole('Accountant'); 
     });
 
     Gate::define('view-offices', function ($user) {
-        return $user->hasRole('Admin'); // Define roles for Office
+        return $user->hasRole('Admin'); 
     });
 
-    // Define gates for Transactional menu based on roles
+    Gate::define('view-transactional', function ($user) {
+        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2')|| $user->hasRole('Accountant'); 
+    });
+
+
     Gate::define('view-sales', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); // Define roles for Sales
+        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); 
     });
 
     Gate::define('view-purchases', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); // Define roles for Purchases
+        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); 
     });
 
     Gate::define('view-payments', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant')|| $user->hasRole('Finance 3'); // Define roles for Payments
+        return $user->hasRole('Admin') || $user->hasRole('Accountant')|| $user->hasRole('Finance 3'); 
     });
 
-    // Define gates for Report menu based on roles
     Gate::define('view-general-ledger', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant'); // Define roles for General Ledger
+        return $user->hasRole('Admin') || $user->hasRole('Accountant'); 
     });
 
     Gate::define('view-balance-sheet', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant'); // Define roles for Balance Sheet
+        return $user->hasRole('Admin') || $user->hasRole('Accountant'); 
     });
 
     Gate::define('view-profit-loss', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant'); // Define roles for Profit Loss
+        return $user->hasRole('Admin') || $user->hasRole('Accountant'); 
     });
 
     Gate::define('view-journal-voucher', function ($user) {
-        return $user->hasRole('Admin')|| $user->hasRole('Accountant');// Define roles for Journal Voucher
+        return $user->hasRole('Admin')|| $user->hasRole('Accountant');
     });
 
     Gate::define('view-outstanding-sales', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant'); // Define roles for Outstanding Sales
+        return $user->hasRole('Admin') || $user->hasRole('Accountant');
     });
 
     Gate::define('view-outstanding-purchases', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant');; // Define roles for Outstanding Purchases
+        return $user->hasRole('Admin') || $user->hasRole('Accountant');; 
     });
 }
 }

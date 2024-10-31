@@ -335,7 +335,8 @@ return [
             'can' => 'view-offices', // Permission to view Office
         ],
 
-        ['header' => 'Transactional', 'can' => 'view-sales'], // Can view if they have sales permission
+        ['header' => 'Transactional', 
+        'can' => 'view-transactional'], // Can view if they have sales permission
         [
             'text' => 'Sales',
             'icon' => 'fas fa-dollar-sign',

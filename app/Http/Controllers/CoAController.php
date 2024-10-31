@@ -20,7 +20,7 @@ class CoAController extends Controller
 
     public function index(Request $request)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -44,7 +44,7 @@ class CoAController extends Controller
 
     public function create(Request $request)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -53,7 +53,7 @@ class CoAController extends Controller
 
     public function store(Request $request)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
         $request->validate([
@@ -84,7 +84,7 @@ class CoAController extends Controller
 
     public function show(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -98,7 +98,7 @@ class CoAController extends Controller
     
     public function edit(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -110,7 +110,7 @@ class CoAController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -138,7 +138,7 @@ class CoAController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
@@ -158,7 +158,7 @@ class CoAController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin'])) {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
 
