@@ -81,7 +81,7 @@ class UserController extends Controller
             'address' => 'nullable|string',
             'birth_date' => 'nullable|date', 
             'birth_location' => 'nullable|string',
-            'phone' => 'nullable|string|max:20|exists:users,phone', 
+            'phone' => 'nullable|string|max:20', 
             'password' => 'nullable|string|min:8|confirmed', 
         ], [
             'name.exists' => 'The name has already been taken.',

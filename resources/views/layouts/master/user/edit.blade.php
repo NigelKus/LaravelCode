@@ -154,7 +154,7 @@
             </div>
             <div class="card-footer">
                 <button type="submit" class="btn btn-primary">Update</button>
-                <a href="{{ route('office.show', $office->id) }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('user.show', $user->id) }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

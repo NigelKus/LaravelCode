@@ -12,7 +12,6 @@ use Carbon\Carbon;
 
 class BalanceSheetController extends Controller
 {
-
     public function index(Request $request)
     {
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
