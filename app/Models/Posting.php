@@ -18,12 +18,6 @@ class Posting extends Model
         'journal_id',
         'amount',
         'description',
-        'ref_id_1',
-        'ref_type_1',
-        'ref_id_2',
-        'ref_type_2',
-        'ref_id_3',
-        'ref_type_3',
         'status',
         'timestamp',
     ];
