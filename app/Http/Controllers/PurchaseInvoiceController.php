@@ -11,11 +11,9 @@ use App\Models\PurchaseOrder;
 use App\Models\ChartOfAccount;
 use Illuminate\Support\Carbon;
 use App\Models\PurchaseInvoice;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Models\PurchaseOrderDetail;
 use Database\Factories\CodeFactory;
-use Illuminate\Support\Facades\Log;
 use App\Models\PurchaseInvoiceDetail;
 use App\Utils\AccountingEvents\AE_PO2_FinishPurchaseInvoice;
 
@@ -24,6 +22,10 @@ class PurchaseInvoiceController extends Controller
 {
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $statuses = ['pending', 'completed']; 
         $purchaseOrders = PurchaseOrder::all(); 
 
@@ -80,8 +82,12 @@ class PurchaseInvoiceController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $suppliers = Supplier::where('status', 'active')->get();
         $products = Product::where('status', 'active')->get();
         $purchaseOrders = PurchaseOrder::where('status', 'pending')->get();
@@ -135,7 +141,10 @@ class PurchaseInvoiceController extends Controller
 
     public function store(Request $request)
     {   
-        
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $filteredData = collect($request->input('requested'))->filter(function ($value, $key) {
             return $value > 0; 
         })->keys()->toArray();
@@ -232,8 +241,12 @@ class PurchaseInvoiceController extends Controller
             ->with('success', 'purchase invoice updated successfully.');
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseInvoice = PurchaseInvoice::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'details.product', 'purchaseOrder'])
@@ -269,8 +282,12 @@ class PurchaseInvoiceController extends Controller
         ]);
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseInvoice = purchaseInvoice::with(['details.product'])->findOrFail($id);
         $purchaseInvoice->date = \Carbon\Carbon::parse($purchaseInvoice->date);
         $purchaseInvoice->due_date = \Carbon\Carbon::parse($purchaseInvoice->due_date);
@@ -302,6 +319,10 @@ class PurchaseInvoiceController extends Controller
     
     public function update(Request $request, $id)
     {  
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseInvoice = purchaseInvoice::findOrFail($id);
         $purchaseInvoice->supplier_id = $request['supplier_id'];
         $purchaseInvoice->description = $request['description'];
@@ -384,6 +405,10 @@ class PurchaseInvoiceController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,completed,cancelled,deleted',
         ]);
@@ -410,8 +435,12 @@ class PurchaseInvoiceController extends Controller
     }
     
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseInvoice = purchaseInvoice::findOrFail($id);
 
         $journal = Journal::where('ref_id', $purchaseInvoice->id)->first();

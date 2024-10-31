@@ -156,7 +156,7 @@ Route::prefix('admin/master/product')
             Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
             Route::get('{id}', [PurchaseOrderController::class, 'show'])->name('show');
             Route::delete('{id}', [PurchaseOrderController::class, 'destroy'])->name('destroy');
-            Route::patch('{id}/update-status', action: [PurchaseOrderController::class, 'updateStatus'])->name('update_status');
+            Route::patch('{id}/update-status',[PurchaseOrderController::class, 'updateStatus'])->name('update_status');
             Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
             Route::put('{id}', [PurchaseOrderController::class, 'update'])->name('update');
             Route::get('supplier/{supplierId}/orders', [PurchaseOrderController::class, 'getPurchaseOrdersBySupplier'])

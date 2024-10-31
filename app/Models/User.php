@@ -17,6 +17,12 @@ class User extends Authenticatable
     
     protected $table = 'users';
 
+    const ROLE_ADMIN = 'Admin';
+    const ROLE_FINANCE1 = 'Finance 1';
+    const ROLE_FINANCE2 = 'Finance 2';
+    const ROLE_FINANCE3 = 'Finance 3';
+    const ROLE_ACCOUNTANT = 'Accountant';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -61,6 +67,11 @@ class User extends Authenticatable
     public function office()
     {
         return $this->belongsTo(Office::class, 'office_id');
+    }
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
     }
 
 }

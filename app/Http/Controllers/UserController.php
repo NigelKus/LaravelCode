@@ -73,27 +73,41 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $a = $request->validate([
-            'name' => 'required|string|max:255|unique:users,name',
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|exists:users,name',
             'office_id' => 'nullable|exists:mstr_office,id', 
             'role' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email', 
+            'email' => 'required|string|email|max:255|exists:users,email', 
             'address' => 'nullable|string',
             'birth_date' => 'nullable|date', 
             'birth_location' => 'nullable|string',
-            'phone' => 'nullable|string|max:20|unique:users,phone', 
-            'password' => 'required|string|min:8|confirmed', 
+            'phone' => 'nullable|string|max:20|exists:users,phone', 
+            'password' => 'nullable|string|min:8|confirmed', 
         ], [
-            'name.unique' => 'The name has already been taken.',
+            'name.exists' => 'The name has already been taken.',
             'office_id.exists' => 'The selected office is invalid.',
-            'email.unique' => 'The email has already been taken.',
-            'phone.unique' => 'The phone number has already been taken.',
+            'email.exists' => 'The email has already been taken.',
+            'phone.exists' => 'The phone number has already been taken.',
             'password.confirmed' => 'The password confirmation does not match.',
         ]);
     
         $user = User::findOrFail($id);
 
-        $user->update($a);
+        $user->name = $validatedData['name'];
+        $user->office_id = $validatedData['office_id'];
+        $user->role = $validatedData['role'];
+        $user->email = $validatedData['email'];
+        $user->address = $validatedData['address'];
+        $user->birth_date = $validatedData['birth_date'];
+        $user->birth_location = $validatedData['birth_location'];
+        $user->phone = $validatedData['phone'];
+
+        if (!empty($validatedData['password'])) {
+            $user->password = Hash::make($validatedData['password']); 
+        }
+
+    // Save the user model
+    $user->save();
     
         return redirect()->route('user.show', $user->id)->with('success', 'User updated successfully.');
     }

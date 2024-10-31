@@ -11,14 +11,22 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class GeneralLedgerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $CoAs = ChartOfAccount::where('status', 'active')->get(); 
 
         return view('layouts.reports.general_ledger.index', compact('CoAs'));
     }
     public function generate(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
         $balance = 0;
         $fromdate = $request['from_date'];
         $todate = $request['to_date'];

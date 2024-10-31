@@ -4,25 +4,31 @@ namespace App\Http\Controllers;
 
 
 use App\Models\SalesOrder;
-use App\Models\PaymentOrder;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
 use App\Models\PaymentOrderDetail;
-use App\Exports\BalanceSheetExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OutstandingSalesOrder;
 use App\Exports\OutstandingSalesInvoice;
 
 class OutStandingSalesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {   
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.reports.outstanding_sales.index');
     }
 
     public function outstandingOrder(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $dates = $request['date'];
     
         $salesOrder = SalesOrder::with('details')
@@ -59,6 +65,10 @@ class OutStandingSalesController extends Controller
 
     public function outstandingInvoice(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $dates = $request['date'];
     
         $salesInvoice = SalesInvoice::with('details')

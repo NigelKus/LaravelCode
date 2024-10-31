@@ -16,14 +16,16 @@ use App\Models\SalesorderDetail;
 use App\Models\SalesInvoiceDetail;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory; 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Redirect;
 use App\Utils\AccountingEvents\AE_S02_FinishSalesInvoice;
 
 class SalesInvoiceController extends Controller
 {
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $statuses = ['pending', 'completed']; 
         $salesOrders = SalesOrder::all(); 
 
@@ -70,6 +72,7 @@ class SalesInvoiceController extends Controller
             });
             $invoice->total_price = $totalPrice;
         }
+
     
         return view('layouts.transactional.sales_invoice.index', [
             'salesInvoices' => $salesInvoices,
@@ -78,13 +81,19 @@ class SalesInvoiceController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $customers = Customer::where('status', 'active')->get();
         $products = Product::where('status', 'active')->get();
         $salesOrders = SalesOrder::where('status', 'pending')->get();
     
         $salesOrdersDetail = SalesorderDetail::where('status', 'pending')->get();
+
+        
         
         return view('layouts.transactional.sales_invoice.create', [
             'customers' => $customers,
@@ -96,6 +105,9 @@ class SalesInvoiceController extends Controller
     
     public function store(Request $request)
     {   
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
         
         $filteredData = collect($request->input('requested'))->filter(function ($value, $key) {
             return $value > 0; 
@@ -202,8 +214,12 @@ class SalesInvoiceController extends Controller
     }
 
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesInvoice = SalesInvoice::with(['customer' => function ($query) {
             $query->withTrashed();
         }, 'details.product', 'salesOrder'])
@@ -241,8 +257,12 @@ class SalesInvoiceController extends Controller
     }
     
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesInvoice = SalesInvoice::with(['details.product'])->findOrFail($id);
         
         $salesInvoice->date = \Carbon\Carbon::parse($salesInvoice->date);
@@ -263,6 +283,8 @@ class SalesInvoiceController extends Controller
         $salesOrderDetails = SalesOrderDetail::where('salesorder_id', $salesInvoice->salesorder_id)->get();
         
         $salesOrderDetailsMap = $salesOrderDetails->keyBy('product_id');
+
+        $this->authorize('view', $salesInvoice);
         
         return view('layouts.transactional.sales_invoice.edit', [
             'salesInvoice' => $salesInvoice,
@@ -275,6 +297,10 @@ class SalesInvoiceController extends Controller
     
     public function update(Request $request, $id)
     {   
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesInvoice = SalesInvoice::findOrFail($id);
     
         $salesInvoice->customer_id = $request['customer_id'];
@@ -360,6 +386,10 @@ class SalesInvoiceController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,completed,cancelled,deleted',
         ]);
@@ -385,8 +415,12 @@ class SalesInvoiceController extends Controller
     }
     
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesInvoice = SalesInvoice::findOrFail($id);
         $journal = Journal::where('ref_id', $salesInvoice->id)->first();
 

@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
 use App\Models\PaymentPurchase;
 use App\Models\PurchaseInvoice;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Database\Factories\CodeFactory;
 use App\Utils\AccountingEvents\AE_PO4_FinishPurchasePaymentKas;
@@ -22,6 +21,10 @@ class PaymentPurchaseController extends Controller
 
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $statuses = ['pending', 'completed']; 
 
         $query = PaymentPurchase::with(['supplier' => function ($q) {
@@ -62,8 +65,12 @@ class PaymentPurchaseController extends Controller
         return view('layouts.transactional.payment_purchase.index', compact('paymentPurchases', 'statuses')); // Adjust the view as necessary
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $suppliers = Supplier::where('status', 'active')->get();
     
         return view('layouts.transactional.payment_purchase.create', compact('suppliers'));
@@ -71,6 +78,10 @@ class PaymentPurchaseController extends Controller
 
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $inputData = $request->all();
         
         $filteredInvoiceIds = [];
@@ -161,8 +172,12 @@ class PaymentPurchaseController extends Controller
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Payment Purchase created successfully.');
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $paymentPurchase = PaymentPurchase::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'paymentDetails.purchaseInvoice'])
@@ -199,8 +214,12 @@ class PaymentPurchaseController extends Controller
         ]);
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $paymentPurchase = PaymentPurchase::with('paymentDetails')->findOrFail($id);
         $suppliers = $paymentPurchase->supplier;
 
@@ -246,6 +265,10 @@ class PaymentPurchaseController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $inputData = $request->all();
         $filteredInvoiceIds = [];
         $filteredRequested = [];
@@ -391,8 +414,12 @@ class PaymentPurchaseController extends Controller
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Payment Purchase updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $paymentPurchase = PaymentPurchase::findOrFail($id);
         $journal = Journal::where('ref_id', $paymentPurchase->id)->first();
         foreach ($paymentPurchase->paymentDetails as $detail) {
@@ -434,6 +461,10 @@ class PaymentPurchaseController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,completed',
         ]);

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use random;
 use App\Models\Journal;
 use App\Models\Posting;
 use Illuminate\Support\Str;
@@ -11,7 +10,6 @@ use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
 use App\Models\JournalVoucher;
-use Illuminate\Support\Carbon;
 use App\Models\PaymentPurchase;
 use App\Models\PurchaseInvoice;
 use Illuminate\Validation\Rule;
@@ -22,6 +20,10 @@ class CoAController extends Controller
 
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         // Define the allowed statuses
         $allowedStatuses = ['active', 'trashed'];
 
@@ -40,14 +42,20 @@ class CoAController extends Controller
     
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.master.CoA.create');
     }
 
     public function store(Request $request)
     {
-        
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
@@ -74,8 +82,12 @@ class CoAController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $CoA = ChartOfAccount::with(['postings.journal' => function ($query) {
             $query->orderBy('date', 'asc');
         }])->findOrFail($id);
@@ -84,8 +96,12 @@ class CoAController extends Controller
     }
     
     
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $CoA = ChartOfAccount::findOrFail($id);
 
 
@@ -94,6 +110,10 @@ class CoAController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $validatedData = $request->validate([
             'code' => [
                 'required',
@@ -116,8 +136,12 @@ class CoAController extends Controller
         return redirect()->route('CoA.show', $CoA->id)->with('success', 'Chart of Account updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $CoA = ChartOfAccount::findOrFail($id);
 
         $code = $CoA->code . '-del-' . Str::uuid(); 
@@ -134,6 +158,10 @@ class CoAController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|string|in:active,trashed',
         ]);

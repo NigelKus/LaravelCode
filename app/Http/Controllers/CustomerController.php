@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Carbon;
-
 
 class CustomerController extends Controller
 {
@@ -27,6 +25,10 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $allowedStatuses = ['active', 'trashed'];
     
         $status = $request->input('status');
@@ -41,13 +43,21 @@ class CustomerController extends Controller
     }
     
 
-        public function create()
+        public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.master.customer.create');
     }
 
-        public function show($id)
+        public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $customer = Customer::findOrFail($id);
 
         return view('layouts.master.customer.show', compact('customer'));
@@ -55,6 +65,10 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255|unique:mstr_customer,name',
             'code' => 'required|string|max:255|unique:mstr_customer,code',
@@ -94,8 +108,12 @@ class CustomerController extends Controller
         }
     }
     
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $customer = Customer::findOrFail($id);
 
         return view('layouts.master.customer.edit', compact('customer'));
@@ -103,6 +121,10 @@ class CustomerController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $validatedData = $request->validate([
             'code' => [
                 'required',
@@ -143,8 +165,12 @@ class CustomerController extends Controller
     }
     
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $customer = Customer::findOrFail($id);
     
         $customer->update([
@@ -158,6 +184,10 @@ class CustomerController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|string|in:active,trashed',
         ]);

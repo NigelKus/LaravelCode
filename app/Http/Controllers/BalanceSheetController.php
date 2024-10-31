@@ -7,20 +7,27 @@ use App\Models\Posting;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
 use Barryvdh\DomPDF\Facade\PDF;
-use App\Exports\GeneralLedgerExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon; 
 
 class BalanceSheetController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.reports.balance_sheet.index');
     }
 
     public function generate(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $month = $request['month'];
         $year = $request['year'];
         $dateStringDisplay = Carbon::createFromDate($year, $month)->endOfMonth()->translatedFormat('j F Y');

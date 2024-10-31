@@ -19,6 +19,10 @@ class PaymentOrderController extends Controller
 {
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $statuses = ['pending', 'completed']; 
 
         $query = PaymentOrder::with(['customer' => function ($q) {
@@ -58,8 +62,12 @@ class PaymentOrderController extends Controller
         return view('layouts.transactional.payment_order.index', compact('paymentOrders', 'statuses')); // Adjust the view as necessary
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $customers = Customer::where('status', 'active')->get();
     
         return view('layouts.transactional.payment_order.create', compact('customers'));
@@ -68,6 +76,10 @@ class PaymentOrderController extends Controller
 
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $inputData = $request->all();
         
         $filteredInvoiceIds = [];
@@ -159,8 +171,12 @@ class PaymentOrderController extends Controller
 
     }
     
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $paymentOrder = PaymentOrder::with(['customer' => function ($query) {
             $query->withTrashed();
         }, 'paymentDetails.salesInvoice'])
@@ -199,8 +215,12 @@ class PaymentOrderController extends Controller
         
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $paymentOrder = PaymentOrder::with('paymentDetails')->findOrFail($id);
         $customers = $paymentOrder->customer;
 
@@ -248,6 +268,9 @@ class PaymentOrderController extends Controller
     
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
 
         $inputData = $request->all();
         
@@ -391,8 +414,12 @@ class PaymentOrderController extends Controller
         return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Payment Order updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request,$id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $paymentOrder = PaymentOrder::findOrFail($id);
         $journal = Journal::where('ref_id', $paymentOrder->id)->first();
     
@@ -437,6 +464,10 @@ class PaymentOrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
         $request->validate([
             'status' => 'required|in:pending,completed',
         ]);

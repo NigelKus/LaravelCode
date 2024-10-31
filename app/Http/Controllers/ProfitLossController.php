@@ -11,14 +11,21 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProfitLossController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
 
         return view('layouts.reports.profit_loss.index');
     }
     
     public function generate(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
         $fromdate = $request['from_date'];
         $todate = $request['to_date'];
         $fromdate = str_replace('T', ' ', $fromdate);

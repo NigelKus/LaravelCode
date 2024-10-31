@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
-
 {
-
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $allowedStatuses = ['active', 'trashed'];
         $status = $request->input('status');
         $suppliers = Supplier::whereIn('status', $allowedStatuses)
@@ -25,19 +26,31 @@ class SupplierController extends Controller
     
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.master.supplier.create');
     }
 
-        public function show($id)
+        public function show(Request $request,$id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $supplier = Supplier::findOrFail($id);
 
         return view('layouts.master.supplier.show', compact('supplier'));
     }
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255|unique:mstr_supplier,name',
             'code' => 'required|string|max:255|unique:mstr_supplier,code',
@@ -77,8 +90,12 @@ class SupplierController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $supplier = Supplier::findOrFail($id);
 
         return view('layouts.master.supplier.edit', compact('supplier'));
@@ -86,6 +103,10 @@ class SupplierController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $validatedData = $request->validate([
             'code' => [
                 'required',
@@ -127,8 +148,12 @@ class SupplierController extends Controller
     
     
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $supplier = Supplier::findOrFail($id);
         $supplier->update([
             'status' => Supplier::STATUS_DELETED
@@ -141,6 +166,10 @@ class SupplierController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|string|in:active,trashed',
         ]);

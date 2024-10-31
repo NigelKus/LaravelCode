@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<b>Admin</b>LTE',
+    'logo' => '<b>Website</b>Akuntansi',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -292,246 +292,145 @@ return [
     | https://github.com/jeroennoten/Laravel-AdminLTE/wiki/Menu-Configuration
     |
     */
-
+    
     'menu' => [
-        // Navbar items:
-        // [
-        //     'type' => 'navbar-search',
-        //     'text' => 'search',
-        //     'topnav_right' => true,
-        // ],
-        // [
-        //     'type' => 'fullscreen-widget',
-        //     'topnav_right' => true,
-        // ],
-
-        // // Sidebar items:
-        // [
-        //     'type' => 'sidebar-menu-search',
-        //     'text' => 'search',
-        // ],
-        // [
-        //     'text' => 'blog',
-        //     'url' => 'admin/blog',
-        //     'can' => 'manage-blog',
-        // ],
-        // [
-        //     'text' => 'pages',
-        //     'url' => 'admin/pages',
-        //     'icon' => 'far fa-fw fa-file',
-        //     'label' => 4,
-        //     'label_color' => 'success',
-        // ],
-        // ['header' => 'account_settings'],
-        // [
-        //     'text' => 'profile',
-        //     'url' => 'admin/settings',
-        //     'icon' => 'fas fa-fw fa-user',
-        // ],
-        // [
-        //     'text' => 'change_password',
-        //     'url' => 'admin/settings',
-        //     'icon' => 'fas fa-fw fa-lock',
-        // ],
-        
-
-        ['header' => 'Master'],
+        [
+            'header' => 'Master',
+            'can' => 'view-master', // Permission to view the Master header
+        ],
         [
             'text' => 'Customer',
             'url' => 'admin/master/customer/index',
             'icon' => 'fas fa-fw fa-user',
+            'can' => 'view-customers', // Permission to view Customer
         ],
         [
             'text' => 'Product',
             'url' => 'admin/master/product/index',
             'icon' => 'fas fa-fw fa-box',
+            'can' => 'view-products', // Permission to view Product
         ],
-        // [
-        //     'text' => 'SalesOrder',
-        //     'url' => 'admin/master/sales_order/index',
-        //     'icon' => 'fas fa-fw fa-receipt',
-        // ],
-        // [
-        //     'text' => 'Purchase',
-        //     'url' => 'admin/master/purchase/index',
-        //     'icon' => 'fas fa-store',
-        // ],
-
         [
             'text' => 'User',
             'url' => 'admin/master/user/index',
             'icon' => 'fas fa-users',
+            'can' => 'view-users', // Permission to view User
         ],
-
         [
             'text' => 'Supplier',
             'url' => 'admin/master/supplier/index',
             'icon' => 'fas fa-truck',
+            'can' => 'view-suppliers', // Permission to view Supplier
         ],
-
         [
             'text' => 'Chart of Account',
             'url' => 'admin/master/CoA/index',
             'icon' => 'fas fa-chart-bar',
+            'can' => 'view-chart-accounts', // Permission to view Chart of Account
         ],
-
         [
             'text' => 'Office',
             'url' => 'admin/master/office/index',
             'icon' => 'fas fa-building',
+            'can' => 'view-offices', // Permission to view Office
         ],
 
-
-        // ['header' => 'Transactional'],
-        // [
-        //     'text' => 'Sales Invoice',
-        //     'url' => 'admin/transactional/sales_invoice/index',
-        //     'icon' => 'fas fa-file-alt',
-        // ],
-        // [
-        //     'text' => 'Payment Invoice',
-        //     'url' => 'admin/transactional/sales_payment/index',
-        //     'icon' => 'fas fa-file-alt',
-        // ],
-        ['header' => 'Transactional'],
+        ['header' => 'Transactional', 'can' => 'view-sales'], // Can view if they have sales permission
         [
             'text' => 'Sales',
             'icon' => 'fas fa-dollar-sign',
+            'can' => 'view-sales', // Permission to view Sales
             'submenu' => [
                 [
                     'text' => 'Sales Order',
                     'url' => 'admin/transactional/sales_order/index',
-                    'icon' => 'fas fa-receipt'
+                    'icon' => 'fas fa-receipt',
+                    'can' => 'view-sales', // Permission to view Sales Order
                 ],
                 [
                     'text' => 'Sales Invoice',
                     'url' => 'admin/transactional/sales_invoice/index',
-                    'icon' => 'fas fa-file-invoice'
+                    'icon' => 'fas fa-file-invoice',
+                    'can' => 'view-sales', // Permission to view Sales Invoice
                 ],
             ],
         ],
         [
             'text' => 'Purchase',
             'icon' => 'fas fa-shopping-basket',
+            'can' => 'view-purchases', // Permission to view Purchase
             'submenu' => [
                 [
                     'text' => 'Purchase Order',
                     'url' => 'admin/transactional/purchase_order/index',
-                    'icon' =>  'fas fa-clipboard-list',
+                    'icon' => 'fas fa-clipboard-list',
+                    'can' => 'view-purchases', // Permission to view Purchase Order
                 ],
                 [
                     'text' => 'Purchase Invoice',
                     'url' => 'admin/transactional/purchase_invoice/index',
-                    'icon' =>  'fas fa-file-invoice-dollar',
+                    'icon' => 'fas fa-file-invoice-dollar',
+                    'can' => 'view-purchases', // Permission to view Purchase Invoice
                 ],
             ],
         ],
         [
             'text' => 'Payment',
-            'icon' => 'fas fa-money-bill-wave', 
+            'icon' => 'fas fa-money-bill-wave',
+            'can' => 'view-payments', // Permission to view Payment
             'submenu' => [
                 [
                     'text' => 'Payment Sales',
                     'url' => 'admin/transactional/payment_order/index',
-                    'icon' => 'fas fa-receipt', 
+                    'icon' => 'fas fa-receipt',
+                    'can' => 'view-payments', // Permission to view Payment Sales
                 ],
                 [
                     'text' => 'Payment Purchase',
                     'url' => 'admin/transactional/payment_purchase/index',
-                    'icon' => 'fas fa-file-invoice', 
+                    'icon' => 'fas fa-file-invoice',
+                    'can' => 'view-payments', // Permission to view Payment Purchase
                 ],
             ],
         ],
-        ['header' => 'Report'],
+
+        ['header' => 'Report', 'can' => 'view-general-ledger'], // Can view if they have general ledger permission
         [
             'text' => 'General Ledger',
             'url' => 'admin/reports/general_ledger/index',
             'icon' => 'fas fa-book',
+            'can' => 'view-general-ledger', // Permission to view General Ledger
         ],
         [
             'text' => 'Balance Sheet',
             'url' => 'admin/reports/balance_sheet/index',
             'icon' => 'fas fa-balance-scale',
+            'can' => 'view-balance-sheet', // Permission to view Balance Sheet
         ],
-
         [
             'text' => 'Profit Loss',
             'url' => 'admin/reports/profit_loss/index',
             'icon' => 'fas fa-chart-line',
+            'can' => 'view-profit-loss', // Permission to view Profit Loss
         ],
-
         [
             'text' => 'Journal Voucher',
             'url' => 'admin/reports/journal/index',
             'icon' => 'fas fa-clipboard',
+            'can' => 'view-journal-voucher', // Permission to view Journal Voucher
         ],
-
         [
             'text' => 'Outstanding Sales',
             'url' => 'admin/reports/outstanding_sales/index',
-            'icon' => 'fas fa-file-invoice-dollar', 
+            'icon' => 'fas fa-file-invoice-dollar',
+            'can' => 'view-outstanding-sales', // Permission to view Outstanding Sales
         ],
-        
         [
             'text' => 'Outstanding Purchase',
             'url' => 'admin/reports/outstanding_purchase/index',
-            'icon' => 'fas fa-money-bill-wave', 
+            'icon' => 'fas fa-money-bill-wave',
+            'can' => 'view-outstanding-purchases', // Permission to view Outstanding Purchase
         ],
-        
-        // [
-        //     'text' => 'Purchase',
-        //     'icon' => 'fas fa-file-alt',
-        //     'submenu' => [
-        //         [
-        //             'text' => 'Sales Order',
-        //             'url' => '#',
-        //         ],
-        //         [
-        //             'text' => 'level_one',
-        //             'url' => '#',
-        //             'submenu' => [
-        //                 [
-        //                     'text' => 'level_two',
-        //                     'url' => '#',
-        //                 ],
-        //                 [
-        //                     'text' => 'level_two',
-        //                     'url' => '#',
-        //                     'submenu' => [
-        //                         [
-        //                             'text' => 'level_three',
-        //                             'url' => '#',
-        //                         ],
-        //                         [
-        //                             'text' => 'level_three',
-        //                             'url' => '#',
-        //                         ],
-        //                     ],
-        //                 ],
-        //             ],
-        //         ],
-        //         [
-        //             'text' => 'level_one',
-        //             'url' => '#',
-        //         ],
-        //     ],
-        // ],
-        // ['header' => 'labels'],
-        // [
-        //     'text' => 'important',
-        //     'icon_color' => 'red',
-        //     'url' => '#',
-        // ],
-        // [
-        //     'text' => 'warning',
-        //     'icon_color' => 'yellow',
-        //     'url' => '#',
-        // ],
-        // [
-        //     'text' => 'information',
-        //     'icon_color' => 'cyan',
-        //     'url' => '#',
-        // ],
     ],
 
     /*

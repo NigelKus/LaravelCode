@@ -6,7 +6,6 @@ use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Models\PurchaseOrderDetail;
 use Database\Factories\CodeFactory;
@@ -17,6 +16,10 @@ class PurchaseOrderController extends Controller
 {
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $statuses = ['pending', 'completed']; 
 
         $query = PurchaseOrder::with(['supplier' => function ($q) {
@@ -57,8 +60,12 @@ class PurchaseOrderController extends Controller
         return view('layouts.transactional.purchase_order.index', compact('purchaseOrders', 'statuses'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $suppliers = Supplier::where('status', 'active')->get();
     
         $products = Product::where('status', 'active')->get();
@@ -68,6 +75,10 @@ class PurchaseOrderController extends Controller
     
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $productIds = $request->input('product_ids', []);
         $quantities = $request->input('qtys', []);
         $prices = $request->input('price_eachs', []);
@@ -151,8 +162,12 @@ class PurchaseOrderController extends Controller
             ->with('purchase_order_code', $purchaseOrderCode);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseOrder = PurchaseOrder::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'details.product'])
@@ -168,8 +183,12 @@ class PurchaseOrderController extends Controller
         return view('layouts.transactional.purchase_order.show', compact('purchaseOrder', 'totalPrice', 'deleted'));
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseOrder = PurchaseOrder::findOrFail($id);
 
         $hasInsufficientQuantity = false;
@@ -201,8 +220,12 @@ class PurchaseOrderController extends Controller
         return redirect()->route('purchase_order.index', $purchaseOrder->id)->with('success', 'Purchase Order deleted successfully.');
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $purchaseOrder = PurchaseOrder::with('details.product')->findOrFail($id);
 
         $purchaseOrder->date = \Carbon\Carbon::parse($purchaseOrder->date);
@@ -215,6 +238,9 @@ class PurchaseOrderController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
 
         $purchaseOrder = PurchaseOrder::findOrFail($id);
 
@@ -292,6 +318,10 @@ class PurchaseOrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,completed,cancelled',
         ]);

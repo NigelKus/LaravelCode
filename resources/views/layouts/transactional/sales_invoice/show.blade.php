@@ -9,15 +9,12 @@
         @csrf
         @method('DELETE')
     
-        @can('delete', $salesInvoice)
             @if($salesInvoice->status !== 'deleted')
                 <button type="submit" class="btn btn-danger">Delete</button>
             @else
                 <button type="button" class="btn btn-danger" disabled>Deleted</button>
             @endif
-        @else
-            <button type="button" class="btn btn-danger" disabled>Not Authorized</button>
-        @endcan
+
     </form>
     
 </div>

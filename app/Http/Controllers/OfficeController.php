@@ -2,24 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use random;
 use App\Models\Office;
-use App\Models\Posting;
-use Illuminate\Support\Str;
-use App\Models\PaymentOrder;
-use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
-use App\Models\ChartOfAccount;
-use App\Models\JournalVoucher;
-use Illuminate\Support\Carbon;
-use App\Models\PaymentPurchase;
-use App\Models\PurchaseInvoice;
-use Illuminate\Validation\Rule;
 
 class OfficeController extends Controller
 {
-
     public function index(Request $request){
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $allowedStatuses = ['active', 'trashed'];
     
         $status = $request->input('status');
@@ -32,11 +24,19 @@ class OfficeController extends Controller
         return view('layouts.master.office.index', compact('offices', 'allowedStatuses'));
     }
 
-    public function create(){
+    public function create(Request $request){
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.master.office.create');
     }
 
     public function store(Request $request){
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255|unique:mstr_office,name',
             'code' => 'required|string|max:255|unique:mstr_office,code',
@@ -67,8 +67,12 @@ class OfficeController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request,$id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $office = Office::findOrFail($id);
 
         return view('layouts.master.office.show', compact('office'));
@@ -76,7 +80,11 @@ class OfficeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $a = $request->validate([
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255|unique:mstr_office,name',
             'code' => 'required|string|max:255|unique:mstr_office,code',
             'location' => 'nullable|string',
@@ -90,14 +98,18 @@ class OfficeController extends Controller
     
         $office = Office::findOrFail($id);
 
-        $office->update($a);
+        $office->update($validatedData);
     
         return redirect()->route('office.show', $office->id)->with('success', 'Office updated successfully.');
     }
     
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $office = Office::findOrFail($id);
     
         $office->update([
@@ -111,6 +123,10 @@ class OfficeController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|string|in:active,trashed',
         ]);
@@ -123,8 +139,12 @@ class OfficeController extends Controller
         return redirect()->route('office.show', $id)->with('success', 'Office status updated successfully.');
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $office = Office::findOrFail($id);
 
         return view('layouts.master.office.edit', compact('office'));

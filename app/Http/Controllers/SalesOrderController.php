@@ -16,6 +16,10 @@ class SalesOrderController extends Controller
 {
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $statuses = ['pending', 'completed']; 
         
         $query = SalesOrder::with(['customer' => function ($q) {
@@ -56,8 +60,12 @@ class SalesOrderController extends Controller
         return view('layouts.transactional.sales_order.index', compact('salesOrders', 'statuses'));
     }
     
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $customers = Customer::where('status', 'active')->get();
         $products = Product::where('status', 'active')->get();
         return view('layouts.transactional.sales_order.create-copy', compact('customers', 'products'));
@@ -65,6 +73,10 @@ class SalesOrderController extends Controller
 
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $productIds = $request->input('product_ids', []);
         $quantities = $request->input('qtys', []);
         $prices = $request->input('price_eachs', []);
@@ -147,8 +159,12 @@ class SalesOrderController extends Controller
     }
     
     
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesOrder = SalesOrder::with(['customer' => function ($query) {
             $query->withTrashed();
         }, 'details.product'])
@@ -165,6 +181,10 @@ class SalesOrderController extends Controller
 
         public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,completed,cancelled',
         ]);
@@ -177,8 +197,12 @@ class SalesOrderController extends Controller
         
     }
     
-        public function edit($id)
+        public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesOrder = SalesOrder::with('details.product')->findOrFail($id);
         $salesOrder->date = \Carbon\Carbon::parse($salesOrder->date);
         $customers = Customer::where('status', 'active')->get();
@@ -189,6 +213,10 @@ class SalesOrderController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesOrder = SalesOrder::findOrFail($id);
         $product_ids = $request->input('product_ids', []);
         $qtys = $request->input('qtys', []);
@@ -295,8 +323,12 @@ class SalesOrderController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $salesOrder = SalesOrder::findOrFail($id);
 
         $hasInsufficientQuantity = false;

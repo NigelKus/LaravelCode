@@ -9,6 +9,10 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $status = $request->input('status');
         $collection = $request->input('collection');
         $validStatuses = ['active', 'trashed'];
@@ -39,13 +43,21 @@ class ProductController extends Controller
         return view('layouts.master.product.index', compact('products', 'statuses', 'collections'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         return view('layouts.master.product.create');
     }
 
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'code' => 'required|string|max:255|unique:mstr_product,code',
             'collection' => 'required|string|max:255',
@@ -82,14 +94,22 @@ class ProductController extends Controller
         }
     }
     
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $product = Product::findOrFail($id);
         return view('layouts.master.product.show', compact('product'));
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $product = Product::findOrFail($id);
 
         return view('layouts.master.product.edit', compact('product'));
@@ -97,6 +117,10 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $request->validate([
             'code' => [
                 'required',
@@ -135,8 +159,12 @@ class ProductController extends Controller
     }
     
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $product = Product::findOrFail($id);
         $product->update(['status' => Product::STATUS_DELETED]);
 
@@ -145,6 +173,10 @@ class ProductController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
         $request->validate([
             'status' => 'required|string|in:active,trashed',
         ]);

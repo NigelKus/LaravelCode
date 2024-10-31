@@ -18,8 +18,11 @@ class JournalVoucherController extends Controller
 {
     public function index(Request $request)
     {
-        $query = JournalVoucher::where('status', 'pending');
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
 
+        $query = JournalVoucher::where('status', 'pending');
     
         $statuses = ['pending', 'completed'];
     
@@ -54,8 +57,12 @@ class JournalVoucherController extends Controller
     }
     
 
-    public function create()
+    public function create(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $CoAs = ChartOfAccount::where('status', 'active')->orderBy('code', 'asc')->get();
 
         $kasbank = ChartOfAccount::where('status', 'active')
@@ -67,6 +74,9 @@ class JournalVoucherController extends Controller
     
     public function store(Request $request)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
             // dd($request->all());
             $coaIds = $request->input('coa_ids', []);
             $amounts = $request->input('amounts', []);
@@ -172,8 +182,12 @@ class JournalVoucherController extends Controller
     //     return view('layouts.reports.journal.show',compact('journalVoucher', 'details'));
     // }
 
-        public function show($id)
+        public function show(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $journalVoucher = JournalVoucher::with('journal')->findOrFail($id); 
 
         $journal = Journal::withTrashed()->where('ref_id', $id)->first();
@@ -190,8 +204,12 @@ class JournalVoucherController extends Controller
     }
 
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $CoAs = ChartOfAccount::where('status', 'active')->orderBy('code', 'asc')->get();
 
         $kasbank = ChartOfAccount::where('status', 'active')
@@ -213,8 +231,12 @@ class JournalVoucherController extends Controller
         return view('layouts.reports.journal.edit', compact('CoAs', 'kasbank', 'journalVoucher','debitDetails', 'creditDetails'));
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+
         $journalVoucher = JournalVoucher::findOrFail($id); 
     
         $details = JournalVoucherDetail::where('voucher_id', $journalVoucher->id)->get();
@@ -247,7 +269,10 @@ class JournalVoucherController extends Controller
 
     public function update(Request $request)
     {
-        // dd($request->all());
+        if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
+            abort(403, 'Unauthorized access');
+        }
+        
         $coaIds = $request->input('coa_ids', []);
         $amounts = $request->input('amounts', []);
         $descriptions = $request->input('descriptions', []);
