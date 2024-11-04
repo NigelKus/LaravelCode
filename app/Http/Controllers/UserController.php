@@ -74,7 +74,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255|exists:users,name',
+            'name' => 'required|string|max:255',
             'office_id' => 'nullable|exists:mstr_office,id', 
             'role' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|exists:users,email', 
@@ -84,7 +84,6 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20', 
             'password' => 'nullable|string|min:8|confirmed', 
         ], [
-            'name.exists' => 'The name has already been taken.',
             'office_id.exists' => 'The selected office is invalid.',
             'email.exists' => 'The email has already been taken.',
             'phone.exists' => 'The phone number has already been taken.',
@@ -112,7 +111,6 @@ class UserController extends Controller
         return redirect()->route('user.show', $user->id)->with('success', 'User updated successfully.');
     }
     
-
     public function destroy($id)
     {
         $user = User::findOrFail($id);

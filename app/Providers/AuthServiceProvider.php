@@ -59,9 +59,8 @@ class AuthServiceProvider extends ServiceProvider
     });
 
     Gate::define('view-transactional', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2')|| $user->hasRole('Accountant'); 
+        return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); 
     });
-
 
     Gate::define('view-sales', function ($user) {
         return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); 
@@ -72,7 +71,7 @@ class AuthServiceProvider extends ServiceProvider
     });
 
     Gate::define('view-payments', function ($user) {
-        return $user->hasRole('Admin') || $user->hasRole('Accountant')|| $user->hasRole('Finance 3'); 
+        return $user->hasRole('Admin') || $user->hasRole('Finance 3'); 
     });
 
     Gate::define('view-general-ledger', function ($user) {
