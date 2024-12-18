@@ -196,8 +196,6 @@ class JournalVoucherController extends Controller
             $query->withTrashed();
         }])->where('voucher_id', $journalVoucher->id)->get();
         
-
-
         // dd($details);
 
         return view('layouts.reports.journal.show', compact('journalVoucher', 'details', 'journal'));
@@ -225,8 +223,6 @@ class JournalVoucherController extends Controller
         $creditDetails = JournalVoucherDetail::where('voucher_id', $journalVoucher->id)
                                             ->where('amount', '<', 0)
                                             ->get();
-
-        
 
         return view('layouts.reports.journal.edit', compact('CoAs', 'kasbank', 'journalVoucher','debitDetails', 'creditDetails'));
     }
