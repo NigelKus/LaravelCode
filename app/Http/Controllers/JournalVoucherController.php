@@ -41,7 +41,7 @@ class JournalVoucherController extends Controller
         if ($request->has('date') && $request->date != '') {
             $query->whereDate('date', $request->date);
         }
-    
+        
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc');
