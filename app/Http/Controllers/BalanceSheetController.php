@@ -171,10 +171,9 @@ class BalanceSheetController extends Controller
             ->sum('amount');
         
         $totalLaba = abs($totalLaba -= $b);
-
-        
         
         $totalPasiva = $totalPasiva += $totalLaba;
+
 
         return view('layouts.reports.balance_sheet.report', compact('dateStringDisplay', 
         'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva'));
@@ -183,8 +182,12 @@ class BalanceSheetController extends Controller
 
     public function generateBalanceSheetPDF(Request $request)
     {
-        $dateStringDisplay = $request['fromdate'];
+
+        $dateStringDisplay = $request['dateStringDisplay'];
         $date = Carbon::parse($dateStringDisplay);
+
+        // dd($date);
+
 
         $dateStringStart = $date->copy()->startOfMonth()->format('Y-m-d H:i:s');
         $dateStringEnd = $date->copy()->endOfMonth()->format('Y-m-d H:i:s');
@@ -320,8 +323,6 @@ class BalanceSheetController extends Controller
             ->sum('amount');
         
         $totalLaba = abs($totalLaba -= $b);
-
-        
         
         $totalPasiva = $totalPasiva += $totalLaba;
 
@@ -332,8 +333,9 @@ class BalanceSheetController extends Controller
 
     public function generateBalanceSheetExcel(Request $request)
     {
-        $dateStringDisplay = $request['fromdate'];
+        $dateStringDisplay = $request['dateStringDisplay'];
         $date = Carbon::parse($dateStringDisplay);
+
 
         $dateStringStart = $date->copy()->startOfMonth()->format('Y-m-d H:i:s');
         $dateStringEnd = $date->copy()->endOfMonth()->format('Y-m-d H:i:s');
