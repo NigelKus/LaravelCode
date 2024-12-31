@@ -259,10 +259,7 @@ class SalesInvoiceController extends Controller
 
     public function edit(Request $request, $id)
     {
-        if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+        
         $salesInvoice = SalesInvoice::with(['details.product'])->findOrFail($id);
         
         $salesInvoice->date = \Carbon\Carbon::parse($salesInvoice->date);
@@ -283,8 +280,6 @@ class SalesInvoiceController extends Controller
         $salesOrderDetails = SalesOrderDetail::where('salesorder_id', $salesInvoice->salesorder_id)->get();
         
         $salesOrderDetailsMap = $salesOrderDetails->keyBy('product_id');
-
-        $this->authorize('view', $salesInvoice);
         
         return view('layouts.transactional.sales_invoice.edit', [
             'salesInvoice' => $salesInvoice,
