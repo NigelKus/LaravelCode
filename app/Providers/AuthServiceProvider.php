@@ -66,8 +66,24 @@ class AuthServiceProvider extends ServiceProvider
         return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); 
     });
 
+    Gate::define('view-sales-order', function ($user) {
+        return $user->hasRole('Admin') || $user->hasRole('Finance 1') ; 
+    });
+
+    Gate::define('view-sales-invoice', function ($user) {
+        return $user->hasRole('Admin') || $user->hasRole('Finance 2') ; 
+    });
+
     Gate::define('view-purchases', function ($user) {
         return $user->hasRole('Admin') || $user->hasRole('Finance 1') || $user->hasRole('Finance 2'); 
+    });
+
+    Gate::define('view-purchases-order', function ($user) {
+        return $user->hasRole('Admin') || $user->hasRole('Finance 1') ; 
+    });
+
+    Gate::define('view-purchases-invoice', function ($user) {
+        return $user->hasRole('Admin') || $user->hasRole('Finance 2'); 
     });
 
     Gate::define('view-payments', function ($user) {

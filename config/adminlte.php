@@ -346,13 +346,13 @@ return [
                     'text' => 'Sales Order',
                     'url' => 'admin/transactional/sales_order/index',
                     'icon' => 'fas fa-receipt',
-                    'can' => 'view-sales', // Permission to view Sales Order
+                    'can' => 'view-sales-order', // Permission to view Sales Order
                 ],
                 [
                     'text' => 'Sales Invoice',
                     'url' => 'admin/transactional/sales_invoice/index',
                     'icon' => 'fas fa-file-invoice',
-                    'can' => 'view-sales', // Permission to view Sales Invoice
+                    'can' => 'view-sales-invoice', // Permission to view Sales Invoice
                 ],
             ],
         ],
@@ -365,13 +365,13 @@ return [
                     'text' => 'Purchase Order',
                     'url' => 'admin/transactional/purchase_order/index',
                     'icon' => 'fas fa-clipboard-list',
-                    'can' => 'view-purchases', // Permission to view Purchase Order
+                    'can' => 'view-purchases-order', // Permission to view Purchase Order
                 ],
                 [
                     'text' => 'Purchase Invoice',
                     'url' => 'admin/transactional/purchase_invoice/index',
                     'icon' => 'fas fa-file-invoice-dollar',
-                    'can' => 'view-purchases', // Permission to view Purchase Invoice
+                    'can' => 'view-purchases-invoice', // Permission to view Purchase Invoice
                 ],
             ],
         ],
