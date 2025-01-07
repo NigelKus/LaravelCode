@@ -33,6 +33,8 @@
         <input type="text" name="price_totals[]" class="form-control price-total" value="{{ $price_total }}" readonly />
     </td>
     <td>
-        <button type="button" class="btn btn-danger btn-sm del-row">Remove</button>
+        <button type="button" class="btn btn-danger btn-sm del-row">
+            Remove
+        </button>
     </td>
 </tr>
