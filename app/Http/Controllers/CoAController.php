@@ -38,15 +38,12 @@ class CoAController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         return view('layouts.master.CoA.create');
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request){
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
-            abort(403, 'Unauthorized access');
-        }
+            abort(403, 'Unauthorized access');}
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255',
@@ -55,7 +52,6 @@ class CoAController extends Controller
             'name.unique' => 'The name has already been taken.',
             'code.unique' => 'The code has already been taken.',
         ]);
-    
         try {
             $CoA = ChartOfAccount::create([
                 'name' => $request->input('name'),
@@ -63,26 +59,19 @@ class CoAController extends Controller
                 'description' => $request->input('description'),
                 'status' => 'active'
             ]);
-    
             return redirect()->route('CoA.show', ['id' => $CoA->id])
                                 ->with('success', value: 'CoA created successfully.');
-    
         } catch (\Exception $e) {
-    
-            return redirect()->back()->with('error', 'Failed to create chart of account. Please try again.');
-        }
+            return redirect()->back()->with('error', 'Failed to create chart of account. Please try again.');}
     }
 
     public function show(Request $request, $id)
     {
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $CoA = ChartOfAccount::with(['postings.journal' => function ($query) {
             $query->orderBy('date', 'asc');
         }])->findOrFail($id);
-    
         return view('layouts.master.CoA.show', compact('CoA'));
     }
     
@@ -102,9 +91,7 @@ class CoAController extends Controller
     public function update(Request $request, $id)
     {
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $validatedData = $request->validate([
             'code' => [
                 'required',
@@ -119,11 +106,8 @@ class CoAController extends Controller
             ],
             'description' => 'nullable|string',
         ]);
-    
         $CoA = ChartOfAccount::findOrFail($id);
-
         $CoA->update($validatedData);
-    
         return redirect()->route('CoA.show', $CoA->id)->with('success', 'Chart of Account updated successfully.');
     }
 

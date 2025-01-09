@@ -27,7 +27,6 @@ class GeneralLedgerController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         $balance = 0;
         $fromdate = $request['from_date'];
         $todate = $request['to_date'];

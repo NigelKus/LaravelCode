@@ -17,35 +17,26 @@ class SalesOrderController extends Controller
     public function index(Request $request)
     {
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $statuses = ['pending', 'completed']; 
-        
         $query = SalesOrder::with(['customer' => function ($q) {
             $q->withTrashed(); 
         }])
         ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-    
-    
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
-    
         if ($request->has('code') && $request->code != '') {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
-    
         if ($request->has('customer') && $request->customer != '') {
             $query->whereHas('customer', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->customer . '%');
             });
         }
-
         if ($request->has('date') && $request->date != '') {
             $query->whereDate('date', $request->date);
         }
-    
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc');
@@ -53,10 +44,8 @@ class SalesOrderController extends Controller
                 $query->orderBy('date', 'asc'); 
             }
         }
-    
         $perPage = $request->get('perPage', 10);
         $salesOrders = $query->paginate($perPage);
-    
         return view('layouts.transactional.sales_order.index', compact('salesOrders', 'statuses'));
     }
     
@@ -65,7 +54,6 @@ class SalesOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-
         $customers = Customer::where('status', 'active')->get();
         $products = Product::where('status', 'active')->get();
         return view('layouts.transactional.sales_order.create-copy', compact('customers', 'products'));
@@ -76,7 +64,6 @@ class SalesOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-
         $productIds = $request->input('product_ids', []);
         $quantities = $request->input('qtys', []);
         $prices = $request->input('price_eachs', []);
@@ -84,19 +71,15 @@ class SalesOrderController extends Controller
         $filteredData = array_filter(array_map(null, $productIds, $quantities, $prices, $priceTotals), function($item) {
             return $item[0] !== null; 
         });
-        
         $filteredProductIds = array_column($filteredData, 0);
         $filteredQuantities = array_column($filteredData, 1);
         $filteredPrices = array_column($filteredData, 2);
         $filteredPriceTotals = array_column($filteredData, 3);
-        
         if (empty($filteredProductIds)) {
             return redirect()->back()->withErrors(['error' => 'At least one product must be selected.']);
         }
-
         $filteredPrices = array_map(fn($value) => str_replace(',', '', $value), $filteredPrices);
         $filteredPriceTotals = array_map(fn($value) => str_replace(',', '', $value), $filteredPriceTotals);
-        
         $request->merge([
             'product_ids' => array_values($filteredProductIds),
             'qtys' => array_values($filteredQuantities),
@@ -115,7 +98,6 @@ class SalesOrderController extends Controller
             'price_eachs.*' => 'required|numeric|min:0',
         ]);
         $salesOrderCode = CodeFactory::generateSalesOrderCode();
-    
         DB::beginTransaction();
         $salesOrder = SalesOrder::create([  
             'code' => $salesOrderCode,
@@ -124,22 +106,17 @@ class SalesOrderController extends Controller
             'status' => 'pending',
             'date' => $validatedData['date'],
         ]);
-        
         $productIds = $validatedData['product_ids'];
         $quantities = $validatedData['qtys'];
         $prices = $validatedData['price_eachs'];
-    
         if (count($productIds) !== count($quantities) || count($productIds) !== count($prices)) {
             DB::rollback();
             return redirect()->back()->withErrors(['error' => 'Mismatch between product details.']);
         }
-    
         $detailsData = [];
-    
         foreach ($productIds as $index => $productId) {
             $quantity = $quantities[$index];
             $price = $prices[$index];
-    
             $detailsData[] = [
                 'salesorder_id' => $salesOrder->id,
                 'product_id' => $productId,
@@ -148,11 +125,8 @@ class SalesOrderController extends Controller
                 'status' => 'pending',
             ];
         }
-        
         SalesorderDetail::insert($detailsData);
-    
         DB::commit();
-    
         return redirect()->route('sales_order.show', ['id' => $salesOrder->id])
             ->with('success', 'Sales Order created successfully.')
             ->with('sales_order_code', $salesOrderCode);
@@ -164,18 +138,14 @@ class SalesOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-
         $salesOrder = SalesOrder::with(['customer' => function ($query) {
             $query->withTrashed();
         }, 'details.product'])
         ->findOrFail($id);
-
         $deleted = ($salesOrder->customer->status == 'deleted');
-    
         $totalPrice = $salesOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
-        
         return view('layouts.transactional.sales_order.show', compact('salesOrder', 'totalPrice', 'deleted'));
     }
 
@@ -184,15 +154,12 @@ class SalesOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-
         $request->validate([
             'status' => 'required|in:pending,completed,cancelled',
         ]);
-
         $salesOrder = SalesOrder::findOrFail($id);
         $salesOrder->status = $request->input('status');
         $salesOrder->save();
-
         return redirect()->route('sales_order.show', $salesOrder->id)->with('success', 'Status updated successfully.');
         
     }
@@ -216,21 +183,17 @@ class SalesOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-
         $salesOrder = SalesOrder::findOrFail($id);
         $product_ids = $request->input('product_ids', []);
         $qtys = $request->input('qtys', []);
         $price_eachs = $request->input('price_eachs', []);
         $price_totals = $request->input('price_totals', []);
-    
         $filteredData = array_filter(array_map(null, $product_ids, $qtys, $price_eachs, $price_totals), function($item) {
             return !is_null($item[0]); 
         });
-    
         if (empty($filteredData)) {
             return redirect()->back()->withErrors(['product_ids' => 'There is a missing product.'])->withInput();
         }
-    
         $salesOrderDetails = [];
         foreach ($filteredData as $data) {
             list($product_id, $qty, $price_each, $price_total) = $data;
@@ -240,24 +203,18 @@ class SalesOrderController extends Controller
                 'quantity' => !is_null($qty) ? (int)$qty : null,
                 'price' => !is_null($price_each) ? (float)str_replace(',', '', $price_each) : null,
                 'price_total' => !is_null($price_total) ? (float)str_replace(',', '', $price_total) : null,
-            ];
-        }
-        
+            ];}
         $salesOrder->update([
             'customer_id' => $request->input('customer_id'),
             'description' => $request->input('description'),
             'date' => \Carbon\Carbon::parse($request->input('date')),
         ]);
-        
         $product_ids = $request->input('product_ids', []);
-        
         $qtys = $request->input('qtys', []);
         $price_eachs = $request->input('price_eachs', []);
         $price_totals = $request->input('price_totals', []);
-    
         $salesOrderDetails = [];
         $length = count($product_ids);
-    
         for ($i = 0; $i < $length; $i++) {
             if (!is_null($product_ids[$i])) {
                 $salesOrderDetails[] = [
@@ -268,7 +225,6 @@ class SalesOrderController extends Controller
                 ];
             }
         }
-    
         foreach ($salesOrderDetails as $detail) {
             SalesOrderDetail::updateOrCreate(
                 [
