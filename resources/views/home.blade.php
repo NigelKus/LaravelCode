@@ -31,7 +31,7 @@
             <div class="icon">
                 <i class="fas fa-shopping-cart"></i>
             </div>
-            <a href="{{ route('sales_invoice.index') }}" class="small-box-footer">
+            <a href="{{ route('purchase_order.index') }}" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>

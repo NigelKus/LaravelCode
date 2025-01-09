@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Posting;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\GeneralLedgerExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -30,8 +31,12 @@ class GeneralLedgerController extends Controller
         $balance = 0;
         $fromdate = $request['from_date'];
         $todate = $request['to_date'];
+
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
+
+        $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
+        $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
     
         if ($request['id'] == null) {
             $coas = ChartOfAccount::where('status', 'active')
@@ -67,8 +72,12 @@ class GeneralLedgerController extends Controller
                     'balance' => $balance,
                     'postings' => $postings,
                 ];
+
+                // $fromdate = Carbon::parse($fromdate)->format('d-m-Y H:i');
+                // $todate = Carbon::parse($todate)->format('d-m-Y H:i');
+
             }
-            return view('layouts.reports.general_ledger.report', compact('results', 'fromdate', 'todate'));
+            return view('layouts.reports.general_ledger.report', compact('results', 'displayfromdate', 'displaytodate', 'fromdate', 'todate'));
         } else {
             $coa = ChartOfAccount::find($request['id']);
     
@@ -93,7 +102,11 @@ class GeneralLedgerController extends Controller
                 ->orderBy('date', 'asc')
                 ->get();
                 $all = false;
-            return view('layouts.reports.general_ledger.report', compact('postings', 'balance', 'fromdate', 'todate', 'coa'));
+
+                // $fromdate = Carbon::parse($fromdate)->format('d-m-Y H:i');
+                // $todate = Carbon::parse($todate)->format('d-m-Y H:i');
+                
+            return view('layouts.reports.general_ledger.report', compact('postings', 'balance', 'displayfromdate', 'displaytodate', 'coa', 'fromdate', 'todate'));
         }
     }
     
@@ -103,7 +116,10 @@ class GeneralLedgerController extends Controller
         $fromdate = $request->input('fromdate');
         $todate = $request->input('todate');
         $title = 'General Ledger Report';
-        $date = date('m/d/Y');
+        $date = date('d/m/Y');
+
+        $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
+        $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
 
         $results = []; 
         if($coa_id  == null)
@@ -141,7 +157,7 @@ class GeneralLedgerController extends Controller
                     ];
             }
             
-            $pdf = PDF::loadView('layouts.reports.general_ledger.pdf', compact('results', 'fromdate', 'todate', 'title', 'date'));
+            $pdf = PDF::loadView('layouts.reports.general_ledger.pdf', compact('results', 'displayfromdate', 'displaytodate', 'title', 'date', 'fromdate', 'todate'));
             return $pdf->stream('general-ledger-AllCoA.pdf');
         }else{
             $coa = ChartOfAccount::find($coa_id);
@@ -168,7 +184,7 @@ class GeneralLedgerController extends Controller
                 ->get();
                 
                 
-                $pdf = PDF::loadView('layouts.reports.general_ledger.pdf', compact('postings', 'balance', 'coa', 'fromdate', 'todate', 'title', 'date'));
+                $pdf = PDF::loadView('layouts.reports.general_ledger.pdf', compact('postings', 'balance', 'coa', 'displayfromdate', 'displaytodate', 'title', 'date', 'fromdate', 'todate'));
                 return $pdf->stream('general-ledger-(' . $coa->name . ').pdf');
         }
     }
