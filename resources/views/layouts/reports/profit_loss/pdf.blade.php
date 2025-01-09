@@ -19,9 +19,22 @@
 </head>
 <body>
     <div class="container">
-        <h1>Profit Loss Report</h1>
+        {{-- <h1>Profit Loss Report</h1>
         <p><strong>{{ $fromdate }} s/d {{ $todate }}</strong></p>
-        <p><strong>Created Date: {{ $date }}</strong></p>
+        <p><strong>Created Date: {{ $date }}</strong></p> --}}
+
+        <div style="position: relative; width: 100%; height: 150px;">
+            <!-- Logo Section -->
+            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('vendor/adminlte/dist/img/logoS.png'))) }}" 
+                 style="position: absolute; top: 0; left: 0; height: 75px; width: 75px;">
+        
+            <!-- Text Section -->
+            <div style="text-align: center; position: absolute; top: 0; left: 50%; transform: translateX(-50%);">
+                <h1 style="margin: 0; font-size: 30px;">Laporan Rugi Laba</h1>
+                <p style="margin: 5px 0; font-size: 18px;"><strong>{{ $displayfromdate }} s/d {{ $displaytodate }}</strong></p>
+                <p style="margin: 5px 0; font-size: 18px;"><strong>Dibuat pada : {{ $createddate }}</strong></p>
+            </div>
+        </div>
 
         <table class="table table-bordered" style="margin-bottom: 40px;">
             <thead>

@@ -98,9 +98,9 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
     public function headings(): array
     {
         return [
-            ['Profit Loss Report'],
-            ['Date Range:', $this->fromdate . ' s/d ' . $this->todate],
-            ['Created Date:', $this->date],
+            ['Laporan Laba Rugi'],
+            ['Tanggal :', $this->fromdate . ' s/d ' . $this->todate],
+            ['Dibuat pada :', $this->date],
             [],
             [],
         ];
@@ -109,7 +109,7 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
     public function styles(Worksheet $sheet)
     {
         $sheet->getColumnDimension('A')->setWidth(27); // Keterangan
-        $sheet->getColumnDimension('B')->setWidth(32); // Jumlah
+        $sheet->getColumnDimension('B')->setWidth(38); // Jumlah
         $sheet->getColumnDimension('C')->setWidth(28); // Total
 
         $sheet->getStyle('B:C')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);

@@ -25,9 +25,9 @@
     
         <!-- Text Section -->
         <div style="text-align: center; position: absolute; top: 0; left: 50%; transform: translateX(-50%);">
-            <h1 style="margin: 0; font-size: 30px;">General Ledger Report</h1>
+            <h1 style="margin: 0; font-size: 30px;">Laporan Jurnal Umum</h1>
             <p style="margin: 5px 0; font-size: 18px;"><strong>{{ $displayfromdate }} s/d {{ $displaytodate }}</strong></p>
-            <p style="margin: 5px 0; font-size: 18px;"><strong>Created Date: {{ $date }}</strong></p>
+            <p style="margin: 5px 0; font-size: 18px;"><strong>Dibuat pada : {{ $date }}</strong></p>
         </div>
     </div>
     
@@ -44,7 +44,7 @@
                         <tr >
                             <th>Kode</th>
                             <th>Tanggal</th>
-                            <th>Journal Name</th>
+                            <th>Nama Jurnal</th>
                             <th>Kode Transaksi</th>
                             <th style="width: 75px;">Debit</th> 
                             <th style="width: 75px;">Kredit</th> 
@@ -105,7 +105,7 @@
                     <tr>
                         <th>Kode</th>
                         <th>Tanggal</th>
-                        <th>Journal Name</th>
+                        <th>Nama Jurnal</th>
                         <th>Kode Transaksi</th>
                         <th style="width: 75px;">Debit</th> 
                         <th style="width: 75px;">Kredit</th> 

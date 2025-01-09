@@ -30,8 +30,9 @@
                 
                     <!-- Text Section -->
                     <div style="text-align: center; flex: 1;">
-                        <h2 class="margin: 0;text-left">Balance Sheet</h2>
-                        <p class="margin: 0;text-left"><strong>{{ $dateStringDisplay }}</strong></p>
+                        <h2 style="margin: 0;">Neraca Saldo</h2>
+                        <p style="margin: 0;"><strong>{{ $dateStringDisplay }}</strong></p>
+                        <p style="margin: 0;"><strong>Dibuat pada : {{ $createddate }}</strong></p>
                     </div>
                 </div>
 

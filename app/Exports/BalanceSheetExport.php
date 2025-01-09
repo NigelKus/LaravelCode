@@ -10,7 +10,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
 {
-
     protected $dateStringDisplay;
     protected $totalasset;
     protected $totalUtang;
@@ -20,8 +19,10 @@ class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
     protected $codeLaba;
     protected $totalActiva;
     protected $totalPasiva;
+    
+    protected $createddate;
 
-    public function __construct($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva)
+    public function __construct($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate)
     {
         $this->dateStringDisplay = $dateStringDisplay;
         $this->totalasset = $totalasset;
@@ -32,6 +33,7 @@ class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
         $this->codeLaba = $codeLaba;
         $this->totalActiva = $totalActiva;
         $this->totalPasiva = $totalPasiva;
+        $this->createddate = $createddate;
     }
     public function collection()
     {
@@ -110,9 +112,9 @@ class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
     public function headings(): array
     {
         return [
-            ['Balance Sheet Report'],
-            ['Date :', $this->dateStringDisplay],
-            [],
+            ['Laporan Neraca Saldo'],
+            ['Tanggal :', $this->dateStringDisplay],
+            ['Dibuat pada : ', $this->createddate],
             [],
             [],
         ];

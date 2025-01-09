@@ -18,17 +18,18 @@
     </style>
 </head>
 <body>
-    <div style="position: relative; width: 100%; height: 150px;">
+    <div style="position: relative; width: 100%; height: 100px;">
         <!-- Logo Section -->
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('vendor/adminlte/dist/img/logoS.png'))) }}" 
-            style="position: absolute; top: 0; left: 0; height: 75px; width: 75px;">
-    
+            style="position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 75px; width: 75px;">
         <!-- Text Section -->
-        <div style="text-align: center; position: absolute; top: 0; left: 50%; transform: translateX(-50%);">
-            <h1>Balance Sheet Report</h1>
-            <p><strong>{{ $dateStringDisplay }} </strong></p>
+        <div style="text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <h1 style="margin: 0;">Laporan Neraca Saldo</h1>
+            <p style="margin: 0;"><strong>{{ $dateStringDisplay }}</strong></p>
+            <p style="margin: 0;"><strong>Dibuat pada: {{ $createddate }}</strong></p>
         </div>
     </div>
+    
             <table class="table table-bordered" style="margin-bottom: 40px;">
                 <thead>
                     <tr>

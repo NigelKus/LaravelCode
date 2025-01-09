@@ -6,7 +6,7 @@ use App\Exports\BalanceSheetExport;
 use App\Models\Posting;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon; 
 
@@ -33,6 +33,7 @@ class BalanceSheetController extends Controller
         if (!checkdate($month, 1, $year)) {
             return back()->withErrors(['month' => 'Invalid month or year']);
         }
+        $createddate = date('j F Y H:i', strtotime('+7 hours'));
 
         $dateStringStart = Carbon::createFromDate($year, $month)->startOfMonth()->format('Y-m-d H:i:s'); 
         $dateStringEnd = Carbon::createFromDate($year, $month)->endOfMonth()->format('Y-m-d H:i:s'); 
@@ -174,9 +175,8 @@ class BalanceSheetController extends Controller
         
         $totalPasiva = $totalPasiva += $totalLaba;
 
-
         return view('layouts.reports.balance_sheet.report', compact('dateStringDisplay', 
-        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva'));
+        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate'));
     }
 
 
@@ -185,12 +185,11 @@ class BalanceSheetController extends Controller
 
         $dateStringDisplay = $request['dateStringDisplay'];
         $date = Carbon::parse($dateStringDisplay);
-
         // dd($date);
-
 
         $dateStringStart = $date->copy()->startOfMonth()->format('Y-m-d H:i:s');
         $dateStringEnd = $date->copy()->endOfMonth()->format('Y-m-d H:i:s');
+        $createddate = date('j F Y H:i', strtotime('+7 hours'));
 
         $totalActiva = 0;
         $totalPasiva = 0;
@@ -327,7 +326,7 @@ class BalanceSheetController extends Controller
         $totalPasiva = $totalPasiva += $totalLaba;
 
         $pdf = PDF::loadView('layouts.reports.balance_sheet.pdf', compact('dateStringDisplay', 
-        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva'));
+        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate'));
         return $pdf->stream('balance-sheet.pdf');
     }
 
@@ -335,7 +334,7 @@ class BalanceSheetController extends Controller
     {
         $dateStringDisplay = $request['dateStringDisplay'];
         $date = Carbon::parse($dateStringDisplay);
-
+        $createddate = date('j F Y H:i', strtotime('+7 hours'));
 
         $dateStringStart = $date->copy()->startOfMonth()->format('Y-m-d H:i:s');
         $dateStringEnd = $date->copy()->endOfMonth()->format('Y-m-d H:i:s');
@@ -477,6 +476,6 @@ class BalanceSheetController extends Controller
         
         $totalPasiva = $totalPasiva += $totalLaba;
 
-        return Excel::download(new BalanceSheetExport($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva), 'Balance Sheet.xlsx');
+        return Excel::download(new BalanceSheetExport($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate), 'Balance Sheet.xlsx');
     }
 }

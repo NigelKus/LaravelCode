@@ -120,7 +120,7 @@ class GeneralLedgerExport implements FromCollection, WithHeadings, WithStyles
             $data->push([
                 'Kode',
                 'Tanggal',
-                'Journal Name',
+                'Nama Jurnal',
                 'Kode Transaksi',
                 'Debit',
                 'Kredit',
@@ -182,9 +182,9 @@ class GeneralLedgerExport implements FromCollection, WithHeadings, WithStyles
     public function headings(): array
     {
         return [
-            ['General Ledger Report'],
-            ['Date Range:', $this->fromdate . ' s/d ' . $this->todate],
-            ['Created Date:', $this->date],
+            ['Laporan Jurnal Umum'],
+            [ $this->fromdate . ' s/d ' . $this->todate],
+            ['Dibuat pada :', $this->date],
             [],
             [],
         ];

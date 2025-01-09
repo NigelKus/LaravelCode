@@ -31,7 +31,7 @@ class GeneralLedgerController extends Controller
         $balance = 0;
         $fromdate = $request['from_date'];
         $todate = $request['to_date'];
-
+        $date = date('j F Y H:i', strtotime('+7 hours'));
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
 
@@ -77,7 +77,7 @@ class GeneralLedgerController extends Controller
                 // $todate = Carbon::parse($todate)->format('d-m-Y H:i');
 
             }
-            return view('layouts.reports.general_ledger.report', compact('results', 'displayfromdate', 'displaytodate', 'fromdate', 'todate'));
+            return view('layouts.reports.general_ledger.report', compact('results', 'displayfromdate', 'displaytodate', 'fromdate', 'todate', 'date'));
         } else {
             $coa = ChartOfAccount::find($request['id']);
     
@@ -106,7 +106,7 @@ class GeneralLedgerController extends Controller
                 // $fromdate = Carbon::parse($fromdate)->format('d-m-Y H:i');
                 // $todate = Carbon::parse($todate)->format('d-m-Y H:i');
                 
-            return view('layouts.reports.general_ledger.report', compact('postings', 'balance', 'displayfromdate', 'displaytodate', 'coa', 'fromdate', 'todate'));
+            return view('layouts.reports.general_ledger.report', compact('postings', 'balance', 'displayfromdate', 'displaytodate', 'coa', 'fromdate', 'todate', 'date'));
         }
     }
     
@@ -116,7 +116,7 @@ class GeneralLedgerController extends Controller
         $fromdate = $request->input('fromdate');
         $todate = $request->input('todate');
         $title = 'General Ledger Report';
-        $date = date('d/m/Y');
+        $date = date('j F Y H:i', strtotime('+7 hours'));
 
         $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
         $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
@@ -192,9 +192,10 @@ class GeneralLedgerController extends Controller
     public function generateGeneralLedgerExcel(Request $request)
     {
         $coa_id = $request->input('coa_id');
-        $fromdate = $request->input('fromdate');
-        $todate = $request->input('todate');
-        $date = now()->format('Y-m-d H:i:s');
+        $fromdate = Carbon::parse($request->input('fromdate'))->format('j F y H:i:s');
+        $todate = Carbon::parse($request->input('todate'))->format('j F y H:i:s');
+        
+        $date = now()->format('j F y H:i:s');
     
         $results = []; 
         if ($coa_id == null) {

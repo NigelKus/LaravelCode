@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Posting;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\ProfitLossExport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -30,6 +31,11 @@ class ProfitLossController extends Controller
         $todate = $request['to_date'];
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
+        $date = date('d/m/Y');
+        $createddate = date('j F Y H:i', strtotime('+7 hours'));
+
+        $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
+        $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
     
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
             ->where('code', 'not like', '42%')
@@ -94,7 +100,7 @@ class ProfitLossController extends Controller
             ->sum('amount');
         // dd($totalHPP);
 
-        return view('layouts.reports.profit_loss.report', compact('fromdate', 'todate', 'pendapatan', 'beban', 'totalHPP', 'HPP'));
+        return view('layouts.reports.profit_loss.report', compact('fromdate', 'todate', 'pendapatan', 'beban', 'totalHPP', 'HPP', 'displayfromdate', 'displaytodate', 'createddate'));
     }
     
 
@@ -104,7 +110,10 @@ class ProfitLossController extends Controller
         $todate = $request['todate'];
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
-        $date = date('m/d/Y');
+        $date = date('d/m/Y');
+        $createddate = date('j F Y H:i', strtotime('+7 hours'));
+        $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
+        $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
     
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
             ->where('code', 'not like', '42%')
@@ -170,7 +179,7 @@ class ProfitLossController extends Controller
             ->sum('amount');
 
 
-        $pdf = PDF::loadView('layouts.reports.profit_loss.pdf', compact('fromdate', 'todate', 'pendapatan', 'beban', 'HPP', 'date', 'totalHPP'));
+        $pdf = PDF::loadView('layouts.reports.profit_loss.pdf', compact('fromdate', 'todate', 'pendapatan', 'beban', 'HPP', 'date', 'totalHPP', 'displayfromdate', 'displaytodate', 'createddate'));
         return $pdf->stream('profit-loss.pdf');
     }
 
@@ -242,6 +251,10 @@ class ProfitLossController extends Controller
             ->where('date', '>=', $fromdate)  
             ->where('date', '<=', $todate) 
             ->sum('amount');
+
+        $date = date('j F Y H:i', strtotime('+7 hours'));
+        $fromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
+        $todate = Carbon::parse($todate)->format('j F Y H:i');
 
 
         return Excel::download(new ProfitLossExport($fromdate, $todate, $pendapatan, $beban, $HPP, $date, $totalHPP), 'Profit Loss.xlsx');

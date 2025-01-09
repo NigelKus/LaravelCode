@@ -30,8 +30,9 @@
                 
                     <!-- Text Section -->
                     <div style="text-align: center; flex: 1;">
-                        <h2 style="margin: 0; font-size: 30px;">General Ledger Report</h2>
+                        <h2 style="margin: 0; font-size: 30px;">Laporan Jurnal Umum</h2>
                         <p style="margin: 0; font-size: 18px;"><strong>{{ $displayfromdate }} s/d {{ $displaytodate }}</strong></p>
+                        <p style="margin: 0; font-size: 18px;"><strong>Dibuat pada : {{ $date }}</strong></p>
                     </div>
                 </div>
                 <hr style="margin-top: 10px; margin-bottom: 10px;">

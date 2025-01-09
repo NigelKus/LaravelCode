@@ -23,9 +23,19 @@
                 <input type="hidden" name="fromdate" value="{{ $fromdate }}">
                 <input type="hidden" name="todate" value="{{ $todate }}">
             
-                <h2 class="text-left">Profit Loss</h2>
-                <p class="text-left"><strong>{{ $fromdate }} s/d {{ $todate }}</strong></p>
+
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <!-- Logo Section -->
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('vendor/adminlte/dist/img/logoS.png'))) }}" 
+                        style="height: 75px; width: 75px; margin-right: 20px;">
                 
+                    <!-- Text Section -->
+                    <div style="text-align: center; flex: 1;">
+                        <h2 style="margin: 0; font-size: 30px;">Laba Rugi</h2>
+                        <p style="margin: 0; font-size: 18px;"><strong>{{ $displayfromdate }} s/d {{ $displaytodate }}</strong></p>
+                        <p style="margin: 0;"><strong>Dibuat pada : {{ $createddate }}</strong></p>
+                    </div>
+                </div>
                 <hr>
                 <table class="table table-bordered" style="margin-bottom: 40px;">
                     <thead>
