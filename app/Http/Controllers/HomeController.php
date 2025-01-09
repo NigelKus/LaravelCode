@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Product;
+use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
+use App\Models\PurchaseOrder;
 
 class HomeController extends Controller
 {
@@ -25,6 +28,8 @@ class HomeController extends Controller
      */
     public function index()
     {
+
+    //Weekly Revenue Chart
     $weeklyRevenue = [];
     
     $startOfMonth = Carbon::now()->startOfMonth();
@@ -48,6 +53,35 @@ class HomeController extends Controller
         $currentWeekStart->addWeek();
     }
 
-    return view('home', ['weeklyRevenue' => $weeklyRevenue]);
+    //New Orders
+    $salesOrder = SalesOrder::whereDate('created_at', Carbon::today())->count();
+    //New Purchases
+    $purchaseOrder = PurchaseOrder::whereDate('created_at', Carbon::today())->count();
+
+    //Most Sold Product
+    $soldproduct = SalesOrder::with('details')->get();
+    $productIdCounts = $soldproduct
+        ->flatMap(function ($order) {
+            return $order->details;
+        })
+        ->groupBy('product_id')
+        ->map(function ($group) {
+            return $group->count();
+        });
+    $mostSoldProductId = $productIdCounts->sortDesc()->keys()->first();
+    $product = Product::where('id', $mostSoldProductId)->first();      
+    $mostSoldProductCode = $product->code;  
+
+    //Outstanding Sales
+    $outstandingSales = SalesOrder::where('status', "pending")->count();
+    //Outstanding Purchases
+    $outstandingPurchase = PurchaseOrder::where('status', "pending")->count();
+
+    return view('home', ['weeklyRevenue' => $weeklyRevenue, 
+    'salesOrder' => $salesOrder,
+    'purchaseOrder' => $purchaseOrder,
+    'product' => $mostSoldProductCode,
+    'outstandingSales' => $outstandingSales,
+    'outstandingPurchase' => $outstandingPurchase]);
     }
 }
