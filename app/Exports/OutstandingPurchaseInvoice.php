@@ -13,11 +13,14 @@ class OutstandingPurchaseInvoice implements FromCollection, WithHeadings, WithSt
 {
     protected $purchaseInvoice;
     protected $dates;
-
-    public function __construct($purchaseInvoice = null, $dates = null)
+    protected $displaydate;
+    protected $createddate;
+    public function __construct($purchaseInvoice = null, $dates = null, $displaydate, $createddate)
     {
         $this->purchaseInvoice = $purchaseInvoice;
         $this->dates = $dates;
+        $this->displaydate = $displaydate;
+        $this->createddate = $createddate;
     }
 
     public function collection()
@@ -44,17 +47,17 @@ class OutstandingPurchaseInvoice implements FromCollection, WithHeadings, WithSt
     public function headings(): array
     {
         return [
-            ['Outstanding Sales Order'],
-            ['Date :', $this->dates],
-            [],
-            ['Invoice Code', 'Purchase Order', 'Customer', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
+            ['Outstanding Purchase Invoice List'],
+            ['Date :', $this->displaydate],
+            ['Created at :', $this->createddate],
+            ['Invoice Code', 'Date', 'Customer', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
         $sheet->getColumnDimension('A')->setWidth(25); // Invoice Code
-        $sheet->getColumnDimension('B')->setWidth(30); // Purchase Order
+        $sheet->getColumnDimension('B')->setWidth(30); // Date
         $sheet->getColumnDimension('C')->setWidth(28); // Customer
         $sheet->getColumnDimension('D')->setWidth(25); // Description
         $sheet->getColumnDimension('E')->setWidth(10); // Total

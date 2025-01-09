@@ -30,8 +30,6 @@ class OutStandingSalesController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        $createddate = now()->format('j F y H:i:s');
-
         $dates = $request['date'];
     
         
@@ -64,6 +62,7 @@ class OutStandingSalesController extends Controller
         });
 
         $displaydate = Carbon::parse($dates)->format('j F Y');
+        $createddate = now()->format('j F y H:i:s');
         return view('layouts.reports.outstanding_sales.outstandingOrder', compact('dates', 'salesOrder', 'createddate', 'displaydate'));
     }
     

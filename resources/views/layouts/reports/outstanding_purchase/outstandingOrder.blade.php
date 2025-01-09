@@ -11,9 +11,20 @@
         <div class="card-header">
             <form action="{{ route('outstanding_purchase.excelOrder') }}" method="POST" class="form-horizontal" id="exportForm">
                 @csrf
-            <h3 class="card-title">Outstanding Purchase Order List {{ $dates }}</h3>
-            <input type="hidden" name="dates" value="{{ $dates }}">
+                <input type="hidden" name="dates" id="dates" value="{{ $dates }}">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <!-- Logo Section -->
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('vendor/adminlte/dist/img/logoS.png'))) }}" 
+                        style="height: 75px; width: 75px; margin-right: 20px;">
+                
+                    <!-- Text Section -->
+                    <div style="text-align: center; flex: 1;">
+                        <h2 style="margin: 0; font-size: 30px;">Outstanding Purchase Order List {{ $displaydate }}</h2>
+                        <p style="margin: 0; font-size: 18px;"><strong>Created At : {{ $createddate }}</strong></p>
+                    </div>
+                </div>
             
+                
             @if ($errors->any())
                 <div class="alert alert-danger">
                     <ul>

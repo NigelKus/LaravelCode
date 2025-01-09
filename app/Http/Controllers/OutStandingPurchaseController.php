@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseInvoice;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\PaymentPurchaseDetail;
 use App\Exports\OutstandingPurchaseOrder;
@@ -58,8 +59,11 @@ class OutStandingPurchaseController extends Controller
         $purchaseOrder = $purchaseOrder->filter(function ($order) {
             return $order->quantity_difference !== 0;
         });
-    
-        return view('layouts.reports.outstanding_purchase.outstandingOrder', compact('dates', 'purchaseOrder'));
+        
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        $createddate = now()->format('j F Y H:i:s');
+
+        return view('layouts.reports.outstanding_purchase.outstandingOrder', compact('dates', 'purchaseOrder', 'createddate', 'displaydate'));
     }
     
 
@@ -103,7 +107,9 @@ class OutStandingPurchaseController extends Controller
             return $invoice->remaining_price !== 0;
         });
     
-        return view('layouts.reports.outstanding_purchase.outstandingInvoice', compact('dates', 'purchaseInvoice'));
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        $createddate = now()->format('j F Y H:i:s');
+        return view('layouts.reports.outstanding_purchase.outstandingInvoice', compact('dates', 'purchaseInvoice', 'createddate', 'displaydate'));
     }
     
     public function generateOrderPdf(Request $request)
@@ -140,7 +146,9 @@ class OutStandingPurchaseController extends Controller
                 return $order->quantity_difference !== 0;
             });
 
-        $pdf = PDF::loadView('layouts.reports.outstanding_purchase.pdfOrder', compact('dates', 'purchaseOrder'));
+            $displaydate = Carbon::parse($dates)->format('j F Y');
+            $createddate = now()->format('j F Y H:i:s');
+        $pdf = PDF::loadView('layouts.reports.outstanding_purchase.pdfOrder', compact('dates', 'purchaseOrder','createddate', 'displaydate'));
         return $pdf->stream('outstanding-purchase-order.pdf');
     }
 
@@ -180,8 +188,10 @@ class OutStandingPurchaseController extends Controller
             return $invoice->remaining_price !== 0;
         });
 
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        $createddate = now()->format('j F Y H:i:s');
 
-        $pdf = PDF::loadView('layouts.reports.outstanding_purchase.pdfInvoice', compact('dates', 'purchaseInvoice'));
+        $pdf = PDF::loadView('layouts.reports.outstanding_purchase.pdfInvoice', compact('dates', 'purchaseInvoice','createddate', 'displaydate'));
         return $pdf->stream('outstanding-purchase-invoice.pdf');
     }
 
@@ -196,6 +206,7 @@ class OutStandingPurchaseController extends Controller
         $purchaseInvoice = PurchaseInvoice::with('details')
             ->whereDate('date', '<=', $dates)
             ->get();
+
     
             foreach ($purchaseOrder as $order) {
                 $order->total_quantity = $order->details->sum('quantity');
@@ -217,7 +228,9 @@ class OutStandingPurchaseController extends Controller
             return $order->quantity_difference !== 0;
         });
 
-        return Excel::download(new OutstandingPurchaseOrder($purchaseOrder, $dates), 'Outstanding Purchase Order.xlsx');
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        $createddate = now()->format('j F Y H:i:s');
+        return Excel::download(new OutstandingPurchaseOrder($purchaseOrder, $dates, $displaydate, $createddate), 'Outstanding Purchase Order.xlsx');
     }
 
     public function generateInvoiceExcel(Request $request)
@@ -256,6 +269,8 @@ class OutStandingPurchaseController extends Controller
             return $invoice->remaining_price !== 0;
         });
 
-        return Excel::download(new OutstandingPurchaseInvoice($purchaseInvoice, $dates), 'Outstanding Purchase Invoice.xlsx');
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        $createddate = now()->format('j F Y H:i:s');
+        return Excel::download(new OutstandingPurchaseInvoice($purchaseInvoice, $dates, $displaydate, $createddate), 'Outstanding Purchase Invoice.xlsx');
     }
 }

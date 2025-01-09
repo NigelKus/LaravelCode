@@ -42,7 +42,7 @@
                     <thead>
                         <tr>
                             <th>Invoice Code</th>
-                            <th>Sales Order</th>
+                            <th>Date</th>
                             <th>Customer</th>
                             <th>Description</th>
                             <th>Total</th>

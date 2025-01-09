@@ -13,11 +13,14 @@ class OutstandingPurchaseOrder implements FromCollection, WithHeadings, WithStyl
 {
     protected $purchaseOrder;
     protected $dates;
-
-    public function __construct($purchaseOrder = null, $dates = null)
+    protected $displaydate;
+    protected $createddate;
+    public function __construct($purchaseOrder = null, $dates = null, $displaydate, $createddate)
     {
         $this->purchaseOrder = $purchaseOrder;
         $this->dates = $dates;
+        $this->displaydate = $displaydate;
+        $this->createddate = $createddate;
     }
 
     public function collection()
@@ -44,9 +47,9 @@ class OutstandingPurchaseOrder implements FromCollection, WithHeadings, WithStyl
     public function headings(): array
     {
         return [
-            ['Outstanding Sales Order'],
-            ['Date :', $this->dates],
-            [],
+            ['Outstanding Purchase Order List'],
+            ['Date :', $this->displaydate],
+            ['Created at : ', $this->createddate],
             ['Order Code', 'Date', 'Customer', 'Description', 'Quantity', 'Sent', 'Remaining', 'Status'],
         ];
     }

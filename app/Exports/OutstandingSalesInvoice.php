@@ -52,14 +52,14 @@ class OutstandingSalesInvoice implements FromCollection, WithHeadings, WithStyle
             ['Outstanding Sales Order List'],
             ['Date :', $this->displaydate],
             ['Created at :', $this->createddate],
-            ['Invoice Code', 'Sales Order', 'Customer', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
+            ['Invoice Code', 'Date', 'Customer', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
         $sheet->getColumnDimension('A')->setWidth(25); // Invoice Code
-        $sheet->getColumnDimension('B')->setWidth(30); // Sales Order
+        $sheet->getColumnDimension('B')->setWidth(30); // Date
         $sheet->getColumnDimension('C')->setWidth(28); // Customer
         $sheet->getColumnDimension('D')->setWidth(25); // Description
         $sheet->getColumnDimension('E')->setWidth(10); // Total
