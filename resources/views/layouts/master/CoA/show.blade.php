@@ -13,10 +13,9 @@
     </div>
 @stop
 
-
 @section('content')
     <div class="card">
-        <div class="card-body">
+        <div class="card-body pb-0" >
             <h4 >Chart of Account Information</h4>
             <dl class="row mb-4">
                 <dt class="col-sm-2">ID</dt>
@@ -42,8 +41,8 @@
             </dl>
         </div>
 
-        <div class ="card-body">
-            <div class="card mt-4">
+        <div class ="card-body pt-0 pb-0" >
+            <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Change Chart of Account Status</h3>
                 </div>
@@ -70,7 +69,7 @@
             </div>
         </div>
         
-        <div class ="card-body">
+        <div class ="card-body pt-0 pb-0" >
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="card-title">Journal Account</h3>

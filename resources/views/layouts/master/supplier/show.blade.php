@@ -15,7 +15,7 @@
 
 @section('content')
     <div class="card">
-        <div class="card-body">
+        <div class="card-body pb-0">
             <h4>Supplier Information</h4>
             <dl class="row">
                 <dt class="col-sm-3">ID</dt>
@@ -60,7 +60,7 @@
         </div>
 
         <div class="card-body">        
-            <div class="card mt-4">
+            <div class="card mt-4 pt-0">
                 <div class="card-header">
                     <h3 class="card-title">Change Supplier Status</h3>
                 </div>

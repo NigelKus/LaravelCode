@@ -21,25 +21,16 @@ class CoAController extends Controller
     public function index(Request $request)
     {
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
-            abort(403, 'Unauthorized access');
-        }
-
-        // Define the allowed statuses
+            abort(403, 'Unauthorized access');}
         $allowedStatuses = ['active', 'trashed'];
-
-        // Get the status from the request, if any
         $status = $request->input('status');
-    
-        // Build the query
         $CoAs = ChartOfAccount::whereIn('status', $allowedStatuses)
-            ->when($status && in_array($status, $allowedStatuses), function ($query) use ($status) {
-                return $query->where('status', $status);
-            })
+            ->when($status && in_array($status, $allowedStatuses), 
+            function ($query) use ($status) {
+                return $query->where('status', $status);})
             ->orderBy('code', 'asc')
             ->get();
-    
         return view('layouts.master.CoA.index', compact('CoAs', 'allowedStatuses'));
-    
     }
 
     public function create(Request $request)
