@@ -13,11 +13,16 @@ class OutstandingSalesInvoice implements FromCollection, WithHeadings, WithStyle
 {
     protected $salesInvoice;
     protected $dates;
+    protected $displaydate;
+    protected $createddate;
 
-    public function __construct($salesInvoice = null, $dates = null)
+
+    public function __construct($salesInvoice = null, $dates = null, $displaydate, $createddate)
     {
         $this->salesInvoice = $salesInvoice;
         $this->dates = $dates;
+        $this->displaydate = $displaydate;
+        $this->createddate = $createddate;
     }
 
     public function collection()
@@ -44,9 +49,9 @@ class OutstandingSalesInvoice implements FromCollection, WithHeadings, WithStyle
     public function headings(): array
     {
         return [
-            ['Outstanding Sales Order'],
-            ['Date :', $this->dates],
-            [],
+            ['Outstanding Sales Order List'],
+            ['Date :', $this->displaydate],
+            ['Created at :', $this->createddate],
             ['Invoice Code', 'Sales Order', 'Customer', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
         ];
     }

@@ -13,11 +13,15 @@ class OutstandingSalesOrder implements FromCollection, WithHeadings, WithStyles
 {
     protected $salesOrder;
     protected $dates;
+    protected $displaydate;
+    protected $createddate;
 
-    public function __construct($salesOrder = null, $dates = null)
+    public function __construct($salesOrder = null, $dates = null, $displaydate, $createddate)
     {
         $this->salesOrder = $salesOrder;
         $this->dates = $dates;
+        $this->displaydate = $displaydate;
+        $this->createddate = $createddate;
     }
 
     public function collection()
@@ -44,9 +48,9 @@ class OutstandingSalesOrder implements FromCollection, WithHeadings, WithStyles
     public function headings(): array
     {
         return [
-            ['Outstanding Sales Order'],
-            ['Date :', $this->dates],
-            [],
+            ['Outstanding Sales Order List'],
+            ['Date :', $this->displaydate],
+            ['Created at :', $this->createddate],
             ['Order Code', 'Date', 'Customer', 'Description', 'Quantity', 'Sent', 'Remaining', 'Status'],
         ];
     }

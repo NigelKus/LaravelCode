@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use Carbon\Carbon;
 use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
 use Illuminate\Http\Request;
@@ -29,8 +30,11 @@ class OutStandingSalesController extends Controller
             abort(403, 'Unauthorized access');
         }
 
+        $createddate = now()->format('j F y H:i:s');
+
         $dates = $request['date'];
     
+        
         $salesOrder = SalesOrder::with('details')
             ->whereDate('date', '<=', $dates)
             ->get();
@@ -58,8 +62,9 @@ class OutStandingSalesController extends Controller
         $salesOrder = $salesOrder->filter(function ($order) {
             return $order->quantity_difference !== 0;
         });
-    
-        return view('layouts.reports.outstanding_sales.outstandingOrder', compact('dates', 'salesOrder'));
+
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        return view('layouts.reports.outstanding_sales.outstandingOrder', compact('dates', 'salesOrder', 'createddate', 'displaydate'));
     }
     
 
@@ -70,6 +75,7 @@ class OutStandingSalesController extends Controller
         }
 
         $dates = $request['date'];
+        $createddate = now()->format('j F y H:i:s');
     
         $salesInvoice = SalesInvoice::with('details')
             ->whereDate('date', '<=', $dates)
@@ -102,13 +108,15 @@ class OutStandingSalesController extends Controller
         $salesInvoice = $salesInvoice->filter(function ($invoice) {
             return $invoice->remaining_price !== 0;
         });
-    
-        return view('layouts.reports.outstanding_sales.outstandingInvoice', compact('dates', 'salesInvoice'));
+        
+        $displaydate = Carbon::parse($dates)->format('j F Y');
+        return view('layouts.reports.outstanding_sales.outstandingInvoice', compact('dates', 'salesInvoice', 'createddate', 'displaydate'));
     }
     
     public function generateOrderPdf(Request $request)
     {   
         $dates = $request['dates'];
+        $createddate = now()->format('j F y H:i:s');
 
         $salesOrder = SalesOrder::with('details')
             ->whereDate('date', '<=', $dates)
@@ -139,13 +147,15 @@ class OutStandingSalesController extends Controller
         });
 
 
-        $pdf = PDF::loadView('layouts.reports.outstanding_sales.pdfOrder', compact('dates', 'salesOrder'));
+        $dates = Carbon::parse($dates)->format('j F Y');
+        $pdf = PDF::loadView('layouts.reports.outstanding_sales.pdfOrder', compact('dates', 'salesOrder', 'createddate'));
         return $pdf->stream('outstanding-sales-order.pdf');
     }
 
     public function generateInvoicePdf(Request $request)
     {   
         $dates = $request['dates'];
+        $createddate = now()->format('j F y H:i:s');
 
         $salesInvoice = SalesInvoice::with('details')
             ->whereDate('date', '<=', $dates)
@@ -179,14 +189,16 @@ class OutStandingSalesController extends Controller
             return $invoice->remaining_price !== 0;
         });
 
-
-        $pdf = PDF::loadView('layouts.reports.outstanding_sales.pdfInvoice', compact('dates', 'salesInvoice'));
+        $dates = Carbon::parse($dates)->format('j F Y');
+        $pdf = PDF::loadView('layouts.reports.outstanding_sales.pdfInvoice', compact('dates', 'salesInvoice', 'createddate'));
         return $pdf->stream('outstanding-sales-invoice.pdf');
     }
 
     public function generateOrderExcel(Request $request)
     {   
         $dates = $request['dates'];
+        $createddate = now()->format('j F y H:i:s');
+        $displaydate = Carbon::parse($dates)->format('j F Y');
         
         $salesOrder = SalesOrder::with('details')
             ->whereDate('date', '<=', $dates)
@@ -216,12 +228,14 @@ class OutStandingSalesController extends Controller
             return $order->quantity_difference !== 0;
         });
 
-        return Excel::download(new OutstandingSalesOrder($salesOrder, $dates), 'Outstanding Sales Order.xlsx');
+        return Excel::download(new OutstandingSalesOrder($salesOrder, $dates, $createddate, $displaydate), 'Outstanding Sales Order.xlsx');
     }
 
     public function generateInvoiceExcel(Request $request)
     {   
         $dates = $request['dates'];
+        $createddate = now()->format('j F y H:i:s');
+        $displaydate = Carbon::parse($dates)->format('j F Y');
         
         $salesInvoice = SalesInvoice::with('details')
             ->whereDate('date', '<=', $dates)
@@ -255,6 +269,6 @@ class OutStandingSalesController extends Controller
             return $invoice->remaining_price !== 0;
         });
 
-        return Excel::download(new OutstandingSalesInvoice($salesInvoice, $dates), 'Outstanding Sales Invoice.xlsx');
+        return Excel::download(new OutstandingSalesInvoice($salesInvoice, $dates, $createddate, $displaydate), 'Outstanding Sales Invoice.xlsx');
     }
 }
