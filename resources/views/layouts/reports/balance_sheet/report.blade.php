@@ -21,8 +21,20 @@
             <form action="{{ route('balance_sheet.excel') }}" method="POST" class="form-horizontal" id="exportForm">
                 @csrf
                 <input type="hidden" name="dateStringDisplay" value="{{ $dateStringDisplay }}">
-                <h2 class="text-left">Balance Sheet</h2>
-                <p class="text-left"><strong>{{ $dateStringDisplay }}</strong></p>
+
+
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <!-- Logo Section -->
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('vendor/adminlte/dist/img/logoS.png'))) }}" 
+                        style="height: 75px; width: 75px; margin-right: 20px;">
+                
+                    <!-- Text Section -->
+                    <div style="text-align: center; flex: 1;">
+                        <h2 class="margin: 0;text-left">Balance Sheet</h2>
+                        <p class="margin: 0;text-left"><strong>{{ $dateStringDisplay }}</strong></p>
+                    </div>
+                </div>
+
                 <hr>
 
                 <div class="row">

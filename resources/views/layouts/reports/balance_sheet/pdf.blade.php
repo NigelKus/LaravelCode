@@ -18,80 +18,17 @@
     </style>
 </head>
 <body>
-    <h1>Balance Sheet Report</h1>
-    <p><strong>{{ $dateStringDisplay }} </strong></p>
-        {{-- <table class="table table-bordered" style="margin-bottom: 40px;">
-            <thead>
-            </thead>
-            <td colspan="2">
-                Asset
-            </td>
-            <td colspan="2">
-                Liablities & Equity
-            </td>
-
-            <tr>
-                <td>Nama</td>
-                <td>Jumlah</td>
-                <td>Nama</td>
-                <td>Jumlah</td>
-            </tr>
-
-            @php
-                $firstrun = 0;
-                $displayedCoaCodes = [];
-                $isDisplayed = false;
-            @endphp
-            @foreach ($totalasset as $item)
-            <tr>
-                <td>{{ $item['coa']->name }}({{ $item['coa']->code }})</td>
-                <td>{{ number_format($item['total'], 2) }}</td>
-
-                @foreach ($totalUtang as $liabilityItem)
-                    @if ($firstrun == 0)
-                        <td><strong>Liabilities</strong></td>
-                        <td></td>
-                        @php
-                        $firstrun = 1;
-                        @endphp
-                        @elseif (!$isDisplayed && !in_array($liabilityItem['coa']->code, $displayedCoaCodes))
-                            <td>{{ $liabilityItem['coa']->name }} ({{ $liabilityItem['coa']->code }})</td>
-                            <td>{{ number_format($liabilityItem['total'], 2) }}</td>
-
-                            @php
-                                $displayedCoaCodes[] = $liabilityItem['coa']->code;
-                                $isDisplayed = true;
-                                $firstrun = 2;
-                            @endphp
-                    @else
-                        @if($firstrun == 2)
-                            <td><strong>Equity</strong></td>
-                            <td></td>
-                            @php
-                                $firstrun = 3;
-                            @endphp
-                        @endif
-                    @endif
-
-                    @if($firstrun == 3)
-                    <td><strong>Equity</strong></td>
-                    <td></td>
-                    @php
-                        $firstrun = 3;
-                    @endphp
-                @endif
-                @endforeach
-            </tr>
-            @endforeach
-                <tr>
-                    <td><strong>Total Asset</strong></td>
-                    <td>{{ number_format($totalActiva, 2) }}</td>
-                </tr>
-            </tbody>
-
-            
-        </table> --}}
-
+    <div style="position: relative; width: 100%; height: 150px;">
+        <!-- Logo Section -->
+        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('vendor/adminlte/dist/img/logoS.png'))) }}" 
+            style="position: absolute; top: 0; left: 0; height: 75px; width: 75px;">
+    
+        <!-- Text Section -->
+        <div style="text-align: center; position: absolute; top: 0; left: 50%; transform: translateX(-50%);">
+            <h1>Balance Sheet Report</h1>
+            <p><strong>{{ $dateStringDisplay }} </strong></p>
+        </div>
+    </div>
             <table class="table table-bordered" style="margin-bottom: 40px;">
                 <thead>
                     <tr>
