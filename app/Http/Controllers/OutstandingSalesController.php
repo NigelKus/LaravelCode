@@ -20,7 +20,6 @@ class OutStandingSalesController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         return view('layouts.reports.outstanding_sales.index');
     }
 
@@ -29,38 +28,27 @@ class OutStandingSalesController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         $dates = $request['date'];
-    
-        
         $salesOrder = SalesOrder::with('details')
             ->whereDate('date', '<=', $dates)
             ->get();
-        
         $salesInvoice = SalesInvoice::with('details')
             ->whereDate('date', '<=', $dates)
             ->get();
-    
             foreach ($salesOrder as $order) {
                 $order->total_quantity = $order->details->sum('quantity');
-                
                 $relatedInvoices = $salesInvoice->where('salesorder_id', $order->id);
-
                 $order->total_quantity_sent = $relatedInvoices->sum(function ($invoice) {
                     return $invoice->details->sum('quantity');
                 });
-
                 $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
-
                 if ($order->quantity_difference !== 0) {
                     $order->status = 'pending'; 
                 }
             }
-    
         $salesOrder = $salesOrder->filter(function ($order) {
             return $order->quantity_difference !== 0;
         });
-
         $displaydate = Carbon::parse($dates)->format('j F Y');
         $createddate = now()->format('j F y H:i:s');
         return view('layouts.reports.outstanding_sales.outstandingOrder', compact('dates', 'salesOrder', 'createddate', 'displaydate'));
@@ -72,42 +60,32 @@ class OutStandingSalesController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         $dates = $request['date'];
         $createddate = now()->format('j F y H:i:s');
-    
         $salesInvoice = SalesInvoice::with('details')
             ->whereDate('date', '<=', $dates)
             ->get();
-        
         $salesPayment = PaymentOrderDetail::with('paymentOrder')
             ->whereHas('paymentOrder', function($query) use ($dates) {
                 $query->whereDate('date', '<=', $dates);
             })
             ->get();
-    
         foreach ($salesInvoice as $invoice) {
             $invoice->total_price = $invoice->details->sum(function ($detail) {
                 return $detail->price * $detail->quantity; 
             });
-
             $relatedPayments = $salesPayment->where('invoicesales_id', $invoice->id);
-    
             $invoice->paid = $relatedPayments->sum(function ($payment) {
                 return $payment->price; 
             });
-    
             $invoice->remaining_price = $invoice->total_price - $invoice->paid;
-
             if ($invoice->remaining_price !== 0) {
                 $invoice->status = 'pending'; 
             }
         }
-
         $salesInvoice = $salesInvoice->filter(function ($invoice) {
             return $invoice->remaining_price !== 0;
         });
-        
         $displaydate = Carbon::parse($dates)->format('j F Y');
         return view('layouts.reports.outstanding_sales.outstandingInvoice', compact('dates', 'salesInvoice', 'createddate', 'displaydate'));
     }
