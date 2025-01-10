@@ -22,33 +22,25 @@ class PaymentOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
-
         $statuses = ['pending', 'completed']; 
-
         $query = PaymentOrder::with(['customer' => function ($q) {
             $q->withTrashed(); 
         }])
         ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
-    
         if ($request->has('code') && $request->code != '') {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
-    
         if ($request->has('customer') && $request->customer != '') {
             $query->whereHas('customer', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->customer . '%');
             });
         }
-
         if ($request->has('date') && $request->date != '') {
             $query->whereDate('date', $request->date);
         }
-    
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc'); 
@@ -56,10 +48,8 @@ class PaymentOrderController extends Controller
                 $query->orderBy('date', 'asc'); 
             }
         }
-    
         $perPage = $request->get('perPage', 10); 
         $paymentOrders = $query->paginate($perPage);
-
         return view('layouts.transactional.payment_order.index', compact('paymentOrders', 'statuses')); // Adjust the view as necessary
     }
 
@@ -81,15 +71,11 @@ class PaymentOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
-
         $inputData = $request->all();
-        
         $filteredInvoiceIds = [];
         $filteredRequested = [];
         $filteredOriginalPrices = [];
         $filteredRemainingPrices = [];
-        
         foreach ($inputData['invoice_id'] as $index => $invoiceId) {
             if (!empty($invoiceId) && !empty($inputData['requested'][$index])) {
                 $filteredInvoiceIds[] = $invoiceId;
@@ -98,14 +84,12 @@ class PaymentOrderController extends Controller
                 $filteredRemainingPrices[] = $inputData['remaining_prices'][$index];
             }
         }
-        
         $request->merge([
             'invoice_id' => $filteredInvoiceIds,
             'requested' => $filteredRequested,
             'original_prices' => $filteredOriginalPrices,
             'remaining_prices' => $filteredRemainingPrices,
         ]);
-        
         $request->validate([
             'customer_id' => 'required|exists:mstr_customer,id',
             'description' => 'nullable|string|max:255', 
@@ -115,8 +99,6 @@ class PaymentOrderController extends Controller
             'invoice_id.*' => 'exists:sales_invoice,id',
             'payment_type' => 'required',
         ]);
-
-    
         $salesPaymentCode = CodeFactory::generatePaymentSalesCode();
         DB::beginTransaction();
         $paymentOrder = PaymentOrder::create([
@@ -126,10 +108,8 @@ class PaymentOrderController extends Controller
             'date' => $request['date'],
             'status' => 'pending',
         ]);
-        
         foreach ($request['invoice_id'] as $index => $invoiceId) {
             $requestedAmount = $request['requested'][$index];
-            
             $paymentOrder->paymentDetails()->create([
                 'payment_id' => $paymentOrder->id,
                 'invoicesales_id' => $invoiceId,
@@ -137,7 +117,6 @@ class PaymentOrderController extends Controller
                 'status' => 'pending',
             ]);
             $invoice = SalesInvoice::with('details')->findOrFail($invoiceId);
-
             if ($invoice->calculatePriceRemaining() == 0) 
             {
                 $invoice->status = 'completed';
@@ -145,7 +124,6 @@ class PaymentOrderController extends Controller
             {
                 $invoice->status = 'pending';   
             }
-
             $invoice->save();
         }
         $requiredAccounts = [
@@ -153,14 +131,12 @@ class PaymentOrderController extends Controller
             1100 => "Chart of Account Code 1100 does not exist.",
             1200 => "Chart of Account Code 1200 does not exist.",
         ];
-
         foreach ($requiredAccounts as $code => $errorMessage) {
             if (!ChartOfAccount::where("code", $code)->exists()) {
                 DB::rollBack();
                 return redirect()->back()->withErrors(['error' => $errorMessage]);
             }
         }
-
         if($request['payment_type'] == 'bank')
         {
             AE_S03_FinishSalesPaymentBank::process($paymentOrder);
@@ -168,10 +144,8 @@ class PaymentOrderController extends Controller
         {
             AE_S04_FinishSalesPaymentKas::process($paymentOrder);
         }
-
         DB::commit();
         return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Payment Order created successfully.');
-
     }
     
     public function show(Request $request, $id)
@@ -179,35 +153,26 @@ class PaymentOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
-
         $paymentOrder = PaymentOrder::with(['customer' => function ($query) {
             $query->withTrashed();
         }, 'paymentDetails.salesInvoice'])
         ->findOrFail($id);
-
         $deleted = ($paymentOrder->customer->status == 'deleted');
-    
         $totalPrice = $paymentOrder->paymentDetails->sum(function ($detail) {
             return $detail->price;
         });
-
         $refType = 'App\Models\PaymentOrder';
-
         $journal = Journal::where('ref_id', $paymentOrder->id)
                         ->where('ref_type', $refType)
                         ->first();
         $coas = [];
         $postings = collect();
-        
         if ($journal) {
             $postings = Posting::where('journal_id', $journal->id)->get();
             foreach ($postings as $posting) {
                 $coas[] = $posting->account()->withTrashed()->first(); 
             }
         }
-
-        // dd($coas);
         return view('layouts.transactional.payment_order.show', [
             'paymentOrder' => $paymentOrder,
             'totalPrice' => $totalPrice,
@@ -216,7 +181,6 @@ class PaymentOrderController extends Controller
             'coas' => $coas,
             'deleted' => $deleted,
         ]);
-        
     }
 
     public function edit(Request $request, $id)

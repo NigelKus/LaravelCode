@@ -23,40 +23,25 @@ class PurchaseInvoiceController extends Controller
     public function index(Request $request)
     {
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $statuses = ['pending', 'completed']; 
         $purchaseOrders = PurchaseOrder::all(); 
-
         $query = PurchaseInvoice::with(['supplier' => function($q){
             $q->withTrashed();
         }])->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
         $query->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
         if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
-    
+            $query->where('status', $request->status);}
         if ($request->has('code') && $request->code != '') {
-            $query->where('code', 'like', '%' . $request->code . '%');
-        }
-    
+            $query->where('code', 'like', '%' . $request->code . '%');}
         if ($request->has('purchase_order') && $request->purchase_order != '') {
-            $query->where('code', 'like', '%' . $request->purchase_order . '%');
-        }
-
+            $query->where('code', 'like', '%' . $request->purchase_order . '%');}
         if ($request->has('supplier') && $request->supplier != '') {
             $query->whereHas('supplier', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->supplier . '%');
-            });
-        }
-    
+            });}
         if ($request->has('date') && $request->date != '') {
-            $query->whereDate('date', $request->date);
-        }
-    
+            $query->whereDate('date', $request->date);}
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc'); 
@@ -64,17 +49,14 @@ class PurchaseInvoiceController extends Controller
                 $query->orderBy('date', 'asc'); 
             }
         }
-    
         $perPage = $request->get('perPage', 10); 
         $purchaseInvoices = $query->paginate($perPage);
-
         foreach ($purchaseInvoices as $invoice) {
             $totalPrice = $invoice->details->sum(function($detail) {
                 return $detail->price * $detail->quantity; 
             });
             $invoice->total_price = $totalPrice;
         }
-    
         return view('layouts.transactional.purchase_invoice.index', [
             'purchaseInvoices' => $purchaseInvoices,
             'statuses' => $statuses,
@@ -144,21 +126,16 @@ class PurchaseInvoiceController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
             abort(403, 'Unauthorized access');
         }
-
         $filteredData = collect($request->input('requested'))->filter(function ($value, $key) {
             return $value > 0; 
         })->keys()->toArray();
-
         $requestData = $request->all();
         foreach (['requested', 'qtys', 'price_eachs', 'price_totals', 'purchase_order_detail_ids'] as $field) {
             $requestData[$field] = array_intersect_key($requestData[$field], array_flip($filteredData));
         }
-
         $requestData['price_eachs'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_eachs'], array_flip($filteredData)));
         $requestData['price_totals'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_totals'], array_flip($filteredData)));
-
         $request->replace($requestData);
-        
         $request->validate([
             'supplier_id' => 'required|exists:mstr_supplier,id',
             'description' => 'nullable|string',
@@ -173,11 +150,8 @@ class PurchaseInvoiceController extends Controller
         ], [
             'requested.*.min' => 'Requested quantity must be at least 1.',
         ]);
-
         DB::beginTransaction();
-        
             $purchaseInvoiceCode = CodeFactory::generatePurchaseInvoiceCode();
-
             $purchaseInvoice = new purchaseInvoice();
             $purchaseInvoice->code = $purchaseInvoiceCode; 
             $purchaseInvoice->purchaseorder_id = $request->input('purchaseorder_id');
@@ -187,27 +161,21 @@ class PurchaseInvoiceController extends Controller
             $purchaseInvoice->due_date = $request->input('due_date');
             $purchaseInvoice->status = 'pending'; 
             $purchaseInvoice->save();
-            
             $purchaseOrderId = $request->input('purchaseorder_id');
-            
             $existingpurchaseOrder = PurchaseOrder::with('details')->find($purchaseOrderId); 
             if (!$existingpurchaseOrder) {
                 throw new \Exception('purchase order not found.');
             }
-
             $requestedQuantities = $request->input('requested');
             $priceEaches = $request->input('price_eachs');
             $purchaseDetail = $request->input('purchase_order_detail_ids');
             foreach ($purchaseDetail as $index => $purchaseOrderDetailId) {
                 $purchaseOrderDetail = $existingpurchaseOrder->details->where('id', $purchaseOrderDetailId)->first();
-
                 if (!$purchaseOrderDetail) {
                     throw new \Exception('purchase order detail not found for ID ' . $purchaseOrderDetailId);
                 }
-                
                 $productId = $purchaseOrderDetail->product_id;
                 $requested = $requestedQuantities[$index] ?? 0;
-                
                 $purchaseInvoiceDetail = new PurchaseInvoiceDetail();
                 $purchaseInvoiceDetail->purchaseinvoice_id = $purchaseInvoice->id;
                 $purchaseInvoiceDetail->product_id = $productId;
@@ -216,27 +184,20 @@ class PurchaseInvoiceController extends Controller
                 $purchaseInvoiceDetail->price = $priceEaches[$index];
                 $purchaseInvoiceDetail->status = 'pending'; 
                 $purchaseInvoiceDetail->save();
-
                 PurchaseOrderDetail::checkAndUpdateStatus($purchaseOrderId, $productId, $purchaseOrderDetailId);
-                
             }
-            
             $requiredAccounts = [
                 1300 => "Chart of Account Code 1300 does not exist.",
                 2000 => "Chart of Account Code 2000 does not exist.",
             ];
-
             foreach ($requiredAccounts as $code => $errorMessage) {
                 if (!ChartOfAccount::where("code", $code)->exists()) {
                     DB::rollBack();
                     return redirect()->back()->withErrors(['error' => $errorMessage]);
                 }
             }
-            
             AE_PO2_FinishPurchaseInvoice::process($purchaseInvoice);
-
             DB::commit();
-
             return redirect()->route('purchase_invoice.show', $purchaseInvoice->id)
             ->with('success', 'purchase invoice updated successfully.');
     }
@@ -246,20 +207,15 @@ class PurchaseInvoiceController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
             abort(403, 'Unauthorized access');
         }
-
         $purchaseInvoice = PurchaseInvoice::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'details.product', 'purchaseOrder'])
         ->findOrFail($id);
-
         $deleted = ($purchaseInvoice->supplier->status == 'deleted');
-
         $totalPrice = $purchaseInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
-
         $refType = 'App\Models\PurchaseInvoice';
-
         $journal = Journal::where('ref_id', $purchaseInvoice->id)
                         ->where('ref_type', $refType)
                         ->first();
@@ -271,7 +227,6 @@ class PurchaseInvoiceController extends Controller
                 $coas[] = $posting->account()->withTrashed()->first(); 
             }
         }
-        
         return view('layouts.transactional.purchase_invoice.show', [
             'purchaseInvoice' => $purchaseInvoice,
             'totalPrice' => $totalPrice,

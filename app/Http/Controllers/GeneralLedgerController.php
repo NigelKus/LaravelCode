@@ -17,9 +17,7 @@ class GeneralLedgerController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         $CoAs = ChartOfAccount::where('status', 'active')->get(); 
-
         return view('layouts.reports.general_ledger.index', compact('CoAs'));
     }
     public function generate(Request $request)
@@ -33,16 +31,13 @@ class GeneralLedgerController extends Controller
         $date = date('j F Y H:i', strtotime('+7 hours'));
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
-
         $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
         $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
-    
         if ($request['id'] == null) {
             $coas = ChartOfAccount::where('status', 'active')
             ->orderBy('code', 'asc')
             ->get();
             $results = []; 
-    
             foreach ($coas as $coa) {
                 $starting = Posting::where('account_id', $coa->id)
                     ->with('journal')
@@ -53,7 +48,6 @@ class GeneralLedgerController extends Controller
                     ->get();
     
                 $balance = $starting->sum('amount');
-    
                 $postings = Posting::where('account_id', $coa->id)
                     ->with('journal')
                     ->when($fromdate, function ($query) use ($fromdate) {
@@ -71,15 +65,10 @@ class GeneralLedgerController extends Controller
                     'balance' => $balance,
                     'postings' => $postings,
                 ];
-
-                // $fromdate = Carbon::parse($fromdate)->format('d-m-Y H:i');
-                // $todate = Carbon::parse($todate)->format('d-m-Y H:i');
-
             }
             return view('layouts.reports.general_ledger.report', compact('results', 'displayfromdate', 'displaytodate', 'fromdate', 'todate', 'date'));
         } else {
             $coa = ChartOfAccount::find($request['id']);
-    
             $starting = Posting::where('account_id', $request['id'])
                 ->with('journal')
                 ->when($fromdate, function ($query) use ($fromdate) {
@@ -89,7 +78,6 @@ class GeneralLedgerController extends Controller
                 ->get();
                 
             $balance = $starting->sum('amount');
-            
             $postings = Posting::where('account_id', $request['id'])
                 ->with('journal')
                 ->when($fromdate, function ($query) use ($fromdate) {
@@ -101,10 +89,6 @@ class GeneralLedgerController extends Controller
                 ->orderBy('date', 'asc')
                 ->get();
                 $all = false;
-
-                // $fromdate = Carbon::parse($fromdate)->format('d-m-Y H:i');
-                // $todate = Carbon::parse($todate)->format('d-m-Y H:i');
-                
             return view('layouts.reports.general_ledger.report', compact('postings', 'balance', 'displayfromdate', 'displaytodate', 'coa', 'fromdate', 'todate', 'date'));
         }
     }

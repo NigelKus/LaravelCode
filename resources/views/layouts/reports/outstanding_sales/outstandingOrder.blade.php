@@ -44,7 +44,7 @@
                         <tr>
                             <th>Order Code</th>
                             <th>Date</th>
-                            <th>Customer</th>
+                            <th>Supplier</th>
                             <th>Description</th>
                             <th>Quantity</th>
                             <th>Sent</th>

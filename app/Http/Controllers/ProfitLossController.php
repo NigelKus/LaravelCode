@@ -17,7 +17,6 @@ class ProfitLossController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-
         return view('layouts.reports.profit_loss.index');
     }
     
@@ -26,32 +25,26 @@ class ProfitLossController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Accountant'])) {
             abort(403, 'Unauthorized access');
         }
-        
         $fromdate = $request['from_date'];
         $todate = $request['to_date'];
         $fromdate = str_replace('T', ' ', $fromdate);
         $todate = str_replace('T', ' ', $todate);
         $date = date('d/m/Y');
         $createddate = date('j F Y H:i', strtotime('+7 hours'));
-
         $displayfromdate = Carbon::parse($fromdate)->format('j F Y H:i');;
         $displaytodate = Carbon::parse($todate)->format('j F Y H:i');
-    
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
             ->where('code', 'not like', '42%')
             ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
-        
         $pendapatan = [];
-    
         foreach ($pendapatanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '<', 0)
                 ->where('date', '>=', $fromdate)  
                 ->where('date', '<=', $todate) 
                 ->sum('amount');
-            
             if ($sum != 0) {
                 $pendapatan[$id] = [
                     'coa' => ChartOfAccount::find($id),
@@ -59,16 +52,12 @@ class ProfitLossController extends Controller
                 ]; 
             }
         }
-    
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
             ->where('code', '<=', 8999)
             ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
-    
-        
         $beban = [];
-    
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
@@ -83,23 +72,17 @@ class ProfitLossController extends Controller
                 ]; 
             }
         }
-
         $HPP = ChartOfAccount::where('code', 4200)
             ->where('status', 'active')
             ->first();
-
         $codeHPP = ChartOfAccount::where('code', 4200)
             ->where('status', 'active')
             ->pluck('id')->first();
-
-
         $totalHPP = Posting::where('account_id', $codeHPP)
             ->where('amount', '>', 0)
             ->where('date', '>=', $fromdate)  
             ->where('date', '<=', $todate) 
             ->sum('amount');
-        // dd($totalHPP);
-
         return view('layouts.reports.profit_loss.report', compact('fromdate', 'todate', 'pendapatan', 'beban', 'totalHPP', 'HPP', 'displayfromdate', 'displaytodate', 'createddate'));
     }
     

@@ -23,38 +23,24 @@ class SalesInvoiceController extends Controller
     public function index(Request $request)
     {
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $statuses = ['pending', 'completed']; 
         $salesOrders = SalesOrder::all(); 
-
         $query = SalesInvoice::with(['customer' => function($q){
             $q->withTrashed();
         }])->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
         if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
-    
+            $query->where('status', $request->status);}
         if ($request->has('code') && $request->code != '') {
-            $query->where('code', 'like', '%' . $request->code . '%');
-        }
-    
+            $query->where('code', 'like', '%' . $request->code . '%');}
         if ($request->has('sales_order') && $request->sales_order != '') {
-            $query->where('code', 'like', '%' . $request->sales_order . '%');
-        }
-
+            $query->where('code', 'like', '%' . $request->sales_order . '%');}
         if ($request->has('customer') && $request->customer != '') {
             $query->whereHas('customer', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->customer . '%');
-            });
-        }
-    
+            });}
         if ($request->has('date') && $request->date != '') {
-            $query->whereDate('date', $request->date);
-        }
-    
+            $query->whereDate('date', $request->date);}
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc'); 
@@ -62,18 +48,13 @@ class SalesInvoiceController extends Controller
                 $query->orderBy('date', 'asc'); 
             }
         }
-    
         $perPage = $request->get('perPage', 10); 
         $salesInvoices = $query->paginate($perPage);
-
         foreach ($salesInvoices as $invoice) {
             $totalPrice = $invoice->details->sum(function($detail) {
                 return $detail->price * $detail->quantity; 
             });
-            $invoice->total_price = $totalPrice;
-        }
-
-    
+            $invoice->total_price = $totalPrice;}
         return view('layouts.transactional.sales_invoice.index', [
             'salesInvoices' => $salesInvoices,
             'statuses' => $statuses,
@@ -108,21 +89,16 @@ class SalesInvoiceController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
             abort(403, 'Unauthorized access');
         }
-        
         $filteredData = collect($request->input('requested'))->filter(function ($value, $key) {
             return $value > 0; 
         })->keys()->toArray();
-
         $requestData = $request->all();
         foreach (['requested', 'qtys', 'price_eachs', 'price_totals', 'sales_order_detail_ids'] as $field) {
             $requestData[$field] = array_intersect_key($requestData[$field], array_flip($filteredData));
         }
-
         $requestData['price_eachs'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_eachs'], array_flip($filteredData)));
         $requestData['price_totals'] = array_map(fn($value) => str_replace(',', '', $value), array_intersect_key($requestData['price_totals'], array_flip($filteredData)));
-
         $request->replace($requestData);
-        
         $request->validate([
             'customer_id' => 'required|exists:mstr_customer,id',
             'description' => 'nullable|string',
@@ -137,11 +113,8 @@ class SalesInvoiceController extends Controller
         ], [
             'requested.*.min' => 'Requested quantity must be at least 1.',
         ]);
-
         DB::beginTransaction();
-        
             $salesInvoiceCode = CodeFactory::generateSalesInvoiceCode();
-
             $salesInvoice = new SalesInvoice();
             $salesInvoice->code = $salesInvoiceCode; 
             $salesInvoice->salesorder_id = $request->input('salesorder_id');
@@ -151,29 +124,20 @@ class SalesInvoiceController extends Controller
             $salesInvoice->due_date = $request->input('due_date');
             $salesInvoice->status = 'pending'; 
             $salesInvoice->save();
-            
             $salesOrderId = $request->input('salesorder_id');
-            
             $existingSalesOrder = SalesOrder::with('details')->find($salesOrderId); 
             if (!$existingSalesOrder) {
-                throw new \Exception('Sales order not found.');
-            }
-
+                throw new \Exception('Sales order not found.');}
             $requestedQuantities = $request->input('requested');
             $priceEaches = $request->input('price_eachs');
             $salesDetail = $request->input('sales_order_detail_ids');
-
             $HPP = 0;
             foreach ($salesDetail as $index => $salesOrderDetailId) {
                 $salesOrderDetail = $existingSalesOrder->details->where('id', $salesOrderDetailId)->first();
-
                 if (!$salesOrderDetail) {
-                    throw new \Exception('Sales order detail not found for ID ' . $salesOrderDetailId);
-                }
-                
+                    throw new \Exception('Sales order detail not found for ID ' . $salesOrderDetailId);}
                 $productId = $salesOrderDetail->product_id;
                 $requested = $requestedQuantities[$index] ?? 0;
-                
                 $salesInvoiceDetail = new SalesInvoiceDetail();
                 $salesInvoiceDetail->invoicesales_id = $salesInvoice->id;
                 $salesInvoiceDetail->product_id = $productId;
@@ -182,33 +146,24 @@ class SalesInvoiceController extends Controller
                 $salesInvoiceDetail->price = $priceEaches[$index];
                 $salesInvoiceDetail->status = 'pending'; 
                 $salesInvoiceDetail->save();
-
                 $HPP = $HPP + ($requested * HPPFactory::generateHPP($productId,  $request->input('date')));
                 SalesorderDetail::checkAndUpdateStatus($salesOrderId, $productId, $salesOrderDetailId);
-                
             }
-
             $salesInvoice->HPP = $HPP;
-
             $requiredAccounts = [
                 1200 => "Chart of Account Code 1200 does not exist.",
                 4000 => "Chart of Account Code 4000 does not exist.",
                 4200 => "Chart of Account Code 4200 does not exist.",
                 1300 => "Chart of Account Code 1300 does not exist.",
             ];
-
             foreach ($requiredAccounts as $code => $errorMessage) {
                 if (!ChartOfAccount::where("code", $code)->exists()) {
                     DB::rollBack();
                     return redirect()->back()->withErrors(['error' => $errorMessage]);
                 }
             }
-            
-            
             AE_S02_FinishSalesInvoice::process($salesInvoice);
-            
             DB::commit();
-
             return redirect()->route('sales_invoice.show', $salesInvoice->id)
             ->with('success', 'Sales invoice updated successfully.');
     }
@@ -219,33 +174,26 @@ class SalesInvoiceController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
             abort(403, 'Unauthorized access');
         }
-
         $salesInvoice = SalesInvoice::with(['customer' => function ($query) {
             $query->withTrashed();
         }, 'details.product', 'salesOrder'])
         ->findOrFail($id);
-
         $deleted = ($salesInvoice->customer->status == 'deleted');
-
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
-        
         $refType = 'App\Models\SalesInvoice';
-
         $journal = Journal::where('ref_id', $salesInvoice->id)
                         ->where('ref_type', $refType)
                         ->first();
         $coas = [];
         $postings = collect();
-
         if($journal){
             $postings = Posting ::where('journal_id', $journal->id)->get();
             foreach ($postings as $posting) {
                 $coas[] = $posting->account()->withTrashed()->first(); 
             }
         }
-
         return view('layouts.transactional.sales_invoice.show', [
             'salesInvoice' => $salesInvoice,
             'totalPrice' => $totalPrice,

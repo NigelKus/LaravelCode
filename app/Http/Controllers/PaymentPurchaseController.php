@@ -24,33 +24,25 @@ class PaymentPurchaseController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
         $statuses = ['pending', 'completed']; 
-
         $query = PaymentPurchase::with(['supplier' => function ($q) {
             $q->withTrashed(); 
         }])
         ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
-    
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
-    
         if ($request->has('code') && $request->code != '') {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
-    
         if ($request->has('supplier') && $request->supplier != '') {
             $query->whereHas('supplier', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->supplier . '%');
             });
         }
-
         if ($request->has('date') && $request->date != '') {
             $query->whereDate('date', $request->date);
         }
-    
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc'); 
@@ -58,10 +50,8 @@ class PaymentPurchaseController extends Controller
                 $query->orderBy('date', 'asc');
             }
         }
-    
         $perPage = $request->get('perPage', 10); 
         $paymentPurchases = $query->paginate($perPage);
-
         return view('layouts.transactional.payment_purchase.index', compact('paymentPurchases', 'statuses')); // Adjust the view as necessary
     }
 
@@ -82,15 +72,11 @@ class PaymentPurchaseController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
-
         $inputData = $request->all();
-        
         $filteredInvoiceIds = [];
         $filteredRequested = [];
         $filteredOriginalPrices = [];
         $filteredRemainingPrices = [];
-        
         foreach ($inputData['invoice_id'] as $index => $invoiceId) {
             if (!empty($invoiceId) && !empty($inputData['requested'][$index])) {
                 $filteredInvoiceIds[] = $invoiceId;
@@ -99,14 +85,12 @@ class PaymentPurchaseController extends Controller
                 $filteredRemainingPrices[] = $inputData['remaining_prices'][$index];
             }
         }
-        
         $request->merge([
             'invoice_id' => $filteredInvoiceIds,
             'requested' => $filteredRequested,
             'original_prices' => $filteredOriginalPrices,
             'remaining_prices' => $filteredRemainingPrices,
         ]);
-        
         $request->validate([
             'supplier_id' => 'required|exists:mstr_supplier,id', 
             'description' => 'nullable|string|max:255', 
@@ -116,7 +100,6 @@ class PaymentPurchaseController extends Controller
             'invoice_id.*' => 'exists:purchase_invoice,id', 
             'payment_type' => 'required',
         ]);
-        
         $purchasePaymentCode = CodeFactory::generatePaymentPurchaseCode();
         DB::beginTransaction();
         $paymentPurchase = PaymentPurchase::create([
@@ -126,7 +109,6 @@ class PaymentPurchaseController extends Controller
             'date' => $request['date'],
             'status' => 'pending',
         ]);
-        
         foreach ($request['invoice_id'] as $index => $invoiceId) {
             $requestedAmount = $request['requested'][$index];
             
@@ -137,7 +119,6 @@ class PaymentPurchaseController extends Controller
                 'status' => 'pending',
             ]);
             $invoice = PurchaseInvoice::with('details')->findOrFail($invoiceId);
-
             if ($invoice->calculatePriceRemaining() == 0) 
             {
                 $invoice->status = 'completed';
@@ -145,23 +126,19 @@ class PaymentPurchaseController extends Controller
             {
                 $invoice->status = 'pending';   
             }
-
             $invoice->save();
         }
-
         $requiredAccounts = [
             1000 => "Chart of Account Code 1000 does not exist.",
             1100 => "Chart of Account Code 1100 does not exist.",
             2000 => "Chart of Account Code 2000 does not exist.",
         ];
-
         foreach ($requiredAccounts as $code => $errorMessage) {
             if (!ChartOfAccount::where("code", $code)->exists()) {
                 DB::rollBack();
                 return redirect()->back()->withErrors(['error' => $errorMessage]);
             }
         }
-        
         if($request['payment_type'] == 'bank')
         {
             AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);
@@ -179,33 +156,26 @@ class PaymentPurchaseController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
         $paymentPurchase = PaymentPurchase::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'paymentDetails.purchaseInvoice'])
         ->findOrFail($id);
-
         $deleted = ($paymentPurchase->supplier->status == 'deleted');
-
         $totalPrice = $paymentPurchase->paymentDetails->sum(function ($detail) {
             return $detail->price;
         });
-
         $refType = 'App\Models\PaymentPurchase';
-
         $journal = Journal::where('ref_id', $paymentPurchase->id)
                         ->where('ref_type', $refType)
                         ->first();
         $coas = [];
         $postings = collect();
-
         if($journal){
             $postings = Posting ::where('journal_id', $journal->id)->get();
             foreach ($postings as $posting) {
                 $coas[] = $posting->account()->withTrashed()->first(); 
             }
         }
-
         return view('layouts.transactional.payment_purchase.show', [
             'paymentPurchase' => $paymentPurchase,
             'totalPrice' => $totalPrice,

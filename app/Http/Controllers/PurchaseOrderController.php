@@ -19,33 +19,21 @@ class PurchaseOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-
         $statuses = ['pending', 'completed']; 
-
         $query = PurchaseOrder::with(['supplier' => function ($q) {
-            $q->withTrashed(); 
-        }])
+            $q->withTrashed(); }])
         ->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-
-    
         if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
-    
+            $query->where('status', $request->status);}
         if ($request->has('code') && $request->code != '') {
-            $query->where('code', 'like', '%' . $request->code . '%');
-        }
-    
+            $query->where('code', 'like', '%' . $request->code . '%');}
         if ($request->has('supplier') && $request->supplier != '') {
             $query->whereHas('supplier', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->supplier . '%');
             });
         }
-
         if ($request->has('date') && $request->date != '') {
-            $query->whereDate('date', $request->date);
-        }
-    
+            $query->whereDate('date', $request->date);}
         if ($request->has('sort')) {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc'); 
@@ -53,10 +41,8 @@ class PurchaseOrderController extends Controller
                 $query->orderBy('date', 'asc'); 
             }
         }
-    
         $perPage = $request->get('perPage', 10); 
         $purchaseOrders = $query->paginate($perPage);
-    
         return view('layouts.transactional.purchase_order.index', compact('purchaseOrders', 'statuses'));
     }
 
@@ -76,37 +62,28 @@ class PurchaseOrderController extends Controller
     public function store(Request $request)
     {
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $productIds = $request->input('product_ids', []);
         $quantities = $request->input('qtys', []);
         $prices = $request->input('price_eachs', []);
         $priceTotals = $request->input('price_totals', []);
-        
         $filteredData = array_filter(array_map(null, $productIds, $quantities, $prices, $priceTotals), function($item) {
             return $item[0] !== null;
         });
-        
         $filteredProductIds = array_column($filteredData, 0);
         $filteredQuantities = array_column($filteredData, 1);
         $filteredPrices = array_column($filteredData, 2);
         $filteredPriceTotals = array_column($filteredData, 3);
-        
         if (empty($filteredProductIds)) {
-            return redirect()->back()->withErrors(['error' => 'At least one product must be selected.']);
-        }
-
+            return redirect()->back()->withErrors(['error' => 'At least one product must be selected.']);}
         $filteredPrices = array_map(fn($value) => str_replace(',', '', $value), $filteredPrices);
         $filteredPriceTotals = array_map(fn($value) => str_replace(',', '', $value), $filteredPriceTotals);
-        
         $request->merge([
             'product_ids' => array_values($filteredProductIds),
             'qtys' => array_values($filteredQuantities),
             'price_eachs' => array_values($filteredPrices),
             'price_totals' => array_values($filteredPriceTotals),
         ]);
-        
         $validatedData = $request->validate([
             'supplier_id' => 'required|integer|exists:mstr_supplier,id',
             'description' => 'nullable|string',
@@ -119,7 +96,6 @@ class PurchaseOrderController extends Controller
             'price_eachs.*' => 'required|numeric|min:0',
         ]);
         $purchaseOrderCode = CodeFactory::generatePurchaseOrdersCode();
-    
         DB::beginTransaction();
         $purchaseOrder = PurchaseOrder::create([  
             'code' => $purchaseOrderCode,
@@ -128,22 +104,16 @@ class PurchaseOrderController extends Controller
             'status' => 'pending',
             'date' => $validatedData['date'],
         ]);
-        
         $productIds = $validatedData['product_ids'];
         $quantities = $validatedData['qtys'];
         $prices = $validatedData['price_eachs'];
-    
         if (count($productIds) !== count($quantities) || count($productIds) !== count($prices)) {
             DB::rollback();
-            return redirect()->back()->withErrors(['error' => 'Mismatch between product details.']);
-        }
-    
+            return redirect()->back()->withErrors(['error' => 'Mismatch between product details.']);}
         $detailsData = [];
-    
         foreach ($productIds as $index => $productId) {
             $quantity = $quantities[$index];
             $price = $prices[$index];
-    
             $detailsData[] = [
                 'purchaseorder_id' => $purchaseOrder->id,
                 'product_id' => $productId,
@@ -152,11 +122,8 @@ class PurchaseOrderController extends Controller
                 'status' => 'pending',
             ];
         }
-        
         PurchaseOrderDetail::insert($detailsData);
-    
         DB::commit();
-    
         return redirect()->route('purchase_order.show', ['id' => $purchaseOrder->id])
             ->with('success', 'Purchase Order created successfully.')
             ->with('purchase_order_code', $purchaseOrderCode);
@@ -165,21 +132,15 @@ class PurchaseOrderController extends Controller
     public function show(Request $request, $id)
     {
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
-            abort(403, 'Unauthorized access');
-        }
-
+            abort(403, 'Unauthorized access');}
         $purchaseOrder = PurchaseOrder::with(['supplier' => function ($query) {
             $query->withTrashed();
         }, 'details.product'])
         ->findOrFail($id);
-
         $deleted = ($purchaseOrder->supplier->status == 'deleted');
-
-
         $totalPrice = $purchaseOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });
-        
         return view('layouts.transactional.purchase_order.show', compact('purchaseOrder', 'totalPrice', 'deleted'));
     }
 

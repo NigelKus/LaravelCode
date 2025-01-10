@@ -34,7 +34,7 @@
             <tr>
                 <th>Invoice Code</th>
                 <th>Purchase Order</th>
-                <th>Customer</th>
+                <th>Supplier</th>
                 <th>Description</th>
                 <th>Total</th>
                 <th>Paid</th>

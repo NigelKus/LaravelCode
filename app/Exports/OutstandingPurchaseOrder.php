@@ -50,7 +50,7 @@ class OutstandingPurchaseOrder implements FromCollection, WithHeadings, WithStyl
             ['Outstanding Purchase Order List'],
             ['Date :', $this->displaydate],
             ['Created at : ', $this->createddate],
-            ['Order Code', 'Date', 'Customer', 'Description', 'Quantity', 'Sent', 'Remaining', 'Status'],
+            ['Order Code', 'Date', 'Supplier', 'Description', 'Quantity', 'Sent', 'Remaining', 'Status'],
         ];
     }
 

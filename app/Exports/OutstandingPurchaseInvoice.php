@@ -50,7 +50,7 @@ class OutstandingPurchaseInvoice implements FromCollection, WithHeadings, WithSt
             ['Outstanding Purchase Invoice List'],
             ['Date :', $this->displaydate],
             ['Created at :', $this->createddate],
-            ['Invoice Code', 'Date', 'Customer', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
+            ['Invoice Code', 'Date', 'Supplier', 'Description', 'Total', 'Paid', 'Remaining', 'Status'],
         ];
     }
 
