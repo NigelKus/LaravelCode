@@ -34,8 +34,14 @@ class PurchaseInvoiceController extends Controller
             $query->where('status', $request->status);}
         if ($request->has('code') && $request->code != '') {
             $query->where('code', 'like', '%' . $request->code . '%');}
+
         if ($request->has('purchase_order') && $request->purchase_order != '') {
-            $query->where('code', 'like', '%' . $request->purchase_order . '%');}
+            $query->whereHas('purchaseOrder', function ($q) use ($request) {
+                $q->where('code', 'like', '%' . $request->purchase_order . '%');
+            });
+        }
+            
+
         if ($request->has('supplier') && $request->supplier != '') {
             $query->whereHas('supplier', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->supplier . '%');

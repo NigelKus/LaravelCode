@@ -29,19 +29,36 @@ class SalesInvoiceController extends Controller
         $query = SalesInvoice::with(['customer' => function($q){
             $q->withTrashed();
         }])->whereNotIn('status', ['deleted', 'canceled', 'cancelled']);
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);}
-        if ($request->has('code') && $request->code != '') {
-            $query->where('code', 'like', '%' . $request->code . '%');}
-        if ($request->has('sales_order') && $request->sales_order != '') {
-            $query->where('code', 'like', '%' . $request->sales_order . '%');}
-        if ($request->has('customer') && $request->customer != '') {
+        if ($request->has('status') && $request->status != '') 
+        {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('code') && $request->code != '') 
+        {
+            $query->where('code', 'like', '%' . $request->code . '%');
+        }
+
+        if ($request->has('sales_order') && $request->sales_order != '') 
+        {
+            $query->whereHas('salesOrder', function ($q) use ($request) {
+                $q->where('code', 'like', '%' . $request->sales_order . '%');
+            });
+        }
+        
+        if ($request->has('customer') && $request->customer != '') 
+        {
             $query->whereHas('customer', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->customer . '%');
-            });}
-        if ($request->has('date') && $request->date != '') {
-            $query->whereDate('date', $request->date);}
-        if ($request->has('sort')) {
+            });
+        }
+
+        if ($request->has('date') && $request->date != '') 
+        {
+            $query->whereDate('date', $request->date);
+        }
+        if ($request->has('sort')) 
+        {
             if ($request->sort == 'recent') {
                 $query->orderBy('date', 'desc'); 
             } elseif ($request->sort == 'oldest') {
