@@ -54,8 +54,8 @@
                     <label for="payment_type">Payment Type</label>
                     <select class="form-control @error('payment_type') is-invalid @enderror" id="payment_type" name="payment_type" required>
                         <option value="">Select a Payment Type</option>
-                        <option value="kas" {{ old('payment_type', $payment_type) == 'kas' ? 'selected' : '' }}>Kas</option>
-                        <option value="bank" {{ old('payment_type', $payment_type) == 'bank' ? 'selected' : '' }}>Bank</option>
+                        <option value="kas" >Kas</option>
+                        <option value="bank" >Bank</option>
                     </select>
                     @error('payment_type')
                         <span class="invalid-feedback" role="alert">

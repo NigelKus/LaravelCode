@@ -128,25 +128,25 @@ class PaymentPurchaseController extends Controller
             }
             $invoice->save();
         }
-        $requiredAccounts = [
-            1000 => "Chart of Account Code 1000 does not exist.",
-            1100 => "Chart of Account Code 1100 does not exist.",
-            2000 => "Chart of Account Code 2000 does not exist.",
-        ];
-        foreach ($requiredAccounts as $code => $errorMessage) {
-            if (!ChartOfAccount::where("code", $code)->exists()) {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => $errorMessage]);
-            }
-        }
-        if($request['payment_type'] == 'bank')
-        {
-            AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);
-        }else 
-        {
+        // $requiredAccounts = [
+        //     1000 => "Chart of Account Code 1000 does not exist.",
+        //     1100 => "Chart of Account Code 1100 does not exist.",
+        //     2000 => "Chart of Account Code 2000 does not exist.",
+        // ];
+        // foreach ($requiredAccounts as $code => $errorMessage) {
+        //     if (!ChartOfAccount::where("code", $code)->exists()) {
+        //         DB::rollBack();
+        //         return redirect()->back()->withErrors(['error' => $errorMessage]);
+        //     }
+        // }
+        // if($request['payment_type'] == 'bank')
+        // {
+        //     AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);
+        // }else 
+        // {
             
-            AE_PO4_FinishPurchasePaymentKas::process($paymentPurchase);
-        }
+        //     AE_PO4_FinishPurchasePaymentKas::process($paymentPurchase);
+        // }
         DB::commit();
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Payment Purchase created successfully.');
     }
@@ -446,11 +446,72 @@ class PaymentPurchaseController extends Controller
         
         $paymentPurchase = PaymentPurchase::findOrFail($id);
 
-        $paymentPurchase->update([
-            'status' => $request->input('status'),
-        ]);
+        if ($paymentPurchase->status === $request->input('status')) {
+            return redirect()->route('payment_order.show', $paymentPurchase->id);
+        }
+    
+        if ($request->input('status') === 'completed') {
+            DB::beginTransaction();
+    
+            try {
+                $requiredAccounts = [
+                    1000 => "Chart of Account Code 1000 does not exist.",
+                    1100 => "Chart of Account Code 1100 does not exist.",
+                    1200 => "Chart of Account Code 1200 does not exist.",
+                ];
+    
+                foreach ($requiredAccounts as $code => $errorMessage) {
+                    if (!ChartOfAccount::where("code", $code)->exists()) {
+                        DB::rollBack();
+                        return redirect()->back()->withErrors(['error' => $errorMessage]);
+                    }
+                }
+    
+                if ($request->input('payment_type') === 'bank') {
+                    AE_PO3_FinishPurchasePaymentBank::process($paymentPurchase);
+                } else {
+                    AE_PO4_FinishPurchasePaymentKas::process($paymentPurchase);
+                }
+                
+                $paymentPurchase->update([
+                    'status' => $request->input('status'),
+                ]);
+    
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withErrors(['error' => 'An error occurred: ' . $e->getMessage()]);
+            }
+        } else {
+            $journal = Journal::where('ref_id', $paymentPurchase->id)
+                ->whereNull('deleted_at') 
+                ->first();
 
-        $paymentPurchase->save();
+            if ($journal) {
+                
+                $postings = Posting::where('journal_id', $journal->id)->get();
+                
+                foreach ($postings as $posting) {
+                    $posting->update([
+                        'status' => 'deleted'
+                    ]);
+
+                    $posting->save();
+                    $posting->delete();
+                }
+
+                $journal->update([
+                    'status' => 'deleted'
+                ]);
+
+                $journal->save(); 
+                $journal->delete();
+            }
+            $paymentPurchase->update([
+                'status' => $request->input('status'),
+            ]);
+            DB::commit();
+        }
     
         return redirect()->route('payment_purchase.show', $paymentPurchase->id)->with('success', 'Sales invoice updated successfully.');
     }

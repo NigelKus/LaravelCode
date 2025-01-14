@@ -126,25 +126,26 @@ class PaymentOrderController extends Controller
             }
             $invoice->save();
         }
-        $requiredAccounts = [
-            1000 => "Chart of Account Code 1000 does not exist.",
-            1100 => "Chart of Account Code 1100 does not exist.",
-            1200 => "Chart of Account Code 1200 does not exist.",
-        ];
-        foreach ($requiredAccounts as $code => $errorMessage) {
-            if (!ChartOfAccount::where("code", $code)->exists()) {
-                DB::rollBack();
-                return redirect()->back()->withErrors(['error' => $errorMessage]);
-            }
-        }
-        if($request['payment_type'] == 'bank')
-        {
-            AE_S03_FinishSalesPaymentBank::process($paymentOrder);
-        }else 
-        {
-            AE_S04_FinishSalesPaymentKas::process($paymentOrder);
-        }
         DB::commit();
+        // $requiredAccounts = [
+        //     1000 => "Chart of Account Code 1000 does not exist.",
+        //     1100 => "Chart of Account Code 1100 does not exist.",
+        //     1200 => "Chart of Account Code 1200 does not exist.",
+        // ];
+        // foreach ($requiredAccounts as $code => $errorMessage) {
+        //     if (!ChartOfAccount::where("code", $code)->exists()) {
+        //         DB::rollBack();
+        //         return redirect()->back()->withErrors(['error' => $errorMessage]);
+        //     }
+        // }
+        // if($request['payment_type'] == 'bank')
+        // {
+        //     AE_S03_FinishSalesPaymentBank::process($paymentOrder);
+        // }else 
+        // {
+        //     AE_S04_FinishSalesPaymentKas::process($paymentOrder);
+        // }
+        // DB::commit();
         return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Payment Order created successfully.');
     }
     
@@ -230,7 +231,7 @@ class PaymentOrderController extends Controller
             'combinedDetails' => $combinedDetails,
             'payment_order_id' => $paymentOrder->id,
             'payment_order_code' => $paymentOrder->code, 
-            'payment_type' => $paymentType
+            
         ]);
     }
     
@@ -419,7 +420,6 @@ class PaymentOrderController extends Controller
             $detail->delete();
         }
         
-    
         $paymentOrder->update([
             'status' => 'deleted',
         ]);
@@ -435,20 +435,81 @@ class PaymentOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 3'])) {
             abort(403, 'Unauthorized access');
         }
-
+    
         $request->validate([
             'status' => 'required|in:pending,completed',
         ]);
-        
+    
         $paymentOrder = PaymentOrder::findOrFail($id);
 
-        $paymentOrder->update([
-            'status' => $request->input('status'),
-        ]);
-
-        $paymentOrder->save();
+        if ($paymentOrder->status === $request->input('status')) {
+            return redirect()->route('payment_order.show', $paymentOrder->id);
+        }
     
-        return redirect()->route('payment_order.show', $paymentOrder->id)->with('success', 'Sales invoice updated successfully.');
+        if ($request->input('status') === 'completed') {
+            DB::beginTransaction();
+    
+            try {
+                $requiredAccounts = [
+                    1000 => "Chart of Account Code 1000 does not exist.",
+                    1100 => "Chart of Account Code 1100 does not exist.",
+                    1200 => "Chart of Account Code 1200 does not exist.",
+                ];
+    
+                foreach ($requiredAccounts as $code => $errorMessage) {
+                    if (!ChartOfAccount::where("code", $code)->exists()) {
+                        DB::rollBack();
+                        return redirect()->back()->withErrors(['error' => $errorMessage]);
+                    }
+                }
+    
+                if ($request->input('payment_type') === 'bank') {
+                    AE_S03_FinishSalesPaymentBank::process($paymentOrder);
+                } else {
+                    AE_S04_FinishSalesPaymentKas::process($paymentOrder);
+                }
+                
+                $paymentOrder->update([
+                    'status' => $request->input('status'),
+                ]);
+    
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withErrors(['error' => 'An error occurred: ' . $e->getMessage()]);
+            }
+        } else {
+            $journal = Journal::where('ref_id', $paymentOrder->id)
+            ->whereNull('deleted_at') 
+            ->first();
+            
+            if ($journal) {
+                $postings = Posting::where('journal_id', $journal->id)->get();
+                foreach ($postings as $posting) {
+                    $posting->update([
+                        'status' => 'deleted'
+                    ]);
+
+                    $posting->save();
+                    $posting->delete();
+                }
+
+                $journal->update([
+                    'status' => 'deleted'
+                ]);
+
+                $journal->save(); 
+                $journal->delete();
+            }
+            $paymentOrder->update([
+                'status' => $request->input('status'),
+            ]);
+            DB::commit();
+        }
+    
+        return redirect()->route('payment_order.show', $paymentOrder->id)
+            ->with('success', 'Payment order updated successfully.');
     }
+    
 
 }

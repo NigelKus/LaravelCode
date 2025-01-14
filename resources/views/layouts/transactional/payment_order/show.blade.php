@@ -113,7 +113,6 @@
                                 <option value="">Select Status</option>
                                 <option value="pending" {{ $paymentOrder->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="completed" {{ $paymentOrder->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                {{-- <option value="cancelled" {{ $salesInvoice->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option> --}}
                             </select>
                             @error('status')
                                 <span class="invalid-feedback" role="alert">
@@ -121,8 +120,10 @@
                                 </span>
                             @enderror
                         </div>
+
+                    
                         @if (!$deleted)
-                        <button type="submit" class="btn btn-primary">Update Status</button>
+                            <button type="submit" class="btn btn-primary">Update Status</button>
                         @endif
                     </form>
                 </div>
@@ -181,7 +182,7 @@
                         </table>
                     </div>
                 </div>
-            
+
     
         <div class="mt-3">
         @if(!$deleted)
