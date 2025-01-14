@@ -45,7 +45,7 @@ class SalesInvoiceController extends Controller
                 $q->where('code', 'like', '%' . $request->sales_order . '%');
             });
         }
-        
+
         if ($request->has('customer') && $request->customer != '') 
         {
             $query->whereHas('customer', function ($q) use ($request) {
@@ -191,10 +191,19 @@ class SalesInvoiceController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
             abort(403, 'Unauthorized access');
         }
-        $salesInvoice = SalesInvoice::with(['customer' => function ($query) {
-            $query->withTrashed();
-        }, 'details.product', 'salesOrder'])
-        ->findOrFail($id);
+
+        $salesInvoice = SalesInvoice::with([
+            'salesOrder' => function ($query) {
+                $query->withTrashed();
+            },
+            'customer' => function ($query) {
+                $query->withTrashed();
+            },
+            'details.product' => function ($query) {
+                $query->withTrashed();
+            }
+        ])->findOrFail($id);
+
         $deleted = ($salesInvoice->customer->status == 'deleted');
         $totalPrice = $salesInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;

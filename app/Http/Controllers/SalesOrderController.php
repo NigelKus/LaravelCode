@@ -138,11 +138,18 @@ class SalesOrderController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');
         }
-        $salesOrder = SalesOrder::with(['customer' => function ($query) {
-            $query->withTrashed();
-        }, 'details.product'])
-        ->findOrFail($id);
+        $salesOrder = SalesOrder::with([
+            'customer' => function ($query) {
+                $query->withTrashed();
+            },
+            'details.product' => function ($query) {
+                $query->withTrashed();
+            }
+        ])->findOrFail($id);
+
+
         $deleted = ($salesOrder->customer->status == 'deleted');
+        
         $totalPrice = $salesOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;
         });

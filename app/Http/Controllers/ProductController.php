@@ -167,7 +167,9 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
         $product->update(['status' => Product::STATUS_DELETED]);
-
+        $product->save();
+        $product->delete();
+        
         return redirect()->route('product.index')->with('success', 'Product deleted successfully.');
     }
 

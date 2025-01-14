@@ -133,10 +133,17 @@ class PurchaseOrderController extends Controller
     {
         if (!in_array($request->user()->role, ['Admin', 'Finance 1'])) {
             abort(403, 'Unauthorized access');}
-        $purchaseOrder = PurchaseOrder::with(['supplier' => function ($query) {
-            $query->withTrashed();
-        }, 'details.product'])
-        ->findOrFail($id);
+
+        $purchaseOrder = PurchaseOrder::with([
+            'supplier' => function ($query) {
+                $query->withTrashed();
+            },
+            'details.product' => function ($query) {
+                $query->withTrashed();
+            }
+        ])->findOrFail($id);
+
+
         $deleted = ($purchaseOrder->supplier->status == 'deleted');
         $totalPrice = $purchaseOrder->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;

@@ -146,8 +146,6 @@ class SupplierController extends Controller
         return redirect()->route('supplier.show', $supplier->id)->with('success', 'Supplier updated successfully.');
     }
     
-    
-
     public function destroy(Request $request, $id)
     {
         if (!in_array($request->user()->role, ['Admin'])) {
@@ -158,7 +156,7 @@ class SupplierController extends Controller
         $supplier->update([
             'status' => Supplier::STATUS_DELETED
         ]);
-
+        $supplier->save();
         $supplier->delete();
     
         return redirect()->route('supplier.index')->with('success', 'Supplier status updated to deleted.');

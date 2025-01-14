@@ -213,10 +213,18 @@ class PurchaseInvoiceController extends Controller
         if (!in_array($request->user()->role, ['Admin', 'Finance 2'])) {
             abort(403, 'Unauthorized access');
         }
-        $purchaseInvoice = PurchaseInvoice::with(['supplier' => function ($query) {
-            $query->withTrashed();
-        }, 'details.product', 'purchaseOrder'])
-        ->findOrFail($id);
+
+        $purchaseInvoice = PurchaseInvoice::with([
+            'supplier' => function ($query) {
+                $query->withTrashed();
+            },
+            'details.product' => function ($query) {
+                $query->withTrashed();
+            },
+            'purchaseOrder'
+        ])->findOrFail($id);
+        
+
         $deleted = ($purchaseInvoice->supplier->status == 'deleted');
         $totalPrice = $purchaseInvoice->details->sum(function ($detail) {
             return $detail->price * $detail->quantity;

@@ -125,9 +125,9 @@ class CoAController extends Controller
             'code' => $code,
             'status' => ChartOfAccount::STATUS_DELETED, 
         ]);
-
+        $CoA->save();
         $CoA->delete();
-
+        
         return redirect()->route('CoA.index')->with('success', 'Chart of Account status updated to deleted.');
     }
     
