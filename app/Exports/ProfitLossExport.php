@@ -17,9 +17,10 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
     protected $HPP;
     protected $date;
     protected $totalHPP;
+    protected $saldoAwal;
 
 
-    public function __construct($fromdate, $todate, $pendapatan, $beban, $HPP, $date, $totalHPP)
+    public function __construct($fromdate, $todate, $pendapatan, $beban, $HPP, $date, $totalHPP, $saldoAwal)
     {
         $this->fromdate = $fromdate;
         $this->todate = $todate;
@@ -28,6 +29,7 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
         $this->HPP = $HPP;
         $this->date = $date;
         $this->totalHPP = $totalHPP;
+        $this->saldoAwal = $saldoAwal;
     }
     public function collection()
     {
@@ -36,7 +38,12 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
         $data->push(['']); 
         $data->push(['Keterangan', 'Jumlah', 'Total']);
     
-        $totalPendapatan = 0; 
+        $totalPendapatan = 0;
+
+        $saldoAwal = $this->saldoAwal;
+        
+        $data->push(['Saldo Awal', $this->saldoAwal]);
+
         foreach ($this->pendapatan as $a) {
             $jumlah = number_format(abs($a['total']), 2);
             $totalPendapatan += abs($a['total']);
@@ -84,7 +91,7 @@ class ProfitLossExport implements FromCollection, WithHeadings, WithStyles
             number_format($totalBeban, 2)
         ]);
     
-        $labaBersihSebelumPajak = $labaKotor - $totalBeban ; 
+        $labaBersihSebelumPajak = $labaKotor - $totalBeban + $saldoAwal; 
         $data->push([
             'Laba Bersih Sebelum Pajak',
             '',

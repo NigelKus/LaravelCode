@@ -45,6 +45,11 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td><strong>Saldo Awal</strong></td>
+                    <td>{{ number_format($saldoAwal, 2) }}</td>
+                    <td></td>   
+                </tr>
         
                 @foreach ($pendapatan as $item)
                     <tr>
@@ -70,7 +75,7 @@
                 <tr>
                     <td><strong>Laba Kotor</strong></td>
                     <td></td>
-                    <td><strong>{{ number_format(array_sum(array_column($pendapatan, 'total')) - $totalHPP, 2) }}</strong></td>
+                    <td><strong>{{ number_format(array_sum(array_column($pendapatan, 'total')) - $totalHPP + $saldoAwal, 2) }}</strong></td>
                 </tr>
                 
         
@@ -93,7 +98,7 @@
                     <td></td> 
                     <td>
                         <strong>
-                            {{ number_format(array_sum(array_column($pendapatan, 'total')) - array_sum(array_column($beban, 'total')) - $totalHPP, 2) }}
+                            {{ number_format(array_sum(array_column($pendapatan, 'total')) - array_sum(array_column($beban, 'total')) - $totalHPP , 2) }}
                         </strong>
                     </td>
                     
