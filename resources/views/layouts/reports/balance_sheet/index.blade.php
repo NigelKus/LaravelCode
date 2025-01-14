@@ -9,7 +9,7 @@
 
 @section('content')
     <div class="card">
-        <div class="card-body">
+        <div class="card-body mb-0">
             @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -43,7 +43,7 @@
                 <label for="year">Select Year</label>
                 <select class="form-control @error('year') is-invalid @enderror" id="year" name="year">
                     <option value="">Select Year</option>
-                    @for ($year = date('Y') - 10; $year <= date('Y') + 10; $year++)
+                    @for ($year = date('Y') - 5; $year <= date('Y') + 0; $year++)
                         <option value="{{ $year }}" {{ old('year') == $year ? 'selected' : '' }}>
                             {{ $year }}
                         </option>
@@ -58,6 +58,14 @@
         
             <button type="submit" class="btn btn-primary">Generate</button>
         </form>
+        </div>
+
+        <div class="card-body mt-0">
+            <form action="{{ route('balance_sheet.closeBook') }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Close Book</button>
+            </form>
         </div>
     </div>
 @endsection

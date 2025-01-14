@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\BalanceSheetExport;
+use Carbon\Carbon; 
+use App\Models\Journal;
 use App\Models\Posting;
 use Illuminate\Http\Request;
 use App\Models\ChartOfAccount;
+use App\Models\JournalVoucher;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use App\Exports\BalanceSheetExport;
+use Database\Factories\CodeFactory;
+use App\Models\JournalVoucherDetail;
 use Maatwebsite\Excel\Facades\Excel;
-use Carbon\Carbon; 
+use App\Utils\AccountingEvents\AE_JM1_FinishJournalVoucher;
 
 class BalanceSheetController extends Controller
 {
@@ -44,7 +50,6 @@ class BalanceSheetController extends Controller
         foreach ($assetIds as $id) {
             
             $sum = Posting::where('account_id', $id)
-                ->where('date', '>=', $dateStringStart)  
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
             $a = $sum;
@@ -64,7 +69,7 @@ class BalanceSheetController extends Controller
         $totalUtang = [];
         foreach ($UtangIds as $id) {
             $sum = Posting::where('account_id', $id)
-                ->where('date', '>=', $dateStringStart)  
+                
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
             $a = abs($sum);
@@ -85,7 +90,7 @@ class BalanceSheetController extends Controller
         ->where('status', 'active')  
         ->first();
         $totalModal = Posting::where('account_id', $Modalds)
-            ->where('date', '>=', $dateStringStart)  
+            
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
         $totalModal = abs($totalModal);
@@ -94,17 +99,18 @@ class BalanceSheetController extends Controller
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
             ->where('status', 'active')  
             ->where('code', 'not like', '42%')
+            ->where('code', 'not like', '43%')
             ->orderBy('code', 'asc')
             ->pluck('id');
         foreach ($pendapatanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '<', 0)
-                ->where('date', '>=', $dateStringStart)  
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
                 $a = abs($sum);
                 $totalLaba = $totalLaba += $a;
         }
+
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
             ->where('status', 'active')  
             ->where('code', '<=', 8999)
@@ -113,27 +119,47 @@ class BalanceSheetController extends Controller
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
-                ->where('date', '>=', $dateStringStart)  
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
                 $a = $sum;
                 $totalLaba = $totalLaba -= $a;
         }
+
         $labaId = ChartOfAccount::where('code', 4200)
         ->where('status', 'active')  
             ->pluck('id')->first();
         $codeLaba = ChartOfAccount::where('code', 4200)
         ->where('status', 'active')  
         ->first();
+
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
-            ->where('date', '>=', $dateStringStart)  
-            ->where('date', '<=', $dateStringEnd) 
+            ->where('date', '<=', $dateStringEnd)
+            ->whereNull('deleted_at') 
             ->sum('amount');
+
+        $labaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
+        $codeLabaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+        ->first();
+
+        $c = Posting::where('account_id', $labaBertahan)
+            ->where('amount', '>', 0)
+            ->where('date', '<=', $dateStringEnd)
+            ->whereNull('deleted_at') 
+            ->sum('amount');
+
+        $totalLabaBerjalan = $b;
         $totalLaba = abs($totalLaba -= $b);
+        
+        $totalLaba = abs($totalLaba -= $c);
+        
+        
         $totalPasiva = $totalPasiva += $totalLaba;
         return view('layouts.reports.balance_sheet.report', compact('dateStringDisplay', 
-        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate'));
+        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate', 'codeLabaBertahan', 'totalLabaBerjalan'));
     }
 
 
@@ -162,7 +188,7 @@ class BalanceSheetController extends Controller
         foreach ($assetIds as $id) {
             
             $sum = Posting::where('account_id', $id)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
 
@@ -191,7 +217,7 @@ class BalanceSheetController extends Controller
 
         foreach ($UtangIds as $id) {
             $sum = Posting::where('account_id', $id)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
             
@@ -217,7 +243,7 @@ class BalanceSheetController extends Controller
         $codeModal = ChartOfAccount::where('code', 3000)->first();
 
         $totalModal = Posting::where('account_id', $Modalds)
-            ->where('date', '>=', $dateStringStart)  
+             
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
         
@@ -238,7 +264,7 @@ class BalanceSheetController extends Controller
         foreach ($pendapatanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '<', 0)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
 
@@ -256,7 +282,7 @@ class BalanceSheetController extends Controller
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
 
@@ -274,7 +300,7 @@ class BalanceSheetController extends Controller
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
-            ->where('date', '>=', $dateStringStart)  
+             
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
         
@@ -310,7 +336,7 @@ class BalanceSheetController extends Controller
         foreach ($assetIds as $id) {
             
             $sum = Posting::where('account_id', $id)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
 
@@ -338,7 +364,7 @@ class BalanceSheetController extends Controller
 
         foreach ($UtangIds as $id) {
             $sum = Posting::where('account_id', $id)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
             
@@ -366,7 +392,7 @@ class BalanceSheetController extends Controller
         ->first();
 
         $totalModal = Posting::where('account_id', $Modalds)
-            ->where('date', '>=', $dateStringStart)  
+             
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
         
@@ -387,7 +413,7 @@ class BalanceSheetController extends Controller
         foreach ($pendapatanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '<', 0)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
 
@@ -406,7 +432,7 @@ class BalanceSheetController extends Controller
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
-                ->where('date', '>=', $dateStringStart)  
+                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
 
@@ -425,14 +451,109 @@ class BalanceSheetController extends Controller
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
-            ->where('date', '>=', $dateStringStart)  
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
         
+            
         $totalLaba = abs($totalLaba -= $b);
         
         $totalPasiva = $totalPasiva += $totalLaba;
 
         return Excel::download(new BalanceSheetExport($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate), 'Balance Sheet.xlsx');
+    }
+
+    public function closeBook()
+    {
+        $labaBerjalan = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
+
+        $labaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
+
+        $stock = ChartOfAccount::where('code', 1300)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
+
+        $b = Posting::where('account_id', $labaBerjalan)
+            ->where('amount', '>', 0)
+            ->sum('amount');
+
+        $postingsToUpdate  = Posting::where('account_id', $labaBerjalan)->pluck('journal_id');
+
+        foreach ($postingsToUpdate as $id) {
+            Posting::where('journal_id', $id)
+                ->where(function ($query) use ($labaBerjalan, $stock) {
+                    $query->where('account_id', $labaBerjalan)
+                        ->orWhere('account_id', $stock);
+                })
+                ->update(['status' => 'deleted']);
+        
+            Journal::whereIn('id', [$id])
+            ->update(['status' => 'deleted']);
+        
+        
+            Posting::where('journal_id', $id)
+                ->where(function ($query) use ($labaBerjalan, $stock) {
+                    $query->where('account_id', $labaBerjalan)
+                        ->orWhere('account_id', $stock);
+                })
+                ->delete();
+        
+            // Ensure you're passing an array to `whereIn`
+            Journal::whereIn('id', [$id])
+                ->delete();
+        }
+        
+
+        $journalVoucherCode = CodeFactory::generateJournalVoucherCode();
+        DB::beginTransaction();
+        try {
+            // Create the new journal voucher
+            $journalVoucher = JournalVoucher::create([
+                'code' => $journalVoucherCode,
+                'date' => \Carbon\Carbon::now(),    
+                'name' => 'Close Book',
+                'description' => 'Close Book',
+                'status' => 'pending',
+            ]);
+            $amounts = [];
+            $amounts1 = [];
+            $coaIds = [];
+            $coaIds1 = [];
+
+            $amounts[] = $b;
+            $amounts1[] = $b;
+            $coaIds[] = 1300;
+            $coaIds1[] = 4300;
+
+            $journalVoucher->coa_ids = $coaIds;
+            $journalVoucher->amounts = $amounts;
+            $journalVoucher->coa_ids1 = $coaIds1;
+            $journalVoucher->amounts1 = $amounts1;
+            $journalVoucher->type = 'in';
+            $journalacct = AE_JM1_FinishJournalVoucher::process($journalVoucher);           
+            
+            $postingacct = Posting::where('journal_id', $journalacct->id)->get();
+            
+            foreach ($postingacct as $index => $a) {
+                JournalVoucherDetail::create([
+                    'account_id' => $a->account_id,
+                    'posting_id' => $a->id,
+                    'voucher_id' => $journalVoucher->id,
+                    'amount' => $a->amount,
+                    'description' => 'Close Book',
+                    'status' => 'pending', 
+                ]);
+            }
+    
+            DB::commit();
+    
+            return redirect()->route('balance_sheet.index')->with('success', 'Close Book operation completed successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
     }
 }

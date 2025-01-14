@@ -103,9 +103,16 @@
                                     @endif
                                 </tr>
                                 <tr>
-                                    @if(empty($totalLaba))
+                                    @if(empty($totalLabaBerjalan))
                                     @else
                                     <td>Laba Berjalan({{ $codeLaba->code}})</td>
+                                    <td>{{ number_format($totalLabaBerjalan, 2) }}</td>
+                                    @endif
+                                </tr>
+                                <tr>
+                                    @if(empty($totalLaba))
+                                    @else
+                                    <td>Laba Bertahan({{ $codeLabaBertahan->code}})</td>
                                     <td>{{ number_format($totalLaba, 2) }}</td>
                                     @endif
                                 </tr>

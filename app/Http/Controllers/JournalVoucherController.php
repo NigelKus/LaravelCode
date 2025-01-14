@@ -131,6 +131,7 @@ class JournalVoucherController extends Controller
             $journalVoucher->coa_ids1 = $validatedData['coa_ids1'];
             $journalVoucher->amounts1 = $validatedData['amounts1'];
             $journalVoucher->type = 'in';
+            
             $journalacct = AE_JM1_FinishJournalVoucher::process($journalVoucher);
             $postingacct = Posting::where('journal_id', $journalacct->id)->get();
             foreach ($postingacct as $index => $a) {

@@ -226,6 +226,7 @@ Route::prefix('admin/master/product')
         Route::post('generate', [BalanceSheetController::class, 'generate'])->name('generate');
         Route::post('pdf', [BalanceSheetController::class, 'generateBalanceSheetPDF'])->name('pdf');
         Route::post('excel', [BalanceSheetController::class, 'generateBalanceSheetExcel'])->name('excel');
+        Route::delete('closeBook', [BalanceSheetController::class, 'closeBook'])->name('closeBook');
     });
 
     Route::prefix('admin/reports/profit_loss')
