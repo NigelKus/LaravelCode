@@ -19,10 +19,12 @@ class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
     protected $codeLaba;
     protected $totalActiva;
     protected $totalPasiva;
-    
     protected $createddate;
 
-    public function __construct($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate)
+    protected $codeLabaBertahan; 
+    protected $totalLabaBerjalan;
+
+    public function __construct($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate, $codeLabaBertahan, $totalLabaBerjalan)
     {
         $this->dateStringDisplay = $dateStringDisplay;
         $this->totalasset = $totalasset;
@@ -34,6 +36,8 @@ class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
         $this->totalActiva = $totalActiva;
         $this->totalPasiva = $totalPasiva;
         $this->createddate = $createddate;
+        $this->$codeLabaBertahan = $codeLabaBertahan;
+        $this->$totalLabaBerjalan = $totalLabaBerjalan;
     }
     public function collection()
     {
@@ -96,6 +100,16 @@ class BalanceSheetExport implements FromCollection, WithHeadings, WithStyles
             $jumlah = number_format(abs($this->totalLaba), 2);
             $data->push([
                 'Laba Berjalan'. ' ('. $this->codeLaba->code.')', 
+                $jumlah, 
+                '' 
+            ]);
+        }
+
+        if($this->totalLabaBerjalan)
+        {
+            $jumlah = number_format(abs($this->totalLaba), 2);
+            $data->push([
+                'Laba Bertahan'. ' ('. $this->codeLabaBertahan->code.')', 
                 $jumlah, 
                 '' 
             ]);

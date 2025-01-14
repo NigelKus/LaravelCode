@@ -182,20 +182,14 @@ class BalanceSheetController extends Controller
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
-
         $totalasset = [];
-
         foreach ($assetIds as $id) {
             
             $sum = Posting::where('account_id', $id)
-                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-
             $a = $sum;
-
             $totalActiva = $totalActiva += $a;
-            
             if ($sum != 0) {
                 $totalasset[$id] = [
                     'coa' => ChartOfAccount::find($id),
@@ -203,28 +197,19 @@ class BalanceSheetController extends Controller
                 ]; 
             }
         }
-
-        //Pasiva
-
-        //Utang Usaha
         $UtangIds = ChartOfAccount::where('code', 'like', '2%')
-        
+        ->where('status', 'active')  
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
-        
         $totalUtang = [];
-
         foreach ($UtangIds as $id) {
             $sum = Posting::where('account_id', $id)
-                 
+                
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-            
             $a = abs($sum);
-
             $totalPasiva = $totalPasiva += $a;
-            
             if ($sum != 0) {
                 $totalUtang[$id] = [
                     'coa' => ChartOfAccount::find($id),
@@ -232,84 +217,86 @@ class BalanceSheetController extends Controller
                 ]; 
             }
         }
-
-        //Modal
         $Modalds = ChartOfAccount::where('code', 'like', '3%')
+        ->where('status', 'active')  
             ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
-
-
-        $codeModal = ChartOfAccount::where('code', 3000)->first();
-
+        $codeModal = ChartOfAccount::where('code', 3000)
+        ->where('status', 'active')  
+        ->first();
         $totalModal = Posting::where('account_id', $Modalds)
-             
+            
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
-        
         $totalModal = abs($totalModal);
-
         $totalPasiva = $totalPasiva += $totalModal;
-        
-        //Laba Berjalan
         $totalLaba = 0;
-
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
-        ->where('status', 'active')  
+            ->where('status', 'active')  
             ->where('code', 'not like', '42%')
+            ->where('code', 'not like', '43%')
             ->orderBy('code', 'asc')
             ->pluck('id');
-        
-    
         foreach ($pendapatanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '<', 0)
-                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-
                 $a = abs($sum);
                 $totalLaba = $totalLaba += $a;
         }
 
-    
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
+            ->where('status', 'active')  
             ->where('code', '<=', 8999)
             ->orderBy('code', 'asc')
             ->pluck('id');
-    
-    
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
-                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-
                 $a = $sum;
                 $totalLaba = $totalLaba -= $a;
         }
-        
+
         $labaId = ChartOfAccount::where('code', 4200)
         ->where('status', 'active')  
             ->pluck('id')->first();
-
         $codeLaba = ChartOfAccount::where('code', 4200)
         ->where('status', 'active')  
         ->first();
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
-             
-            ->where('date', '<=', $dateStringEnd) 
+            ->where('date', '<=', $dateStringEnd)
+            ->whereNull('deleted_at') 
             ->sum('amount');
-        
+
+        $labaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
+        $codeLabaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+        ->first();
+
+        $c = Posting::where('account_id', $labaBertahan)
+            ->where('amount', '>', 0)
+            ->where('date', '<=', $dateStringEnd)
+            ->whereNull('deleted_at') 
+            ->sum('amount');
+
+        $totalLabaBerjalan = $b;
         $totalLaba = abs($totalLaba -= $b);
+        
+        $totalLaba = abs($totalLaba -= $c);
+        
         
         $totalPasiva = $totalPasiva += $totalLaba;
 
         $pdf = PDF::loadView('layouts.reports.balance_sheet.pdf', compact('dateStringDisplay', 
-        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate'));
+        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate', 'codeLabaBertahan', 'totalLabaBerjalan'));
         return $pdf->stream('balance-sheet.pdf');
     }
 
@@ -330,20 +317,14 @@ class BalanceSheetController extends Controller
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
-
         $totalasset = [];
-
         foreach ($assetIds as $id) {
             
             $sum = Posting::where('account_id', $id)
-                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-
             $a = $sum;
-
             $totalActiva = $totalActiva += $a;
-            
             if ($sum != 0) {
                 $totalasset[$id] = [
                     'coa' => ChartOfAccount::find($id),
@@ -351,27 +332,19 @@ class BalanceSheetController extends Controller
                 ]; 
             }
         }
-
-        //Pasiva
-
-        //Utang Usaha
         $UtangIds = ChartOfAccount::where('code', 'like', '2%')
+        ->where('status', 'active')  
         ->where('status', 'active')
         ->orderBy('code', 'asc')
         ->pluck('id');
-        
         $totalUtang = [];
-
         foreach ($UtangIds as $id) {
             $sum = Posting::where('account_id', $id)
-                 
+                
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-            
             $a = abs($sum);
-
             $totalPasiva = $totalPasiva += $a;
-            
             if ($sum != 0) {
                 $totalUtang[$id] = [
                     'coa' => ChartOfAccount::find($id),
@@ -379,87 +352,85 @@ class BalanceSheetController extends Controller
                 ]; 
             }
         }
-
-        //Modal
         $Modalds = ChartOfAccount::where('code', 'like', '3%')
+        ->where('status', 'active')  
             ->where('status', 'active')
             ->orderBy('code', 'asc')
             ->pluck('id');
-
-
         $codeModal = ChartOfAccount::where('code', 3000)
         ->where('status', 'active')  
         ->first();
-
         $totalModal = Posting::where('account_id', $Modalds)
-             
+            
             ->where('date', '<=', $dateStringEnd) 
             ->sum('amount');
-        
         $totalModal = abs($totalModal);
-
         $totalPasiva = $totalPasiva += $totalModal;
-        
-        //Laba Berjalan
         $totalLaba = 0;
-
         $pendapatanIds = ChartOfAccount::where('code', 'like', '4%')
-        ->where('status', 'active')  
+            ->where('status', 'active')  
             ->where('code', 'not like', '42%')
+            ->where('code', 'not like', '43%')
             ->orderBy('code', 'asc')
             ->pluck('id');
-        
-    
         foreach ($pendapatanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '<', 0)
-                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-
                 $a = abs($sum);
                 $totalLaba = $totalLaba += $a;
         }
 
-    
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
-        ->where('status', 'active')  
+            ->where('status', 'active')  
             ->where('code', '<=', 8999)
             ->orderBy('code', 'asc')
             ->pluck('id');
-    
-    
         foreach ($bebanIds as $id) {
             $sum = Posting::where('account_id', $id)
                 ->where('amount', '>', 0)
-                 
                 ->where('date', '<=', $dateStringEnd) 
                 ->sum('amount');
-
                 $a = $sum;
                 $totalLaba = $totalLaba -= $a;
         }
-        
-        $labaId = ChartOfAccount::where('code', 4200)
-            ->pluck('id')
-            ->where('status', 'active')  
-            ->first();
 
+        $labaId = ChartOfAccount::where('code', 4200)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
         $codeLaba = ChartOfAccount::where('code', 4200)
         ->where('status', 'active')  
         ->first();
 
         $b = Posting::where('account_id', $labaId)
             ->where('amount', '>', 0)
-            ->where('date', '<=', $dateStringEnd) 
+            ->where('date', '<=', $dateStringEnd)
+            ->whereNull('deleted_at') 
             ->sum('amount');
-        
-            
+
+        $labaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+            ->pluck('id')->first();
+        $codeLabaBertahan = ChartOfAccount::where('code', 4300)
+        ->where('status', 'active')  
+        ->first();
+
+        $c = Posting::where('account_id', $labaBertahan)
+            ->where('amount', '>', 0)
+            ->where('date', '<=', $dateStringEnd)
+            ->whereNull('deleted_at') 
+            ->sum('amount');
+
+        $totalLabaBerjalan = $b;
         $totalLaba = abs($totalLaba -= $b);
+        
+        $totalLaba = abs($totalLaba -= $c);
+        
         
         $totalPasiva = $totalPasiva += $totalLaba;
 
-        return Excel::download(new BalanceSheetExport($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate), 'Balance Sheet.xlsx');
+        return Excel::download(new BalanceSheetExport($dateStringDisplay, $totalasset, $totalUtang, $totalLaba, $totalModal, $codeModal, $codeLaba, $totalActiva, $totalPasiva, $createddate, $codeLabaBertahan, $totalLabaBerjalan), 'Balance Sheet.xlsx');
     }
 
     public function closeBook()
