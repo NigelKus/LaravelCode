@@ -42,9 +42,7 @@ class OutStandingSalesController extends Controller
                     return $invoice->details->sum('quantity');
                 });
                 $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
-                if ($order->quantity_difference !== 0) {
-                    $order->status = 'pending'; 
-                }
+
             }
         $salesOrder = $salesOrder->filter(function ($order) {
             return $order->quantity_difference !== 0;
@@ -79,9 +77,7 @@ class OutStandingSalesController extends Controller
                 return $payment->price; 
             });
             $invoice->remaining_price = $invoice->total_price - $invoice->paid;
-            if ($invoice->remaining_price !== 0) {
-                $invoice->status = 'pending'; 
-            }
+
         }
         $salesInvoice = $salesInvoice->filter(function ($invoice) {
             return $invoice->remaining_price !== 0;
@@ -114,9 +110,6 @@ class OutStandingSalesController extends Controller
 
                 $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
 
-                if ($order->quantity_difference !== 0) {
-                    $order->status = 'pending'; 
-                }
             }
     
         $salesOrder = $salesOrder->filter(function ($order) {
@@ -157,9 +150,6 @@ class OutStandingSalesController extends Controller
     
             $invoice->remaining_price = $invoice->total_price - $invoice->paid;
 
-            if ($invoice->remaining_price !== 0) {
-                $invoice->status = 'pending'; 
-            }
         }
 
         $salesInvoice = $salesInvoice->filter(function ($invoice) {
@@ -196,9 +186,6 @@ class OutStandingSalesController extends Controller
 
                 $order->quantity_difference = $order->total_quantity - $order->total_quantity_sent;
 
-                if ($order->quantity_difference !== 0) {
-                    $order->status = 'pending'; 
-                }
             }
     
         $salesOrder = $salesOrder->filter(function ($order) {
@@ -237,9 +224,6 @@ class OutStandingSalesController extends Controller
     
             $invoice->remaining_price = $invoice->total_price - $invoice->paid;
 
-            if ($invoice->remaining_price !== 0) {
-                $invoice->status = 'pending'; 
-            }
         }
 
         $salesInvoice = $salesInvoice->filter(function ($invoice) {
