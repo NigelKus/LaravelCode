@@ -342,7 +342,7 @@ class ProfitLossController extends Controller
             }
         
             $saldoAwalTotalHPP = Posting::where('account_id', $codeHPP)
-                ->where('amount', '>', 0)
+            ->where('amount', '>', 0)
                 ->where('date', '<', $fromdate)  
                 ->sum('amount');
         
