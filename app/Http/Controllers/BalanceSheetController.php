@@ -110,7 +110,7 @@ class BalanceSheetController extends Controller
                 $a = abs($sum);
                 $totalLaba = $totalLaba += $a;
         }
-
+        
         $bebanIds = ChartOfAccount::where('code', '>=', 5000)
             ->where('status', 'active')  
             ->where('code', '<=', 8999)
@@ -151,6 +151,7 @@ class BalanceSheetController extends Controller
             ->whereNull('deleted_at') 
             ->sum('amount');
 
+        dd($c);   
         $totalLabaBerjalan = $b;
         $totalLaba = abs($totalLaba -= $b);
         
