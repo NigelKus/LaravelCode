@@ -138,29 +138,29 @@ class BalanceSheetController extends Controller
             ->whereNull('deleted_at') 
             ->sum('amount');
 
-        $labaBertahan = ChartOfAccount::where('code', 4300)
-        ->where('status', 'active')  
-            ->pluck('id')->first();
-        $codeLabaBertahan = ChartOfAccount::where('code', 4300)
-        ->where('status', 'active')  
-        ->first();
+        // dd($b);
+        // $labaBertahan = ChartOfAccount::where('code', 4300)
+        // ->where('status', 'active')  
+        //     ->pluck('id')->first();
+        // $codeLabaBertahan = ChartOfAccount::where('code', 4300)
+        // ->where('status', 'active')  
+        // ->first();
 
-        $c = Posting::where('account_id', $labaBertahan)
-            ->where('amount', '>', 0)
-            ->where('date', '<=', $dateStringEnd)
-            ->whereNull('deleted_at') 
-            ->sum('amount');
+        // $c = Posting::where('account_id', $labaBertahan)
+        //     ->where('amount', '>', 0)
+        //     ->where('date', '<=', $dateStringEnd)
+        //     ->whereNull('deleted_at') 
+        //     ->sum('amount');
 
-        dd($c);   
         $totalLabaBerjalan = $b;
         $totalLaba = abs($totalLaba -= $b);
         
-        $totalLaba = abs($totalLaba -= $c);
+        // $totalLaba = abs($totalLaba -= $c);
         
-        
+        // dd($totalPasiva);
         $totalPasiva = $totalPasiva += $totalLaba;
         return view('layouts.reports.balance_sheet.report', compact('dateStringDisplay', 
-        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate', 'codeLabaBertahan', 'totalLabaBerjalan'));
+        'totalasset', 'totalUtang', 'totalLaba', 'totalModal', 'codeModal', 'codeLaba', 'totalActiva', 'totalPasiva', 'createddate', 'totalLabaBerjalan'));
     }
 
 

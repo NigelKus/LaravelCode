@@ -60,13 +60,13 @@
         </form>
         </div>
 
-        <div class="card-body mt-0">
+        {{-- <div class="card-body mt-0">
             <form action="{{ route('balance_sheet.closeBook') }}" method="POST" onsubmit="return confirm('Are you sure?')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-danger">Close Book</button>
             </form>
-        </div>
+        </div> --}}
     </div>
 @endsection
 

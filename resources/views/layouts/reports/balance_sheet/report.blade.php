@@ -109,13 +109,13 @@
                                     <td>{{ number_format($totalLabaBerjalan, 2) }}</td>
                                     @endif
                                 </tr>
-                                <tr>
+                                {{-- <tr>
                                     @if(empty($totalLaba))
                                     @else
                                     <td>Laba Bertahan({{ $codeLabaBertahan->code}})</td>
                                     <td>{{ number_format($totalLaba, 2) }}</td>
                                     @endif
-                                </tr>
+                                </tr> --}}
                                 <tr>
                                     <td><strong>Total Liabilities & Equity</strong></td>
                                     <td>{{ number_format($totalPasiva, 2) }}</td>

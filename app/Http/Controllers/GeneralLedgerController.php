@@ -44,6 +44,7 @@ class GeneralLedgerController extends Controller
                     ->when($fromdate, function ($query) use ($fromdate) {
                         return $query->where('date', '<=', $fromdate);
                     })
+                    ->whereNull('deleted_at')
                     ->orderBy('date', 'asc')
                     ->get();
     
@@ -56,6 +57,7 @@ class GeneralLedgerController extends Controller
                     ->when($todate, function ($query) use ($todate) {
                         return $query->where('date', '<=', $todate);
                     })
+                    ->whereNull('deleted_at')
                     ->orderBy('date', 'asc')
                     ->get();
                     
@@ -74,6 +76,7 @@ class GeneralLedgerController extends Controller
                 ->when($fromdate, function ($query) use ($fromdate) {
                     return $query->where('date', '<=', $fromdate);
                 })
+                ->whereNull('deleted_at')
                 ->orderBy('date', 'asc')
                 ->get();
                 
@@ -86,6 +89,7 @@ class GeneralLedgerController extends Controller
                 ->when($todate, function ($query) use ($todate) {
                     return $query->where('date', '<=', $todate);
                 })
+                ->whereNull('deleted_at')
                 ->orderBy('date', 'asc')
                 ->get();
                 $all = false;
@@ -175,11 +179,13 @@ class GeneralLedgerController extends Controller
     public function generateGeneralLedgerExcel(Request $request)
     {
         $coa_id = $request->input('coa_id');
-        $fromdate = Carbon::parse($request->input('fromdate'))->format('j F y H:i:s');
-        $todate = Carbon::parse($request->input('todate'))->format('j F y H:i:s');
+        $fromdate = $request->input('fromdate');
+        $todate = $request->input('todate');
+        // $fromdate = Carbon::parse($request->input('fromdate'))->format('j F y H:i:s');
+        // $todate = Carbon::parse($request->input('todate'))->format('j F y H:i:s');
         
         $date = now()->format('j F y H:i:s');
-    
+        
         $results = []; 
         if ($coa_id == null) {
             $coas = ChartOfAccount::where('status', 'active')
@@ -216,6 +222,7 @@ class GeneralLedgerController extends Controller
                 ];
             }
             $all = true;
+
             return Excel::download(new GeneralLedgerExport($results, $fromdate, $todate, $date, null, null, null, $all), 'General_Ledger_All_CoA.xlsx');
     
         } else {
