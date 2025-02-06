@@ -75,8 +75,15 @@
                             <td>{{ $payment->code }}</td>
                             <td>{{ $payment->supplier->name ?? 'N/A' }}</td>
                             <td>{{ $payment->description }}</td>
-                            <td>{{ \Carbon\Carbon::parse($payment->date)->format('Y-m-d') }}</td>
-                            <td>{{ ucfirst($payment->status) }}</td>
+                            <td>{{ \Carbon\Carbon::parse($payment->date)->format('d-m-Y') }}</td>
+                            <td style="color: 
+                                @if ($payment->status === 'pending') orange; 
+                                @elseif ($payment->status === 'completed') green; 
+                                @else black; 
+                                @endif;">
+                                {{ ucfirst($payment->status) }}
+                            </td>
+
                             <td>
                                 <a href="{{ route('payment_purchase.show', $payment->id) }}" class="btn btn-info btn-sm">View</a>
                             </td>

@@ -352,4 +352,16 @@ class JournalVoucherController extends Controller
         
         return redirect()->route('journal.show', $journalVoucher->id)->with('success', 'Journal Voucher updated successfully.');
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,completed,cancelled',
+        ]);
+        $journalVoucher = JournalVoucher::findOrFail($id);
+        $journalVoucher->status = $request->input('status');
+        $journalVoucher->save();
+        return redirect()->route('journal.show', $journalVoucher->id)->with('success', 'Status updated successfully.');
+        
+    }
 }

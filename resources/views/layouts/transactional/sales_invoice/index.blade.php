@@ -78,10 +78,17 @@
                         <td>{{ $salesInvoice->salesOrder->code ?? 'N/A' }}</td>
                         <td>{{ $salesInvoice->customer->name ?? 'N/A' }}</td>
                         <td>{{ $salesInvoice->description }}</td>
-                        <td>{{ number_format($salesInvoice->total_price) }}</td> <!-- Total Price with thousand separator -->
-                        <td>{{ number_format($salesInvoice->total_price - $salesInvoice->calculatePriceRemaining()) }}</td> <!-- Paid with thousand separator -->
-                        <td>{{ number_format($salesInvoice->calculatePriceRemaining()) }}</td>
-                        <td>{{ $salesInvoice->status }}</td>
+                        <td style="text-align: right;">{{ number_format($salesInvoice->total_price) }}</td> <!-- Total Price with thousand separator -->
+                        <td style="text-align: right;">{{ number_format($salesInvoice->total_price - $salesInvoice->calculatePriceRemaining()) }}</td> <!-- Paid with thousand separator -->
+                        <td style="text-align: right;">{{ number_format($salesInvoice->calculatePriceRemaining()) }}</td>                        
+                        <td style="color: 
+                            @if ($salesInvoice->status === 'pending') orange 
+                            @elseif ($salesInvoice->status === 'completed') green 
+                            @else black 
+                            @endif;">
+                            {{ ucfirst($salesInvoice->status) }}
+                        </td>
+
                         <td>
                             <a href="{{ route('sales_invoice.show', $salesInvoice->id) }}" class="btn btn-info btn-sm">View</a>
                         </td>

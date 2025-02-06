@@ -78,10 +78,17 @@
                         <td>{{ $purchaseInvoice->purchaseOrder->code ?? 'N/A' }}</td>
                         <td>{{ $purchaseInvoice->supplier->name ?? 'N/A' }}</td>
                         <td>{{ $purchaseInvoice->description }}</td>
-                        <td>{{ number_format($purchaseInvoice->total_price) }}</td> <!-- Total Price with thousand separator -->
-                        <td>{{ number_format($purchaseInvoice->total_price - $purchaseInvoice->calculatePriceRemaining()) }}</td> <!-- Paid with thousand separator -->
-                        <td>{{ number_format($purchaseInvoice->calculatePriceRemaining()) }}</td>
-                        <td>{{ $purchaseInvoice->status }}</td>
+                        <td style="text-align: right;">{{ number_format($purchaseInvoice->total_price) }}</td> <!-- Total Price with thousand separator -->
+                        <td style="text-align: right;">{{ number_format($purchaseInvoice->total_price - $purchaseInvoice->calculatePriceRemaining()) }}</td> <!-- Paid with thousand separator -->
+                        <td style="text-align: right;">{{ number_format($purchaseInvoice->calculatePriceRemaining()) }}</td>
+                        <td style="color: 
+                            @if ($purchaseInvoice->status === 'pending') orange 
+                            @elseif ($purchaseInvoice->status === 'completed') green 
+                            @else black 
+                            @endif;">
+                            {{ ucfirst($purchaseInvoice->status) }}
+                        </td>
+
                         <td>
                             <a href="{{ route('purchase_invoice.show', $purchaseInvoice->id) }}" class="btn btn-info btn-sm">View</a>
                         </td>

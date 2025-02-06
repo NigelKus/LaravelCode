@@ -396,41 +396,81 @@ return [
         ],
 
         ['header' => 'Report', 'can' => 'view-general-ledger'], // Can view if they have general ledger permission
+        // [
+        //     'text' => 'General Ledger',
+        //     'url' => 'admin/reports/general_ledger/index',
+        //     'icon' => 'fas fa-book',
+        //     'can' => 'view-general-ledger', // Permission to view General Ledger
+        // ],
+        // [
+        //     'text' => 'Balance Sheet',
+        //     'url' => 'admin/reports/balance_sheet/index',
+        //     'icon' => 'fas fa-balance-scale',
+        //     'can' => 'view-balance-sheet', // Permission to view Balance Sheet
+        // ],
+        // [
+        //     'text' => 'Profit Loss',
+        //     'url' => 'admin/reports/profit_loss/index',
+        //     'icon' => 'fas fa-chart-line',
+        //     'can' => 'view-profit-loss', // Permission to view Profit Loss
+        // ],
+
+        // [
+        //     'text' => 'Outstanding Sales',
+        //     'url' => 'admin/reports/outstanding_sales/index',
+        //     'icon' => 'fas fa-file-invoice-dollar',
+        //     'can' => 'view-outstanding-sales', // Permission to view Outstanding Sales
+        // ],
+        // [
+        //     'text' => 'Outstanding Purchase',
+        //     'url' => 'admin/reports/outstanding_purchase/index',
+        //     'icon' => 'fas fa-money-bill-wave',
+        //     'can' => 'view-outstanding-purchases', // Permission to view Outstanding Purchase
+        // ],
+
         [
-            'text' => 'General Ledger',
-            'url' => 'admin/reports/general_ledger/index',
-            'icon' => 'fas fa-book',
-            'can' => 'view-general-ledger', // Permission to view General Ledger
-        ],
-        [
-            'text' => 'Balance Sheet',
-            'url' => 'admin/reports/balance_sheet/index',
-            'icon' => 'fas fa-balance-scale',
-            'can' => 'view-balance-sheet', // Permission to view Balance Sheet
-        ],
-        [
-            'text' => 'Profit Loss',
-            'url' => 'admin/reports/profit_loss/index',
+            'text' => 'Reports',
             'icon' => 'fas fa-chart-line',
-            'can' => 'view-profit-loss', // Permission to view Profit Loss
+            'can' => 'view-payments', // Permission to view Payment
+            'submenu' => [
+                [
+                    'text' => 'General Ledger',
+                    'url' => 'admin/reports/general_ledger/index',
+                    'icon' => 'fas fa-book',
+                    'can' => 'view-general-ledger', // Permission to view General Ledger
+                ],
+                [
+                    'text' => 'Balance Sheet',
+                    'url' => 'admin/reports/balance_sheet/index',
+                    'icon' => 'fas fa-balance-scale',
+                    'can' => 'view-balance-sheet', // Permission to view Balance Sheet
+                ],
+                [
+                    'text' => 'Profit Loss',
+                    'url' => 'admin/reports/profit_loss/index',
+                    'icon' => 'fas fa-chart-line',
+                    'can' => 'view-profit-loss', // Permission to view Profit Loss
+                ],
+                [
+                    'text' => 'Outstanding Sales',
+                    'url' => 'admin/reports/outstanding_sales/index',
+                    'icon' => 'fas fa-file-invoice-dollar',
+                    'can' => 'view-outstanding-sales', // Permission to view Outstanding Sales
+                ],
+                [
+                    'text' => 'Outstanding Purchase',
+                    'url' => 'admin/reports/outstanding_purchase/index',
+                    'icon' => 'fas fa-money-bill-wave',
+                    'can' => 'view-outstanding-purchases', // Permission to view Outstanding Purchase
+                ],
+            ],
         ],
+
         [
             'text' => 'Journal Voucher',
             'url' => 'admin/reports/journal/index',
             'icon' => 'fas fa-clipboard',
             'can' => 'view-journal-voucher', // Permission to view Journal Voucher
-        ],
-        [
-            'text' => 'Outstanding Sales',
-            'url' => 'admin/reports/outstanding_sales/index',
-            'icon' => 'fas fa-file-invoice-dollar',
-            'can' => 'view-outstanding-sales', // Permission to view Outstanding Sales
-        ],
-        [
-            'text' => 'Outstanding Purchase',
-            'url' => 'admin/reports/outstanding_purchase/index',
-            'icon' => 'fas fa-money-bill-wave',
-            'can' => 'view-outstanding-purchases', // Permission to view Outstanding Purchase
         ],
     ],
 

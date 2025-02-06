@@ -75,8 +75,14 @@
                             <td>{{ $order->code }}</td>
                             <td>{{ $order->supplier->name ?? 'N/A' }}</td>
                             <td>{{ $order->description }}</td>
-                            <td>{{ \Carbon\Carbon::parse($order->date)->format('Y-m-d') }}</td>
-                            <td>{{ ucfirst($order->status) }}</td>
+                            <td>{{ \Carbon\Carbon::parse($order->date)->format('d-m-Y') }}</td>
+                            <td style="color: 
+                                @if ($order->status === 'pending') orange 
+                                @elseif ($order->status === 'completed') green 
+                                @else black 
+                                @endif;">
+                                {{ ucfirst($order->status) }}
+                            </td>
                             <td>
                                 <a href="{{ route('purchase_order.show', $order->id) }}" class="btn btn-info btn-sm">View</a>
                             </td>

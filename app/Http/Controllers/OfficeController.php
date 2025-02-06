@@ -85,10 +85,10 @@ class OfficeController extends Controller
         }
 
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255|unique:mstr_office,name',
-            'code' => 'required|string|max:255|unique:mstr_office,code',
+            'name' => 'required|string|max:255|',
+            'code' => 'required|string|max:255|',
             'location' => 'nullable|string',
-            'phone' => 'nullable|string|max:20|unique:mstr_office,phone',
+            'phone' => 'nullable|string|max:20|',
             'opening_date' => 'nullable|date',
         ], [
             'name.unique' => 'The name has already been taken.',
